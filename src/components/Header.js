@@ -184,7 +184,7 @@ const NAV_ITEMS = [
     },
     {
         label: 'JUDGES',
-        href: '#judges',  
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}#judges`,  
     },
     {
         label: 'FAQ',
