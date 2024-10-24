@@ -20,14 +20,14 @@ export default function Page() {
   };
 
   const handleBookSession = () => {
-    // Logic for booking a critique session goes here
+    
     console.log("Critique session booked for:", date);
   };
 
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
-    <Box p={8} bg="white" borderRadius="lg" boxShadow="md">
-      {/* Schedule Critiques Section */}
+    <Box p={8} >
+    
       <Box bg="purple.50" p={6} borderRadius="lg" boxShadow="md" mb={8}>
         <Heading size="lg" mb={4}>
           Schedule Critiques

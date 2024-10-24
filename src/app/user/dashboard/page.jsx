@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function Page() {
-  // Dummy data for My Games and Available Games
+  
   const myGames = [
     { title: "Pitch Challenge 1", status: "In Progress" },
     { title: "Pitch Challenge 2", status: "Completed" },

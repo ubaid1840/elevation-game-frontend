@@ -24,12 +24,13 @@ import {
 } from '@chakra-ui/icons'
 import Button, { GhostButton } from './ui/Button'
 import Link from 'next/link'
+import Logo from './logo'
 
 export default function Header() {
     const { isOpen, onToggle } = useDisclosure()
 
     return (
-        <Box pos={'fixed'} width={'100%'}>
+        <Box pos={'fixed'} width={'100%'} zIndex={1}>
             <Flex
                 bg={'#311748A0'}
                 color={'white'}
@@ -52,12 +53,7 @@ export default function Header() {
 
                 </Flex>
                 <Flex display={{ base: 'none', md: 'flex' }}>
-                    <Text
-                        textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
-                        fontFamily={'heading'}
-                        color={'white'}>
-                        Logo
-                    </Text>
+                   <Logo type={'light'}/>
                 </Flex>
                 <Flex justify={'center'}>
 
@@ -176,26 +172,26 @@ const MobileNavItem = ({ label, children, href }) => {
 const NAV_ITEMS = [
     {
         label: 'HOME',
-        href: '#home',  // Add correct id for the Home section
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}#home`,  
     },
     {
         label: 'HOW IT WORKS',
-        href: '#howitworks',  // Remove the `#` from id in section component
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}#howitworks`,  
     },
     {
         label: 'CATEGORIES',
-        href: '#categories',  // Ensure this matches the Categories section id
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}#categories`,  
     },
     {
         label: 'JUDGES',
-        href: '#judges',  // Same here for Judges
+        href: '#judges',  
     },
     {
         label: 'FAQ',
-        href: '#faq',  // For FAQ
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}/faq`,  
     },
     {
         label: 'CONTACT',
-        href: '#contact',  // For Contact
+        href: `${process.env.NEXT_PUBLIC_BASE_URL}/contact`,  
     },
 ]

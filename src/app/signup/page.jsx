@@ -19,6 +19,8 @@ import { useEffect, useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
 import { Link } from "@chakra-ui/next-js";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +40,8 @@ export default function Page() {
   const handleSignup = async () => {};
 
   return (
-    <div>
+    <>
+    <Header />
       <Flex
         minH={"100vh"}
         align={"center"}
@@ -172,6 +175,7 @@ export default function Page() {
           </Stack>
         </Box>
       </Flex>
-    </div>
+      <Footer />
+    </>
   );
 }

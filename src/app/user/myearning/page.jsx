@@ -17,10 +17,10 @@ import {
   Checkbox,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { CSVLink } from "react-csv"; // For exporting to CSV
+import { CSVLink } from "react-csv"; 
 
 export default function MyEarningsPage() {
-  // Dummy data for earnings and tiered income
+  
   const [earnings] = useState({
     totalEarnings: 2000,
     tieredIncome: [
@@ -46,7 +46,7 @@ export default function MyEarningsPage() {
     });
   };
 
-  // CSV data for export
+  
   const csvData = [
     ["Tier", "Percentage", "Amount"],
     ...earnings.tieredIncome.map((income) => [
@@ -58,7 +58,7 @@ export default function MyEarningsPage() {
 
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
-    <Box p={8} bg="white" borderRadius="lg" boxShadow="xl">
+    <Box p={8} >
       <VStack spacing={6} align="start">
         {/* Earnings Header */}
         <Heading size="lg" color="purple.700">

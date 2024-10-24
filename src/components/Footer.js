@@ -24,7 +24,7 @@ export default function Footer() {
         
            
 
-            <Container bg={'#282828FF'} color={'white'} maxW={'100%'} fontWeight={'600'} py={5} alignItems={'center'} justifyContent={'center'} display={'flex'} px={20}>
+            <Container   bg={useColorModeValue("gray.800", "gray.700")} color={'white'} maxW={'100%'} fontWeight={'600'} py={5} alignItems={'center'} justifyContent={'center'} display={'flex'} px={20}>
                 <Wrap justify={'space-between'} w={'100%'} align={'center'}>
                     <WrapItem>
                     <VStack align={'flex-start'}  justify={'center'} w={'fit-content'}>

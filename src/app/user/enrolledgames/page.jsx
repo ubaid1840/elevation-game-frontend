@@ -13,7 +13,6 @@ import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { useRouter } from "next/navigation";
 
-// Sample data for participant's enrolled games
 const participantGamesData = [
   {
     id: 1,
@@ -40,13 +39,11 @@ const participantGamesData = [
 export default function Page() {
   const router = useRouter();
 
-  // Function to handle view details button click
   const handleViewDetails = (gameId) => {
     console.log(`View details for Game ID: ${gameId}`);
     router.push("/user/enrolledgames/singlegame");
   };
 
-  // Define color values
   const bgColor = useColorModeValue("white", "gray.800");
   const cardBgColor = useColorModeValue("gray.50", "gray.700");
   const cardHoverBgColor = useColorModeValue("purple.50", "purple.600");
@@ -83,7 +80,7 @@ export default function Page() {
                 onClick={() => handleViewDetails(game.id)}
                 variant="solid"
                 size="md"
-                _focus={{ boxShadow: "outline" }} // Add focus styles for accessibility
+                _focus={{ boxShadow: "outline" }}
               >
                 View Details
               </Button>

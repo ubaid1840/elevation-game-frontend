@@ -21,7 +21,7 @@ import { useState } from "react";
 
 export default function GameEnrollmentPage() {
   const router = useRouter();
-  // Dummy data for game details
+  
   const gameDetails = {
     title: "Pitch Challenge",
     category: "Strategy",

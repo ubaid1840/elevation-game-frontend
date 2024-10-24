@@ -13,7 +13,7 @@ import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { useRouter } from "next/navigation";
 
-// Sample data for unfinished games
+
 const unfinishedGamesData = [
   {
     id: 1,
@@ -33,7 +33,7 @@ const unfinishedGamesData = [
     totalRounds: 4,
     totalJudges: 2,
   },
-  // Add more unfinished games as needed
+  
 ];
 
 export default function Page() {
@@ -48,7 +48,7 @@ export default function Page() {
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
       <Box p={8} bg="white">
-        <Heading mb={6} color="purple.700">Games Details</Heading>
+        <Heading mb={6} color="purple.700">Dashboard</Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
           {unfinishedGamesData.map((game) => (
@@ -57,7 +57,7 @@ export default function Page() {
               mb={6}
               borderWidth="1px"
               borderRadius="md"
-              p={4} // Reduced padding for a smaller card
+              p={4} 
               cursor="pointer"
               transition="0.2s ease-in-out"
               bg={cardBg}

@@ -44,7 +44,7 @@ const UserManagement = () => {
       role: "User",
       lastActive: "2024-10-18",
     },
-    // Add more users as needed
+   
   ]);
 
   const handleFilterChange = (e) => {

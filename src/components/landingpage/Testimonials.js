@@ -7,6 +7,7 @@ import {
     Container,
     Flex,
     Heading,
+    HStack,
     Link,
     Stack,
     Text,
@@ -25,13 +26,28 @@ import { ChevronLeft, ChevronRight } from "react-feather";
 export default function Testimonials() {
 
     return (
-        <Container maxW={'100%'} bgImage={'/howitworksbg.jpg'} bgSize={'cover'} bgPosition={'center'} alignItems={'center'} justifyContent={'center'} display={'flex'} flexDir={'column'} gap={20} py={'100px'}>
+        <Container maxW={'100%'} bgImage={'/challenge.jpg'} bgSize={'cover'} bgPosition={'center'} alignItems={'center'} justifyContent={'center'} display={'flex'} flexDir={'column'} gap={20} py={'100px'}>
             <Heading color="white">TESTIMONIALS</Heading>
             <TestimonialDemo />
         </Container>
     )
 }
 
+function Toolbar() {
+    const { onNext, onPrevious } = useCarousel();
+    return (
+        <Flex w="full" justify="center">
+            <HStack>
+                <Button w="115px" onClick={onPrevious}>
+                    <ChevronLeft color="#311748FF" />
+                </Button>
+                <Button w="115px" onClick={onNext}>
+                    <ChevronRight color="#311748FF" />
+                </Button>
+            </HStack>
+        </Flex>
+    );
+}
 
 const testimonials = [
     {
@@ -111,30 +127,13 @@ function Testimonial({ bg, heading }) {
     );
 }
 
-function Arrow({ isLeft }) {
-    const { onNext, onPrevious } = useCarousel();
-    const onClickHandler = () => {
-        if (isLeft) {
-            onPrevious();
-        } else {
-            onNext();
-        }
-    };
-    const pos = isLeft ? { left: "10px" } : { right: "10px" };
-    return (
-        <Flex pos="absolute" {...pos} top="35%">
-            <Button size="lg" variant="solid" onClick={onClickHandler}>
-                {isLeft ? <ChevronLeft color="#311748FF" /> : <ChevronRight color="#311748FF" />}
-            </Button>
-        </Flex>
-    );
-}
+
 
 function TestimonialDemo() {
     return (
         <Flex flexDir="column">
             <Carousel>
-                <Flex w="fit-content" pos="relative">
+                <Flex w="fit-content" flexDir="column">
                     <CarouselItems mx={2}>
                         {testimonials.map(({ name, title, bg, src, heading }, index) => {
                             return (
@@ -147,9 +146,7 @@ function TestimonialDemo() {
                             );
                         })}
                     </CarouselItems>
-
-                    <Arrow isLeft />
-                    <Arrow isLeft={false} />
+                    <Toolbar />
                 </Flex>
             </Carousel>
         </Flex>

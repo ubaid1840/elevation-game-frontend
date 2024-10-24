@@ -25,7 +25,7 @@ import {
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 
-// Sample data for a single game with more comments
+
 const gameDetailData = {
   id: 1,
   title: "Game Idea 1",
@@ -59,7 +59,7 @@ export default function GameDetailPage() {
   const [replyText, setReplyText] = useState("");
   const [newComment, setNewComment] = useState("");
   
-  // Modal states
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [critique, setCritique] = useState("");

@@ -1,6 +1,6 @@
 import { Box, Container, Heading, HStack, Image, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react";
-import HowItWorkCard from "./ui/HowItWorkCard";
-import CategoryCard from "./ui/CategoryCard";
+import CategoryCard from "../ui/CategoryCard";
+
 
 
 export default function Categories() {

@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 
 export default function ProfilePage() {
-  // State for user information
+  
   const [userInfo, setUserInfo] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   };
 
   const handlePasswordChange = () => {
-    // Implement password change logic here
+    
     toast({
       title: "Password Changed",
       description: "Your password has been successfully changed.",

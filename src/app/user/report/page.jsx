@@ -75,7 +75,7 @@ export default function Page() {
     };
   }, []);
 
-  // Sample data for CSV export
+  
   const csvData = [
     ["Category", "Value"],
     ["Tier 1", 200],

@@ -19,6 +19,8 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link } from "@chakra-ui/next-js";
+import Header from '@/components/Header'
+import Footer from "@/components/Footer";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +40,8 @@ export default function Page() {
   };
 
   return (
-    <div>
+    <>
+    <Header />
       <Flex
         minH={"100vh"}
         align={"center"}
@@ -65,12 +68,13 @@ export default function Page() {
                 borderRadius={"2px"}
                 border={"1px solid"}
                 borderColor={"#484848"}
-                value={email}
-                onChange={(e) => setemail(e.target.value)}
-                type="email"
                 bg={"gray.800"}
                 _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "purple.400" }}
+                value={email}
+                onChange={(e) => setemail(e.target.value)}
+                type="email"
+               
               />
             </FormControl>
             <FormControl id="password" isRequired>
@@ -142,6 +146,7 @@ export default function Page() {
           </Stack>
         </Box>
       </Flex>
-    </div>
+      <Footer />
+      </>
   );
 }

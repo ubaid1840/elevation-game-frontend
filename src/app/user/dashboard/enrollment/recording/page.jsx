@@ -20,7 +20,7 @@ export default function PitchRecordingPage() {
   };
 
   const handleSubmit = () => {
-    // Handle the video link submission logic here
+    
     console.log("Video Link Submitted:", videoLink);
   };
 

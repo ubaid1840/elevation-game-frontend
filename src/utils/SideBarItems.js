@@ -39,15 +39,16 @@ const GetLinkItems = (role) => {
             case 'judge':
             return [
                 {
+                    name: "Dashboard",
+                    icon: SlGameController ,
+                    path: `/judge/gamedetails`,
+                },
+                {
                     name: "Create Game",
                     icon: SiNintendogamecube,
                     path: `/judge/creategame`,
                 },
-                {
-                    name: "Game Details",
-                    icon: SlGameController ,
-                    path: `/judge/gamedetails`,
-                },
+                
             ];
             case 'user':
                 return [

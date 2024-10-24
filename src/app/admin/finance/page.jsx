@@ -28,7 +28,6 @@ const FinancialOverview = () => {
   const toast = useToast();
 
   const handleSendNotifications = () => {
-    // Logic for sending notifications (e.g., API call)
     toast({
       title: "Notifications Sent",
       description: "Bulk email and text notifications sent to participants.",

@@ -16,7 +16,7 @@ import {
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 
-// Sample data for a single participant with comments
+
 const participantDetailData = {
   id: 1,
   name: "Participant 1",
