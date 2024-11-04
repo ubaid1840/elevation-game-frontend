@@ -10,6 +10,7 @@ import { IoCalendarNumberOutline } from "react-icons/io5";
 import { TbReport } from "react-icons/tb";
 import { PiNetworkDuotone } from "react-icons/pi";
 import { VscGame } from "react-icons/vsc";
+import { SiGotomeeting } from "react-icons/si";
 
 const GetLinkItems = (role) => {
     switch (role) {
@@ -47,6 +48,11 @@ const GetLinkItems = (role) => {
                     name: "Create Game",
                     icon: SiNintendogamecube,
                     path: `/judge/creategame`,
+                },
+                {
+                    name: "Meeting",
+                    icon: SiGotomeeting ,
+                    path: `/judge/meeting`,
                 },
                 
             ];

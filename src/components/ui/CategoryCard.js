@@ -1,7 +1,7 @@
 const { VStack, Image, Box, Text } = require("@chakra-ui/react")
 
 
-const CategoryCard = ({title, spots}) => {
+const CategoryCard = ({title, spots, grandPrize}) => {
 
     return (
         <VStack align={'center'} mx={10} w={'300px'} gap={0}>
@@ -11,9 +11,12 @@ const CategoryCard = ({title, spots}) => {
             </Text>
        </Box>
 
-        <Box w={'100%'} h={'80px'} bg={'white'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
+        <Box w={'100%'} h={'80px'} bg={'white'} display={'flex'} flexDir={'column'} alignItems={'center'} justifyContent={'center'}>
             <Text fontSize={'md'} fontWeight={'700'}>
                 Spots Remaining: {spots}
+            </Text>
+            <Text fontSize={'md'} fontWeight={'700'}>
+                Grand Prize: {grandPrize}
             </Text>
         </Box>
 </VStack>

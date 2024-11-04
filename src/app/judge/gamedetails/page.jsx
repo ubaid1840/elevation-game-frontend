@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -12,29 +12,10 @@ import {
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 
-const unfinishedGamesData = [
-  {
-    id: 1,
-    title: "Game Idea 1",
-    participants: 5,
-    entryLevelPrize: "$100",
-    currentRound: 2,
-    totalRounds: 5,
-    totalJudges: 3,
-  },
-  {
-    id: 2,
-    title: "Game Idea 2",
-    participants: 3,
-    entryLevelPrize: "$150",
-    currentRound: 1,
-    totalRounds: 4,
-    totalJudges: 2,
-  },
-  
-];
+
 
 export default function Page() {
   const cardBg = useColorModeValue("gray.100", "gray.700");
@@ -42,8 +23,20 @@ export default function Page() {
   const router = useRouter()
   const handleGameClick = (gameId) => {
     console.log(`Game ID: ${gameId} clicked`);
-    router.push("/judge/gamedetails/singlegame")
+    router.push(`/judge/gamedetails/${gameId}`)
   };
+  const [unfinishedGamesData, setUnfinishedGamesData] = useState([])
+
+  useEffect(()=>{
+    fetchData()
+  },[])
+
+  async function fetchData() {
+    axios.get("/api/games")
+    .then((response)=>{
+      setUnfinishedGamesData(response.data)
+    })
+  }
 
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
@@ -51,9 +44,9 @@ export default function Page() {
         <Heading mb={6} color="purple.700">Dashboard</Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-          {unfinishedGamesData.map((game) => (
+          {unfinishedGamesData.map((game, index) => (
             <Box
-              key={game.id}
+              key={index}
               mb={6}
               borderWidth="1px"
               borderRadius="md"
@@ -72,10 +65,11 @@ export default function Page() {
               <Stack spacing={3}>
                 <Heading size="md" color="purple.800">{game.title}</Heading>
                 <Divider />
-                <Text fontWeight="bold" color="purple.700">Total Participants: {game.participants}</Text>
-                <Text fontWeight="bold" color="purple.700">Entry Level Prize: {game.entryLevelPrize}</Text>
-                <Text fontWeight="bold" color="purple.700">Current Round: {game.currentRound} / {game.totalRounds}</Text>
-                <Text fontWeight="bold" color="purple.700">Total Judges: {game.totalJudges}</Text>
+                <Text fontWeight="bold" color="purple.700">Total Participants: {game.total_participants}</Text>
+                <Text fontWeight="bold" color="purple.700">Entry Level Prize: {game.prize_amount
+                }</Text>
+                <Text fontWeight="bold" color="purple.700">Current Round: {game.currentround || 0} / {game.totalrounds}</Text>
+                <Text fontWeight="bold" color="purple.700">Total Judges: {game.totaljudges}</Text>
               </Stack>
             </Box>
           ))}

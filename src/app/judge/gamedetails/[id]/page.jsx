@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -24,7 +24,7 @@ import {
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
-
+import axios from "axios";
 
 const gameDetailData = {
   id: 1,
@@ -42,7 +42,11 @@ const gameDetailData = {
     { id: 1, user: "Participant 1", comment: "Can we add more rules?" },
     { id: 2, user: "Participant 2", comment: "What is the scoring system?" },
     { id: 3, user: "Participant 3", comment: "Is there a time limit?" },
-    { id: 4, user: "Participant 4", comment: "How will the winner be determined?" },
+    {
+      id: 4,
+      user: "Participant 4",
+      comment: "How will the winner be determined?",
+    },
     { id: 5, user: "Participant 5", comment: "Can we have a demo?" },
     { id: 6, user: "Participant 1", comment: "What materials are allowed?" },
     { id: 7, user: "Participant 2", comment: "Will there be any penalties?" },
@@ -54,16 +58,20 @@ const gameDetailData = {
   totalRounds: 5,
 };
 
-export default function GameDetailPage() {
+export default function GameDetailPage({ params }) {
   const [replies, setReplies] = useState({});
   const [replyText, setReplyText] = useState("");
   const [newComment, setNewComment] = useState("");
-  
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [critique, setCritique] = useState("");
   const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    axios.get(`/api/games/${params.id}`).then((response)=>{
+    })
+  }, []);
 
   const handleReplyChange = (commentId) => (event) => {
     setReplies({ ...replies, [commentId]: event.target.value });
@@ -112,34 +120,62 @@ export default function GameDetailPage() {
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
       <Box p={8} bg="white">
-        <Heading mb={6} color="purple.700">{gameDetailData.title}</Heading>
+        <Heading mb={6} color="purple.700">
+          {gameDetailData.title}
+        </Heading>
 
-        <Text fontWeight="bold" color="purple.600">Created By: {gameDetailData.createdBy}</Text>
-        
-        <Text fontWeight="bold" color="purple.600" mt={4}>Remaining Judges:</Text>
+        <Text fontWeight="bold" color="purple.600">
+          Created By: {gameDetailData.createdBy}
+        </Text>
+
+        <Text fontWeight="bold" color="purple.600" mt={4}>
+          Remaining Judges:
+        </Text>
         <Stack spacing={1} mb={6}>
           {gameDetailData.remainingJudges.map((judge, index) => (
-            <Text key={index} color="purple.500">{judge}</Text>
-          ))}
-        </Stack>
-
-        <Text fontWeight="bold" color="purple.600">Participants:</Text>
-        <Stack spacing={2} mb={6}>
-          {gameDetailData.participants.map((participant) => (
-            <Text key={participant.id} color="purple.500">
-              <Button variant="link" color="blue.500" onClick={() => handleParticipantClick(participant)}>
-                {participant.name}
-              </Button>: <a href={participant.videoLink} target="_blank" rel="noopener noreferrer" style={{ color: 'blue.500' }}>{participant.videoLink}</a>
+            <Text key={index} color="purple.500">
+              {judge}
             </Text>
           ))}
         </Stack>
 
-        <Text fontWeight="bold" color="purple.600">Current Round: {gameDetailData.currentRound}/{gameDetailData.totalRounds}</Text>
+        <Text fontWeight="bold" color="purple.600">
+          Participants:
+        </Text>
+        <Stack spacing={2} mb={6}>
+          {gameDetailData.participants.map((participant) => (
+            <Text key={participant.id} color="purple.500">
+              <Button
+                variant="link"
+                color="blue.500"
+                onClick={() => handleParticipantClick(participant)}
+              >
+                {participant.name}
+              </Button>
+              :{" "}
+              <a
+                href={participant.videoLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "blue.500" }}
+              >
+                {participant.videoLink}
+              </a>
+            </Text>
+          ))}
+        </Stack>
+
+        <Text fontWeight="bold" color="purple.600">
+          Current Round: {gameDetailData.currentRound}/
+          {gameDetailData.totalRounds}
+        </Text>
         <Button colorScheme="purple" mt={4} onClick={handleNextRound}>
           Next Round
         </Button>
 
-        <Text fontWeight="bold" color="purple.600" mt={6}>Comments:</Text>
+        <Text fontWeight="bold" color="purple.600" mt={6}>
+          Comments:
+        </Text>
         <Stack spacing={4} mb={6}>
           {gameDetailData.comments.map((comment) => (
             <Box key={comment.id} borderWidth="1px" borderRadius="md" p={3}>
@@ -149,14 +185,22 @@ export default function GameDetailPage() {
               <Text
                 color="blue.500"
                 cursor="pointer"
-                onClick={() => setReplies({ ...replies, [comment.id]: replies[comment.id] === undefined ? "" : undefined })}
+                onClick={() =>
+                  setReplies({
+                    ...replies,
+                    [comment.id]:
+                      replies[comment.id] === undefined ? "" : undefined,
+                  })
+                }
               >
                 {replies[comment.id] === undefined ? "Reply" : "Cancel"}
               </Text>
 
               {replies[comment.id] !== undefined && (
                 <FormControl mt={4}>
-                  <FormLabel htmlFor={`reply-${comment.id}`} fontWeight="bold">Your Reply:</FormLabel>
+                  <FormLabel htmlFor={`reply-${comment.id}`} fontWeight="bold">
+                    Your Reply:
+                  </FormLabel>
                   <Textarea
                     id={`reply-${comment.id}`}
                     value={replies[comment.id] || ""}
@@ -177,18 +221,16 @@ export default function GameDetailPage() {
         </Stack>
 
         <FormControl mt={4}>
-          <FormLabel htmlFor="new-comment" fontWeight="bold">Add a Comment:</FormLabel>
+          <FormLabel htmlFor="new-comment" fontWeight="bold">
+            Add a Comment:
+          </FormLabel>
           <Textarea
             id="new-comment"
             value={newComment}
             onChange={handleCommentChange}
             placeholder="Type your comment here..."
           />
-          <Button
-            colorScheme="purple"
-            mt={2}
-            onClick={handleCommentSubmit}
-          >
+          <Button colorScheme="purple" mt={2} onClick={handleCommentSubmit}>
             Submit Comment
           </Button>
         </FormControl>
@@ -201,7 +243,9 @@ export default function GameDetailPage() {
             <ModalCloseButton />
             <ModalBody>
               <FormControl>
-                <FormLabel htmlFor="critique" fontWeight="bold">Critique:</FormLabel>
+                <FormLabel htmlFor="critique" fontWeight="bold">
+                  Critique:
+                </FormLabel>
                 <Textarea
                   id="critique"
                   value={critique}
@@ -211,7 +255,9 @@ export default function GameDetailPage() {
               </FormControl>
 
               <FormControl mt={4}>
-                <FormLabel htmlFor="score" fontWeight="bold">Score:</FormLabel>
+                <FormLabel htmlFor="score" fontWeight="bold">
+                  Score:
+                </FormLabel>
                 <NumberInput
                   id="score"
                   value={score}

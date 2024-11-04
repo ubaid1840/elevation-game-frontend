@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -23,16 +23,28 @@ import {
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
+import axios from "axios";
+import { Link } from "react-feather";
+import { usePathname, useRouter } from "next/navigation";
 
 const GameManagement = () => {
-  const [games, setGames] = useState([
-    { id: 1, name: "Game 1", spots: 5, participants: 3 },
-    { id: 2, name: "Game 2", spots: 10, participants: 7 },
-  ]);
+  const [games, setGames] = useState([]);
   const [gameName, setGameName] = useState("");
   const [spots, setSpots] = useState("");
   const [editingGame, setEditingGame] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    axios.get("/api/games").then((response) => {
+      setGames(response.data);
+    });
+  }
 
   const handleAddOrEditGame = () => {
     if (editingGame) {
@@ -80,7 +92,7 @@ const GameManagement = () => {
           Game Management
         </Heading>
 
-        <Button colorScheme="purple" mb={4} onClick={onOpen}>
+        <Button  colorScheme="purple" mb={4} onClick={()=> router.push(`${pathname}/creategame`)}>
           Add New Game
         </Button>
 
@@ -91,17 +103,18 @@ const GameManagement = () => {
               <Th>Name</Th>
               <Th>Spots Remaining</Th>
               <Th>Participants</Th>
-              <Th>Actions</Th>
+              <Th>Grand Prize</Th>
             </Tr>
           </Thead>
           <Tbody>
             {games.length > 0 ? (
-              games.map((game) => (
-                <Tr key={game.id}>
-                  <Td>{game.name}</Td>
-                  <Td>{game.spots - game.participants}</Td>
-                  <Td>{game.participants}</Td>
-                  <Td>
+              games.map((game, index) => (
+                <Tr key={index}>
+                  <Td>{game.title}</Td>
+                  <Td>{game.total_spots - game.total_participants || 0}</Td>
+                  <Td>{game.total_participants || 0}</Td>
+                  <Td>{game.prize_amount}</Td>
+                  {/* <Td>
                     <Button
                       colorScheme="blue"
                       onClick={() => handleEditGame(game)}
@@ -115,7 +128,7 @@ const GameManagement = () => {
                     >
                       Delete
                     </Button>
-                  </Td>
+                  </Td> */}
                 </Tr>
               ))
             ) : (

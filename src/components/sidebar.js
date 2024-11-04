@@ -36,12 +36,25 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { theme } from "@/data/data";
 import Link from "next/link";
 import Button from "./ui/Button";
-import { MdOutlineEmergencyShare } from "react-icons/md";
+import { MdAttachMoney, MdOutlineEmergencyShare, MdSettings } from "react-icons/md";
 import Logo from "./logo";
+import useCheckSession from "@/lib/checkSession";
+import { UserContext } from "@/store/context/UserContext";
+import { signOut } from "firebase/auth";
+import { auth } from "@/config/firebase";
 
 export default function Sidebar({ children, LinkItems, settingsLink, currentPage, id }) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const checkSession = useCheckSession()
+    const { state: UserState, setUser } = useContext(UserContext)
+
+    useEffect(() => {
+        checkSession().then((val) => {
+            setUser(val.user)
+        })
+
+    }, [])
 
     return (
 
@@ -81,6 +94,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, ...rest }) => {
 
     const router = useRouter()
     const pathname = usePathname()
+    const { state: UserState } = useContext(UserContext)
 
     return (
         <Box
@@ -128,10 +142,34 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, ...rest }) => {
                 */}
 
                 <Divider color={'#EAECF0'} width={'250px'} alignSelf={'center'} />
-                <HStack width={'100%'} align={'center'} justify={'space-between'} p={5}>
-                    <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={()=> router.push("/")}/>
-                    <Text>johndoe@gmail.com</Text>
-                </HStack>
+                {UserState.value.data?.email &&
+                    <>
+                        {UserState.value.data?.role == 'admin'
+                            ?
+                            <NavItem
+                                isActive={pathname.includes('settings')}
+                                icon={MdSettings}
+                                path={`/admin/settings`}
+                            >
+                                Settings
+                            </NavItem>
+
+                            :
+                            <NavItem
+                                isActive={pathname.includes('subscription')}
+                                icon={MdAttachMoney}
+                                path={`/${UserState.value.data?.role}/subscription`}
+                            >
+                                Subscription
+                            </NavItem>
+                        }
+
+                        <HStack width={'100%'} align={'center'} justify={'space-between'} p={5}>
+                            <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={() => signOut(auth)} />
+                            <Text>{UserState.value.data?.name}</Text>
+                        </HStack>
+                    </>}
+
             </Flex>
         </Box>
     );

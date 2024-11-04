@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -15,37 +15,33 @@ import {
   Stack,
   VStack,
   Text,
+  UnorderedList,
+  ListItem,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
+import axios from "axios";
 
 const UserManagement = () => {
   const [filter, setFilter] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
-  const [users] = useState([
-    {
-      id: 1,
-      name: "Alice Smith",
-      email: "alice@example.com",
-      role: "Admin",
-      lastActive: "2024-10-20",
-    },
-    {
-      id: 2,
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      role: "User",
-      lastActive: "2024-10-22",
-    },
-    {
-      id: 3,
-      name: "Charlie Brown",
-      email: "charlie@example.com",
-      role: "User",
-      lastActive: "2024-10-18",
-    },
-   
-  ]);
+  const [users, setUsers] = useState([]);
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    axios.get(`/api/users?role=user`).then((response) => {
+      const temp = response.data;
+      axios.get("/api/users?role=judge").then((res) => {
+        const temp2 = res.data;
+        const finalData = [...temp, ...temp2];
+        setUsers(finalData);
+      });
+    });
+  }
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -57,13 +53,19 @@ const UserManagement = () => {
 
   const filteredUsers = users.filter((user) => {
     const matchesName = user.name.toLowerCase().includes(filter.toLowerCase());
-    const matchesRole = selectedRole ? user.role === selectedRole : true;
+    const matchesRole = selectedRole ? user.role === selectedRole.toLowerCase() : true;
     return matchesName && matchesRole;
   });
 
+  async function handleLogs(id) {
+    axios.get(`/api/users/${id}/logs`).then((response) => {
+      setLogs(response.data);
+    });
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
-      <Box p={8}  bg="white">
+      <Box p={8} bg="white">
         <Heading mb={6} color="purple.700">
           User Management
         </Heading>
@@ -80,7 +82,7 @@ const UserManagement = () => {
             value={selectedRole}
             onChange={handleRoleChange}
           >
-            <option value="Admin">Admin</option>
+            <option value="Judge">Judge</option>
             <option value="User">User</option>
           </Select>
           <Button
@@ -88,6 +90,7 @@ const UserManagement = () => {
             onClick={() => {
               setFilter("");
               setSelectedRole("");
+              setLogs([])
             }}
           >
             Clear Filters
@@ -116,9 +119,7 @@ const UserManagement = () => {
                   <Td>
                     <Button
                       colorScheme="blue"
-                      onClick={() =>
-                        alert(`Showing activity logs for ${user.name}`)
-                      }
+                      onClick={() => handleLogs(user.id)}
                     >
                       View Logs
                     </Button>
@@ -141,6 +142,12 @@ const UserManagement = () => {
           <Text>
             {`Click on "View Logs" to see the detailed activity for each user.`}
           </Text>
+          <UnorderedList>
+            {logs.length > 0 &&
+              logs.map((item, index) => (
+                <ListItem key={index}>{item.action}</ListItem>
+              ))}
+          </UnorderedList>
         </VStack>
       </Box>
     </Sidebar>

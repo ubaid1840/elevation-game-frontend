@@ -21,6 +21,9 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link } from "@chakra-ui/next-js";
 import Header from '@/components/Header'
 import Footer from "@/components/Footer";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/config/firebase";
+import useCheckSession from "@/lib/checkSession";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +32,12 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const checkSession = useCheckSession()
+  const toast = useToast()
+
+  useEffect(()=>{
+    checkSession()
+  },[])
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
@@ -36,7 +45,17 @@ export default function Page() {
   }, [email, password]);
 
   const handleLogin = async () => {
-   
+   signInWithEmailAndPassword(auth, email, password)
+   .catch((e)=>{
+    toast({
+      title: "Error",
+      description: e.message,
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+    setLoading(false)
+   })
   };
 
   return (

@@ -1,8 +1,16 @@
 "use client"
+import UserContextProvider from '@/store/context/UserContext';
+import { useCheckColorMode } from '@/utils/useCheckColorMode';
 import { ChakraProvider, defineStyleConfig, extendTheme } from '@chakra-ui/react'
 import { PrimeReactProvider } from 'primereact/api';
+import { useEffect } from 'react';
 
 export function Providers({ children }) {
+    const checkColorMode = useCheckColorMode()
+
+    useEffect(()=>{
+         checkColorMode()
+    },[])
 
 
     const InputStyles = {
@@ -112,6 +120,8 @@ export function Providers({ children }) {
             Textarea: TextareaStyles,
             Text: TextStyle
         },
+        initialColorMode: 'light',
+        useSystemColorMode: false,
     });
 
     return (
@@ -119,7 +129,9 @@ export function Providers({ children }) {
 
         <ChakraProvider theme={customTheme}>
             <PrimeReactProvider>
-                {children}
+                <UserContextProvider>
+                    {children}
+                </UserContextProvider>
             </PrimeReactProvider>
         </ChakraProvider>
 

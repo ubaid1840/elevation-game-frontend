@@ -21,6 +21,10 @@ import { useRouter } from "next/navigation";
 import { Link } from "@chakra-ui/next-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import useCheckSession from "@/lib/checkSession";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/config/firebase";
+import axios from "axios";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,17 +35,38 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const checkSession = useCheckSession();
+
+  useEffect(() => {
+    checkSession();
+  }, []);
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
     setIsPasswordValid(password.length > 5);
   }, [email, password]);
 
-  const handleSignup = async () => {};
+  const handleSignup = async () => {
+    axios
+      .post("/api/users", {
+        email: email,
+        name: name,
+        role: "user",
+        refered_by: referral,
+        schedule: {},
+      })
+      .then(() => {
+        createUserWithEmailAndPassword(auth, email, password).catch((e)=>{
+          console.log(e)
+        })
+      }).catch((e)=>{
+        console.log(e)
+      })
+  };
 
   return (
     <>
-    <Header />
+      <Header />
       <Flex
         minH={"100vh"}
         align={"center"}
@@ -147,6 +172,7 @@ export default function Page() {
             </FormControl>
             <Stack mt={5}>
               <Button
+              isLoading={loading}
                 borderRadius={"2px"}
                 colorScheme={"purple"}
                 isDisabled={!isEmailValid || !isPasswordValid}
