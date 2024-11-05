@@ -20,9 +20,12 @@ export default function useCheckSession() {
                                 resolve({ user: { ...response.data, ...user } })
                             } else {
                                 signOut(auth)
+                                resolve({error : "User now found"})
                             }
-                        }).catch((e) => {
+                        }).catch((e) => {                            
+                            
                             signOut(auth)
+                            resolve({error : e.message})
                         })
 
                     }

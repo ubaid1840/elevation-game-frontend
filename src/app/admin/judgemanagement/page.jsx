@@ -109,7 +109,7 @@ const JudgeManagement = () => {
             <Tr>
               <Th>Name</Th>
               <Th>email</Th>
-              <Th>Actions</Th>
+              {/* <Th>Actions</Th> */}
             </Tr>
           </Thead>
           <Tbody>

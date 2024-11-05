@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link } from "@chakra-ui/next-js";
-import Header from '@/components/Header'
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebase";
@@ -32,12 +32,22 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const checkSession = useCheckSession()
-  const toast = useToast()
+  const checkSession = useCheckSession();
+  const toast = useToast();
 
-  useEffect(()=>{
-    checkSession()
-  },[])
+  useEffect(() => {
+    try {
+      checkSession().then((res) => {
+        if(res.error){
+          console.log(res.error)
+        }
+        setLoading(false);
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
@@ -45,22 +55,24 @@ export default function Page() {
   }, [email, password]);
 
   const handleLogin = async () => {
-   signInWithEmailAndPassword(auth, email, password)
-   .catch((e)=>{
-    toast({
-      title: "Error",
-      description: e.message,
-      status: "error",
-      duration: 3000,
-      isClosable: true,
+    signInWithEmailAndPassword(auth, email, password).then(()=>{
+      setLoading(false)
+    }).catch((e) => {
+      
+      toast({
+        title: "Error",
+        description: e.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
     });
-    setLoading(false)
-   })
   };
 
   return (
     <>
-    <Header />
+      <Header />
       <Flex
         minH={"100vh"}
         align={"center"}
@@ -93,7 +105,6 @@ export default function Page() {
                 value={email}
                 onChange={(e) => setemail(e.target.value)}
                 type="email"
-               
               />
             </FormControl>
             <FormControl id="password" isRequired>
@@ -115,13 +126,12 @@ export default function Page() {
                   _focus={{ borderColor: "purple.400" }}
                 />
                 <InputRightElement h={"full"}>
-                 
-                    <Icon
-                      as={showPassword ? ViewIcon : ViewOffIcon}
-                      color={"white"}
-                      onClick={() => setShowPassword(!showPassword)}
-                      _hover={{ opacity: 0.7, cursor:'pointer' }}
-                    />
+                  <Icon
+                    as={showPassword ? ViewIcon : ViewOffIcon}
+                    color={"white"}
+                    onClick={() => setShowPassword(!showPassword)}
+                    _hover={{ opacity: 0.7, cursor: "pointer" }}
+                  />
                 </InputRightElement>
               </InputGroup>
             </FormControl>
@@ -166,6 +176,6 @@ export default function Page() {
         </Box>
       </Flex>
       <Footer />
-      </>
+    </>
   );
 }

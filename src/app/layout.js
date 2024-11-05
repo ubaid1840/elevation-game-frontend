@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { Suspense } from "react";
 import Loading from "./loading";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
+import { query } from "@/lib/db";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
