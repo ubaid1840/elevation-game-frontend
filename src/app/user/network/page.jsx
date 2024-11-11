@@ -1,73 +1,46 @@
 "use client";
-import React from "react";
-import { Box, Heading, useColorModeValue } from "@chakra-ui/react";
+import React, { useContext, useEffect, useState } from "react";
+import { Box, Center, Heading, useColorModeValue } from "@chakra-ui/react";
 import Tree from "react-d3-tree";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
+import { UserContext } from "@/store/context/UserContext";
+import axios from "axios";
 
+export default function Page() {
+  const { state: UserState } = useContext(UserContext);
+  const [teamMembersData, setTeamMembersData] = useState({});
 
-const teamMembersData = {
-    name: "You (Participant A)",
-    children: [
-      {
-        name: "Participant B",
-        attributes: {
-          referrals: 2, 
-        },
-        children: [
-          {
-            name: "Participant D",
-            attributes: {
-              referrals: 1, 
-            },
-            children: [],
-          },
-        ],
-      },
-      {
-        name: "Participant C",
-        attributes: {
-          referrals: 3, 
-        },
-        children: [
-          {
-            name: "Participant E",
-            attributes: {
-              referrals: 0, 
-            },
-            children: [],
-          },
-          {
-            name: "Participant F",
-            attributes: {
-              referrals: 2, 
-            },
-            children: [],
-          },
-        ],
-      },
-    ],
-  };
-export default function TeamMembersPage() {
-  const handleNodeClick = (nodeData) => {
-    console.log("Clicked node:", nodeData);
-  };
+  useEffect(() => {
+    if (UserState.value.data?.id) {
+      fetchData(UserState.value.data?.id);
+    }
+  }, [UserState.value.data]);
+
+  async function fetchData(id) {
+    axios.get(`/api/users/${id}/network`).then((response) => {
+      setTeamMembersData(response.data);
+    });
+  }
 
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
       <Box p={8} bg={useColorModeValue("white", "gray.800")}>
-        <Heading mb={6} color="purple.700">Your Team Members</Heading>
-        <Box height="600px"> 
-            <div id="tree-wrapper" style={{ width: '100%', height: '100%' }}>
-          <Tree 
-          orientation="vertical"
-            data={teamMembersData} 
-            onNodeClick={handleNodeClick}
-            translate={{ x: 100, y: 50 }}
-            pathFunc="diagonal"
-          />
-          </div>
-        </Box>
+        <Heading mb={6} color="purple.700">
+          Your Team Members
+        </Heading>
+        {teamMembersData && (
+          <Center w={"100%"}>
+            <Box height="600px" id="tree-wrapper">
+              <Tree
+                orientation="vertical"
+                data={teamMembersData}
+                translate={{ x: 100, y: 50 }}
+                pathFunc="diagonal"
+              />
+            </Box>
+          </Center>
+        )}
       </Box>
     </Sidebar>
   );

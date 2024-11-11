@@ -172,26 +172,26 @@ const MobileNavItem = ({ label, children, href }) => {
 const NAV_ITEMS = [
     {
         label: 'HOME',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}#home`,  
+        href: `/#home`,  
     },
     {
         label: 'HOW IT WORKS',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}#howitworks`,  
+        href: `/#howitworks`,  
     },
     {
         label: 'CATEGORIES',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}#categories`,  
+        href: `/#categories`,  
     },
     {
         label: 'JUDGES',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}#judges`,  
+        href: `/#judges`,  
     },
     {
         label: 'FAQ',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}/faq`,  
+        href: `/faq`,  
     },
     {
         label: 'CONTACT',
-        href: `${process.env.NEXT_PUBLIC_BASE_URL}/contact`,  
+        href: `/contact`,  
     },
 ]

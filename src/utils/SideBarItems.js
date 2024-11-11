@@ -1,7 +1,7 @@
 "use client"
 import { BsCashStack} from "react-icons/bs";
 import { FaUserFriends } from "react-icons/fa";
-import { MdOutlineGamepad, MdOutlineLeaderboard} from "react-icons/md";
+import { MdOutlineGamepad, MdOutlineLeaderboard, MdOutlineSchedule} from "react-icons/md";
 import { RiDashboard3Line,  RiTeamLine } from "react-icons/ri";
 import {  SiNintendogamecube } from "react-icons/si";
 import { SlGameController } from "react-icons/sl";
@@ -48,6 +48,11 @@ const GetLinkItems = (role) => {
                     name: "Create Game",
                     icon: SiNintendogamecube,
                     path: `/judge/creategame`,
+                },
+                {
+                    name: "Availability",
+                    icon: MdOutlineSchedule ,
+                    path: `/judge/schedule`,
                 },
                 {
                     name: "Meeting",

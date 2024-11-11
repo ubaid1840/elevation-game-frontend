@@ -38,7 +38,7 @@ export default function Page() {
   };
 
   const handleResubmitPitch = () => {
-    console.log(`New pitch submitted: ${newPitchLink}`);
+    // console.log(`New pitch submitted: ${newPitchLink}`);
     setNewPitchLink("");
   };
 

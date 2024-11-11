@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -9,28 +9,30 @@ import {
   useColorModeValue,
   SimpleGrid,
   Center,
+  Link,
+  Badge,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { UserContext } from "@/store/context/UserContext";
 
 export default function Page() {
   const cardBg = useColorModeValue("gray.100", "gray.700");
   const cardHoverBg = useColorModeValue("purple.50", "purple.600");
   const router = useRouter();
-  const handleGameClick = (gameId) => {
-    console.log(`Game ID: ${gameId} clicked`);
-    router.push(`/judge/gamedetails/${gameId}`);
-  };
   const [unfinishedGamesData, setUnfinishedGamesData] = useState([]);
+  const { state: UserState } = useContext(UserContext);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (UserState.value.data?.id) {
+      fetchData(UserState.value.data?.id);
+    }
+  }, [UserState.value.data]);
 
-  async function fetchData() {
-    axios.get("/api/games").then((response) => {
+  async function fetchData(id) {
+    axios.get(`/api/games/judge/${id}`).then((response) => {
       setUnfinishedGamesData(response.data);
     });
   }
@@ -50,6 +52,8 @@ export default function Page() {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             {unfinishedGamesData.map((game, index) => (
               <Box
+                as={Link}
+                href={`/judge/gamedetails/${game.id}`}
                 key={index}
                 mb={6}
                 borderWidth="1px"
@@ -63,8 +67,8 @@ export default function Page() {
                   boxShadow: "xl",
                   transform: "scale(1.03)",
                   bg: cardHoverBg,
+                  textDecoration: "none",
                 }}
-                onClick={() => handleGameClick(game.id)}
               >
                 <Stack spacing={3}>
                   <Heading size="md" color="purple.800">
@@ -72,7 +76,7 @@ export default function Page() {
                   </Heading>
                   <Divider />
                   <Text fontWeight="bold" color="purple.700">
-                    Total Participants: {game.total_participants}
+                    Total Participants: {game.enrollments.length}
                   </Text>
                   <Text fontWeight="bold" color="purple.700">
                     Entry Level Prize: {game.prize_amount}
@@ -81,7 +85,10 @@ export default function Page() {
                     Current Round: {game.currentround || 0} / {game.totalrounds}
                   </Text>
                   <Text fontWeight="bold" color="purple.700">
-                    Total Judges: {game.totaljudges}
+                    Total Judges: {game.additional_judges.length + 1}
+                  </Text>
+                  <Text fontWeight="bold" color="purple.700">
+                    Status: <Badge colorScheme={game.winner ?"green" : "yellow"}>{game.winner ? "Completed" : "Pending"}</Badge>
                   </Text>
                 </Stack>
               </Box>

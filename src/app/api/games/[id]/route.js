@@ -5,10 +5,22 @@ export async function GET(req, { params }) {
   const { id } = params;
 
   try {
-    const game = await pool.query(
+    // Fetch the main game details along with participants and pitches
+    const gameResult = await pool.query(
       `SELECT 
         g.created_by AS createdBy, 
         g.additional_judges, 
+        g.description,
+        g.video_link,
+        g.title,
+        g.category,
+        g.totalrounds,
+        g.level,
+        g.total_spots,
+        g.spots_remaining,
+        g.prize_amount,
+        g.currentround,
+        g.deadline,
         u.id AS participant_id, 
         u.name AS participant_name, 
         p.video_link AS pitch_video_link, 
@@ -24,12 +36,33 @@ export async function GET(req, { params }) {
        WHERE g.id = $1`,
       [id]
     );
-    return NextResponse.json(game.rows[0], { status: 200 });
+
+    const game = gameResult.rows[0];
+
+    if (!game) {
+      return NextResponse.json({ message: "Game not found" }, { status: 404 });
+    }
+
+    // Fetch the name of the creator
+    const creatorResult = await pool.query(`SELECT name FROM users WHERE id = $1`, [game.createdby]);
+    const creatorName = creatorResult.rows[0]?.name || null;
+
+    // Fetch the names of additional judges
+    const judgeIds = game.additional_judges || [];
+    const judgesResult = await pool.query(`SELECT id, name FROM users WHERE id = ANY($1::int[])`, [judgeIds]);
+    const judgeNames = judgesResult.rows.map(judge => judge.name);
+
+    // Replace the IDs with names
+    game.createdBy = creatorName;
+    game.additional_judges = judgeNames;
+
+    return NextResponse.json(game, { status: 200 });
   } catch (error) {
-    console.error('Error fetching game:', error);
-    return NextResponse.json({ message: 'Error fetching game', error: error.message }, { status: 500 });
+    console.error("Error fetching game:", error);
+    return NextResponse.json({ message: "Error fetching game", error: error.message }, { status: 500 });
   }
 }
+
 
 export async function PUT(req, { params }) {
   const { id } = params;

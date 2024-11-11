@@ -46,19 +46,23 @@ html {
 }
 
 .custom-svg {
-  fill: white; /* Background of the tree */
+  fill: white;
 }
 
 .custom-g {
-  cursor: pointer; /* Cursor change on hover */
+  cursor: pointer; 
 }
 
 .custom-text {
-  font-size: 14px; /* Adjust font size */
-  fill: purple; /* Text color */
+  font-size: 14px; 
+  fill: purple; 
 }
 
 .custom-branch {
-  stroke: gray; /* Color of the connecting lines */
-  stroke-width: 2; /* Thickness of the connecting lines */
+  stroke: gray; 
+  stroke-width: 2; 
+}
+
+.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
+  box-shadow: none !important;
 }

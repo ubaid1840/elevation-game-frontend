@@ -7,7 +7,7 @@ export async function POST(req) {
     const { booked_by, booked_for, booking_date } = await req.json();
 
     // Validate required fields
-    if (!booked_by || !booked_for) {
+    if (!booked_by || !booked_for || !booking_date) {
       return NextResponse.json(
         { message: 'booked_by and booked_for are required' },
         { status: 400 }
@@ -24,10 +24,14 @@ export async function POST(req) {
     const { rows: newBooking } = await query(insertBookingQuery, [
       booked_by,
       booked_for,
-      booking_date || new Date(),
+      booking_date,
     ]);
 
-    // Return the newly created booking
+    await query(
+      'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+      [booked_by, `User Booked a session with Judge`]
+    );
+
     return NextResponse.json(newBooking[0], { status: 201 });
   } catch (error) {
     console.error('Error creating booking:', error);
@@ -37,5 +41,6 @@ export async function POST(req) {
     );
   }
 }
+
 
 export const revalidate = 0;

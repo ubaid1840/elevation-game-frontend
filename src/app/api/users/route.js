@@ -11,7 +11,7 @@ export async function GET(req) {
   const role = searchParams.get('role');
 
   try {
-    const users = await query('SELECT id, name, email, role, last_active FROM users WHERE role = $1', [role]);
+    const users = await query('SELECT id, name, email, role, last_active, schedule FROM users WHERE role = $1', [role]);
     return NextResponse.json(users.rows );
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -36,8 +36,14 @@ export async function POST(req) {
       if (existingUser.rows[0].role === 'user') {
         return NextResponse.json({ message: 'User already signed up' }, { status: 400 });
       } else if (existingUser.rows[0].role === 'judge') {
-        // If the role is 'judge', return user details with a 200 status
-        return NextResponse.json(existingUser.rows[0], { status: 200 });
+        // If the role is 'judge', update the name and return the updated user details
+        const updatedUser = await query(
+          'UPDATE users SET name = $1 WHERE email = $2 RETURNING *',
+          [name, email]
+        );
+        return NextResponse.json(updatedUser.rows[0], { status: 200 });
+      } else {
+        return NextResponse.json({ message: 'Error creating user'}, { status: 500 });
       }
     }
 
@@ -71,7 +77,7 @@ export async function POST(req) {
       );
 
       await query(
-        'UPDATE users SET referral_count = referral_count + 1 WHERE id = $1',
+        'UPDATE users SET referral_count = COALESCE(referral_count, 0) + 1 WHERE id = $1',
         [referrer_id]
       );
     }
@@ -87,6 +93,7 @@ export async function POST(req) {
     return NextResponse.json({ message: 'Error creating user', error: error.message }, { status: 500 });
   }
 }
+
 
 
 export const revalidate = 0;

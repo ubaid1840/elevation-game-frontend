@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -8,39 +8,35 @@ import {
   Button,
   SimpleGrid,
   useColorModeValue,
+  Link,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { UserContext } from "@/store/context/UserContext";
 
-const participantGamesData = [
-  {
-    id: 1,
-    title: "Game Idea 1",
-    currentRound: 2,
-  },
-  {
-    id: 2,
-    title: "Game Idea 2",
-    currentRound: 1,
-  },
-  {
-    id: 3,
-    title: "Game Idea 3",
-    currentRound: 4,
-  },
-  {
-    id: 4,
-    title: "Game Idea 4",
-    currentRound: 3,
-  },
-];
 
 export default function Page() {
   const router = useRouter();
+  const [participantGamesData, setParticipantGamesData] = useState([]);
+  const { state: UserState } = useContext(UserContext);
+
+  useEffect(() => {
+    if (UserState.value.data?.id) {
+      fetchData();
+    }
+  }, [UserState.value.data]);
+
+  async function fetchData() {
+    axios
+      .get(`/api/users/${UserState.value.data.id}/games`)
+      .then((response) => {
+        setParticipantGamesData(response.data);
+      });
+  }
 
   const handleViewDetails = (gameId) => {
-    console.log(`View details for Game ID: ${gameId}`);
     router.push("/user/enrolledgames/singlegame");
   };
 
@@ -52,7 +48,9 @@ export default function Page() {
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
       <Box p={8} bg={bgColor}>
-        <Heading mb={6} color="purple.700">Your Enrolled Games</Heading>
+        <Heading mb={6} color="purple.700">
+          Your Enrolled Games
+        </Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
           {participantGamesData.map((game) => (
@@ -71,13 +69,19 @@ export default function Page() {
               borderColor={borderColor}
             >
               <Stack spacing={2}>
-                <Heading size="md" color="purple.600">{game.title}</Heading>
-                <Text color="purple.500">Current Round: {game.currentRound}</Text>
+                <Heading size="md" color="purple.600">
+                  {game.title}
+                </Heading>
+                <Text color="purple.500">
+                  Current Round: {game.currentround}
+                </Text>
               </Stack>
               <Button
+              _hover={{textDecoration:'none'}}
+               as={Link}
+               href={`/user/enrolledgames/${game.id}`}
                 colorScheme="purple"
                 mt={4}
-                onClick={() => handleViewDetails(game.id)}
                 variant="solid"
                 size="md"
                 _focus={{ boxShadow: "outline" }}

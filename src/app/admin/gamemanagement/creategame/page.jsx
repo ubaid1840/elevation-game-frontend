@@ -14,23 +14,25 @@ import {
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
-import axios from "axios"; // Import Axios
+import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
 import { useRouter } from "next/navigation";
+import { Calendar } from "primereact/calendar";
 
 export default function Page() {
-  const [title, setTitle] = useState(""); // New state for title
+  const [title, setTitle] = useState("");
   const [videoLink, setVideoLink] = useState("");
   const [gameDescription, setGameDescription] = useState("");
   const [selectedJudges, setSelectedJudges] = useState([]);
   const [rounds, setRounds] = useState(1);
   const [category, setCategory] = useState("");
-  const [spotsRemaining, setSpotsRemaining] = useState(0); // New state for spots remaining
-  const [totalSpots, setTotalSpots] = useState(0); // New state for total spots
+  const [totalSpots, setTotalSpots] = useState(0);
   const [prize, setPrize] = useState(0);
-  const [loading, setLoading] = useState(false)
+  const [deadline, setDeadline] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [availableJudges, setAvailableJudges] = useState([]);
-  const route = useRouter()
+  const [level, setLevel] = useState(null);
+  const route = useRouter();
   const { state: UserState } = useContext(UserContext);
 
   useEffect(() => {
@@ -57,34 +59,34 @@ export default function Page() {
   };
 
   const handleInitiateGame = async () => {
-    // Prepare the data for the API request
     const data = {
       title,
       description: gameDescription,
       totalRounds: Number(rounds),
       category,
-      spotsRemaining : Number(spotsRemaining),
+      spotsRemaining: Number(totalSpots),
       additional_judges: selectedJudges.map((judge) => judge.id),
       total_spots: Number(totalSpots),
       video_link: videoLink,
       creator_id: UserState.value.data.id,
       prize_amount: prize,
+      deadline,
+      currentround: 1,
+      level,
     };
 
     try {
-      // Make the POST request using Axios
-      axios.post("/api/games", data)
-      .then(()=>{
-        route.push("/admin/gamemanagement")
-      })
-      .catch((e)=>{
-        setLoading(false)
-      })
-      // You can also add any success handling here, such as showing a notification or redirecting
+      axios
+        .post("/api/games", data)
+        .then(() => {
+          route.push("/admin/gamemanagement");
+        })
+        .catch((e) => {
+          setLoading(false);
+        });
     } catch (error) {
       console.error("Error initiating game:", error);
-      setLoading(false)
-      // Handle error case, you might want to show an error message to the user
+      setLoading(false);
     }
   };
 
@@ -95,7 +97,6 @@ export default function Page() {
           Create Game
         </Heading>
 
-        {/* Title Section */}
         <FormControl mb={6}>
           <FormLabel htmlFor="title">Game Title</FormLabel>
           <Input
@@ -106,7 +107,6 @@ export default function Page() {
           />
         </FormControl>
 
-        {/* Video Link Section */}
         <FormControl mb={6}>
           <FormLabel htmlFor="videoLink">Video Link</FormLabel>
           <Input
@@ -118,7 +118,6 @@ export default function Page() {
           />
         </FormControl>
 
-        {/* Description Section */}
         <FormControl mb={6}>
           <FormLabel htmlFor="gameDescription">Game Description</FormLabel>
           <Textarea
@@ -130,7 +129,6 @@ export default function Page() {
           />
         </FormControl>
 
-        {/* Display Video */}
         {videoLink && (
           <Box mb={6}>
             <Text fontWeight="bold" mb={2}>
@@ -147,7 +145,20 @@ export default function Page() {
           </Box>
         )}
 
-        {/* Select Number of Rounds */}
+        <FormControl mb={6}>
+          <FormLabel htmlFor="level">Level</FormLabel>
+          <Select
+            value={level}
+            id="level"
+            onChange={(e) => setLevel(e.target.value)}
+            placeholder="Select level"
+          >
+            <option value={"Beginner"}>Beginner</option>
+            <option value={"Intermediate"}>Intermediate</option>
+            <option value={"Advance"}>Advance</option>
+          </Select>
+        </FormControl>
+
         <FormControl mb={6}>
           <FormLabel htmlFor="rounds">Number of Rounds</FormLabel>
           <Input
@@ -160,7 +171,6 @@ export default function Page() {
           />
         </FormControl>
 
-        {/* Total Spots Section */}
         <FormControl mb={6}>
           <FormLabel htmlFor="totalSpots">Total Spots</FormLabel>
           <Input
@@ -174,7 +184,31 @@ export default function Page() {
         </FormControl>
 
         <FormControl mb={6}>
-          <FormLabel htmlFor="totalSpots">Grand Prize</FormLabel>
+          <FormLabel htmlFor="deadline">Deadline</FormLabel>
+          <Box
+            border={"1px solid"}
+            borderColor={"#D0D5DD"}
+            borderRadius={"md"}
+            display={"flex"}
+            justifyContent={"center"}
+            alignItems={"center"}
+            height={"40px"}
+            px={4}
+          >
+            <Calendar
+              id="deadline"
+              value={deadline}
+              onChange={(e) => setDeadline(e.value)}
+              showIcon
+              className="custom-calendar"
+              dateFormat="mm/dd/yy"
+              style={{ width: "100%" }}
+            />
+          </Box>
+        </FormControl>
+
+        <FormControl mb={6}>
+          <FormLabel htmlFor="grandprize">Grand Prize</FormLabel>
           <Input
             id="grandprize"
             type="number"
@@ -185,7 +219,6 @@ export default function Page() {
           />
         </FormControl>
 
-        {/* Select Category */}
         <FormControl mb={6}>
           <FormLabel htmlFor="category">Game Category</FormLabel>
           <Select
@@ -194,14 +227,19 @@ export default function Page() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            <option value="sports">Sports</option>
-            <option value="music">Music</option>
-            <option value="puzzle">Puzzle</option>
-            <option value="strategy">Strategy</option>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Puzzle">Puzzle</option>
+            <option value="Strategy">Strategy</option>
+            <option value="Sports">Sports</option>
+            <option value="Racing">Racing</option>
+            <option value="Role-Playing">Role-Playing</option>
+            <option value="Simulation">Simulation</option>
+            <option value="Arcade">Arcade</option>
+            <option value="Trivia">Trivia</option>
           </Select>
         </FormControl>
 
-        {/* Select Additional Judges Section */}
         <FormControl mb={6}>
           <FormLabel htmlFor="addJudge">Add Additional Judges</FormLabel>
           <Select
@@ -217,7 +255,6 @@ export default function Page() {
           </Select>
         </FormControl>
 
-        {/* Display Selected Judges */}
         <Stack spacing={4} mb={6}>
           <Text fontWeight="bold">Selected Judges:</Text>
           {selectedJudges.map((judge, index) => (
@@ -227,10 +264,14 @@ export default function Page() {
           ))}
         </Stack>
 
-        <Button isLoading={loading} colorScheme="purple" onClick={()=>{
-          setLoading(true)
-          handleInitiateGame()
-        }}>
+        <Button
+          isLoading={loading}
+          colorScheme="purple"
+          onClick={() => {
+            setLoading(true);
+            handleInitiateGame();
+          }}
+        >
           Initiate Game
         </Button>
       </Box>

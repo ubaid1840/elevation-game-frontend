@@ -36,10 +36,11 @@ export default function Page() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const checkSession = useCheckSession();
+  const router = useRouter()
 
-  useEffect(() => {
-    checkSession();
-  }, []);
+  // useEffect(() => {
+  //   checkSession();
+  // }, []);
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
@@ -57,9 +58,11 @@ export default function Page() {
       })
       .then(() => {
         createUserWithEmailAndPassword(auth, email, password).catch((e)=>{
-          console.log(e)
+          setLoading(false)
+        console.log(e)
         })
       }).catch((e)=>{
+        setLoading(false)
         console.log(e)
       })
   };

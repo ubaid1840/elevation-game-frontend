@@ -5,6 +5,7 @@ import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { usePathname, useRouter } from "next/navigation";
 import { UserContext } from "@/store/context/UserContext";
+import axios from "axios";
 
 function randomID(len = 5) {
     const chars =
@@ -16,15 +17,41 @@ function randomID(len = 5) {
     return result;
 }
 
-export default function Meeting({ page }) {
+export default function Meeting({ page, onEndMeeting }) {
     const callContainerRef = useRef(null);
     const [roomID, setRoomID] = useState(randomID(5));
     const { state: UserState } = useContext(UserContext)
     const router = useRouter()
+    const pathname = usePathname()
     let zegoInstance;
 
     async function handleJoinRoom(room) {
         router.push(`/judge/meeting?roomID=${room}`, undefined, { shallow: true })
+        handleShareMeeting(`${pathname}?roomID=${room}`, "Started")
+    }
+
+    async function handleEndRoom(room) {
+        handleEndMeeting()
+    }
+    async function handleShareMeeting(val, stat) {
+        const meeting_link = val.replace("judge", "user")
+        axios.put(`/api/booking/${UserState.value.data.id}`, {
+            meeting_link: meeting_link,
+            status: stat
+        })
+            .then((response) => {
+                console.log(response.data)
+            })
+    }
+
+    async function handleEndMeeting() {
+        axios.post(`/api/booking/${UserState.value.data.id}`, {
+            status : "Ended"
+        })
+            .then((response) => {
+                console.log(response.data)
+            })
+            onEndMeeting(false)
     }
 
     useEffect(() => {
@@ -60,7 +87,16 @@ export default function Meeting({ page }) {
                         mode: ZegoUIKitPrebuilt.VideoConference,
                     },
                     onJoinRoom: () => {
-                        handleJoinRoom(roomID)
+                        if(page == 'judge'){
+                            handleJoinRoom(roomID)
+                        }
+                       
+                    },
+                    onLeaveRoom: () => {
+                        if(page == 'judge'){
+                            handleEndRoom(roomID)
+                        }
+                        
                     }
                 });
             } else {
@@ -88,8 +124,8 @@ export default function Meeting({ page }) {
     }, [roomID, UserState.value.data]);
 
     return (
-        <Sidebar LinkItems={GetLinkItems(page)}>
-            <div ref={callContainerRef} style={{ width: "100%", height: "100vh" }}></div>
-        </Sidebar>
+
+        <div ref={callContainerRef} style={{ width: "100%", height: "100vh" }}></div>
+
     );
 }

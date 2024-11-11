@@ -1,4 +1,4 @@
-import query from '@/lib/db';
+import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
@@ -9,19 +9,18 @@ export async function GET(req, { params }) {
   }
 
   try {
-    // Query to fetch direct referrals of the user
     const referralsQuery = `
-      SELECT 
-        u.name,
-        u.earning
-      FROM users u
-      JOIN referrals r ON u.id = r.referred_id
-      WHERE r.referrer_id = $1;
+    SELECT 
+  u.name,
+  u.package,
+  SUM(u.tier1 + u.tier2 + u.tier3) AS earnings
+FROM users u
+JOIN referrals r ON u.id = r.referred_id
+WHERE r.referrer_id = $1
+GROUP BY u.id;
     `;
 
     const { rows: referrals } = await query(referralsQuery, [id]);
-
-    // Query to get top 10 team members with the highest scores (Winner Status Board)
     const topTeamMembersQuery = `
       SELECT 
         u.name,
@@ -34,8 +33,6 @@ export async function GET(req, { params }) {
     `;
 
     const { rows: topTeamMembers } = await query(topTeamMembersQuery, [id]);
-
-    // Query to get tier earnings for the user
     const earningsQuery = `
       SELECT tier1, tier2, tier3
       FROM users
@@ -43,12 +40,11 @@ export async function GET(req, { params }) {
     `;
 
     const { rows: [earnings] } = await query(earningsQuery, [id]);
-
-    // Construct response
     const response = {
       referrals: referrals.map(referral => ({
         name: referral.name,
-        earning: referral.earning,
+        package : referral.package,
+        earning: referral.earnings,
       })),
       topTeamMembers: topTeamMembers.map(member => ({
         name: member.name,

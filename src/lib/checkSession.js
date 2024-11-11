@@ -14,18 +14,26 @@ export default function useCheckSession() {
                     if (user.email) {
                         await axios.get(`/api/userdetail/${user.email}`).then(async (response) => {
                             if (response.data?.role) {
-                                if (pathname.includes("/login") || pathname.includes("/signup") || pathname.includes("/forgetpassword")) {
+                                if (pathname.includes("/forgetpassword")) {
                                     router.push(`/${response.data.role}`)
+                                } else if (pathname.includes("/login") || pathname.includes("/signup")) {
+                                    if (response.data?.role == 'admin') {
+                                        router.push(`/${response.data.role}`)
+                                    } else if (!response.data.package_expiry) {
+                                        router.push("/payment")
+                                    } else {
+                                        router.push(`/${response.data.role}`)
+                                    }
                                 }
                                 resolve({ user: { ...response.data, ...user } })
                             } else {
-                                signOut(auth)
-                                resolve({error : "User now found"})
+                                // signOut(auth)
+                                resolve({ error: "User now found" })
                             }
-                        }).catch((e) => {                            
-                            
+                        }).catch((e) => {
+
                             signOut(auth)
-                            resolve({error : e.message})
+                            resolve({ error: e.message })
                         })
 
                     }

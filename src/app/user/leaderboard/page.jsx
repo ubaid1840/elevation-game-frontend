@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "@/components/sidebar";
+import { UserContext } from "@/store/context/UserContext";
 import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
@@ -19,65 +20,90 @@ import {
   Tooltip,
   Button,
 } from "@chakra-ui/react";
-
-
-const participants = [
-  { rank: 1, name: "Alice Smith", pitchTitle: "Innovative Pitch", score: 95 },
-  { rank: 2, name: "John Doe", pitchTitle: "Creative Solution", score: 90 },
-  { rank: 3, name: "Emma Johnson", pitchTitle: "Eco-Friendly Idea", score: 85 },
-  { rank: 4, name: "Michael Brown", pitchTitle: "Tech Revolution", score: 80 },
-  { rank: 5, name: "Sophia Davis", pitchTitle: "Future Vision", score: 75 },
-];
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 
 export default function LeaderboardPage() {
+  const { state: UserState } = useContext(UserContext);
+  const [participants, setParticipants] = useState([]);
+
+  useEffect(() => {
+    if (UserState.value.data?.id) {
+      fetchData();
+    }
+  }, [UserState.value.data]);
+
+  async function fetchData() {
+    axios.get(`/api/pitches/leaderboard`).then((response) => {
+      setParticipants(response.data);
+    });
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
-    <Box p={8} >
-      {/* Leaderboard Header */}
-      <VStack spacing={4} align="start">
-        <Heading size="lg" color="purple.700" textAlign="center" mb={6}>
-          Leaderboard
-        </Heading>
-        <Divider borderColor="purple.400" />
-      </VStack>
+      <Box p={8}>
+        {/* Leaderboard Header */}
+        <VStack spacing={4} align="start">
+          <Heading size="lg" color="purple.700" textAlign="center" mb={6}>
+            Leaderboard
+          </Heading>
+          <Divider borderColor="purple.400" />
+        </VStack>
 
-      {/* Rankings Table */}
-      <Table variant="simple" size={useBreakpointValue({ base: "sm", md: "md" })}>
-        <Thead>
-          <Tr>
-            <Th color="white" bg="purple.500">Rank</Th>
-            <Th color="white" bg="purple.500">Name</Th>
-            <Th color="white" bg="purple.500">Top Pitch</Th>
-            <Th color="white" bg="purple.500">Score</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {participants.map((participant) => (
-            <Tr key={participant.rank} _hover={{ bg: "purple.50" }}>
-              <Td>{participant.rank}</Td>
-              <Td>
-                <Tooltip label={`View details about ${participant.name}`} hasArrow>
-                  <Text fontWeight="bold" color="purple.600">{participant.name}</Text>
-                </Tooltip>
-              </Td>
-              <Td>{participant.pitchTitle}</Td>
-              <Td>
-                <Badge colorScheme={participant.score >= 90 ? "green" : "red"}>
-                  {participant.score}
-                </Badge>
-              </Td>
+        {/* Rankings Table */}
+        <Table
+          variant="simple"
+          size={useBreakpointValue({ base: "sm", md: "md" })}
+        >
+          <Thead>
+            <Tr>
+              <Th color="white" bg="purple.500">
+                Rank
+              </Th>
+              <Th color="white" bg="purple.500">
+                Name
+              </Th>
+              <Th color="white" bg="purple.500">
+                Top Pitch
+              </Th>
+              <Th color="white" bg="purple.500">
+                Score
+              </Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {participants.map((participant, index) => (
+              <Tr key={index} _hover={{ bg: "purple.50" }}>
+                <Td>{index + 1}</Td>
+                <Td>
+                  <Text fontWeight="bold" color="purple.600">
+                    {participant.name}
+                  </Text>
+                </Td>
+                <Td>{participant.game_title}</Td>
+                <Td>
+                  <Badge
+                    colorScheme={
+                      participant.score && participant.score >= 90
+                        ? "green"
+                        : "red"
+                    }
+                  >
+                    {participant?.score}
+                  </Badge>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
 
-{/*      
+        {/*      
       <HStack justifyContent="center" mt={8}>
         <Button colorScheme="purple" size="lg" onClick={() => alert('See details')}>
           View Detailed Rankings
         </Button>
       </HStack> */}
-    </Box>
+      </Box>
     </Sidebar>
   );
 }

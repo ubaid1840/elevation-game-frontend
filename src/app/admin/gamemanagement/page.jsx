@@ -42,6 +42,7 @@ const GameManagement = () => {
 
   async function fetchData() {
     axios.get("/api/games").then((response) => {
+      console.log(response.data)
       setGames(response.data);
     });
   }
@@ -111,8 +112,8 @@ const GameManagement = () => {
               games.map((game, index) => (
                 <Tr key={index}>
                   <Td>{game.title}</Td>
-                  <Td>{game.total_spots - game.total_participants || 0}</Td>
-                  <Td>{game.total_participants || 0}</Td>
+                  <Td>{game.spots_remaining|| 0}</Td>
+                  <Td>{game.totalEnrollments || 0}</Td>
                   <Td>{game.prize_amount}</Td>
                   {/* <Td>
                     <Button

@@ -3,7 +3,9 @@ import twilio from 'twilio';
 import query from './db';
 
 const transporter = nodemailer.createTransport({
-  service: process.env.BULK_EMAIL_SERVICE,
+  host: process.env.BULK_EMAIL_HOST,
+  port: process.env.BULK_EMAIL_PORT,
+  secure: false,
   auth: {
     user: process.env.BULK_EMAIL_USER,
     pass: process.env.BULK_EMAIL_PASSWORD,
@@ -33,17 +35,20 @@ export const sendBulkNotifications = async (message, subject) => {
 
     // Send SMS
     const smsPromises = users.rows.map(user => {
-      return twilioClient.messages.create({
-        body: message,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: user.phone,
-      }).catch(err => {
-        console.error(`Error sending SMS to ${user.phone}:`, err);
-      });
+      if (user.phone) {
+        return twilioClient.messages.create({
+          body: message,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: user.phone,
+        }).catch(err => {
+          console.error(`Error sending SMS to ${user.phone}:`, err);
+        });
+      }
+
     });
 
     await Promise.all(smsPromises);
-    
+
     console.log('All notifications sent successfully');
   } catch (error) {
     console.error('Error in sending bulk notifications:', error);

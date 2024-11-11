@@ -68,7 +68,7 @@ export default function SubscriptionPage({page}) {
                     <Stack spacing={4}>
                         {subscriptionOptions.length > 0 && subscriptionOptions.map((option) => (
                             <Radio key={option.id} value={option.label}>
-                                {option.label} - ${option.price} / month
+                                {option.label} - ${option.price}
                             </Radio>
                         ))}
                     </Stack>

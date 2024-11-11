@@ -5,12 +5,25 @@ export async function PUT(req, { params }) {
   const { id } = params;
 
   try {
-    const { score } = await req.json();
+    const { score, status } = await req.json();
 
-    const result = await query(
-      'UPDATE pitches SET score = $1 WHERE id = $2 RETURNING *',
-      [score, id]
-    );
+    let result;
+    if (score !== undefined) {
+      // Update score if score is provided
+      result = await query(
+        'UPDATE pitches SET score = $1 WHERE id = $2 RETURNING *',
+        [score, id]
+      );
+    } else if (status !== undefined) {
+      // Update status if status is provided
+      result = await query(
+        'UPDATE pitches SET status = $1 WHERE id = $2 RETURNING *',
+        [status, id]
+      );
+    } else {
+      // No valid parameter provided
+      return NextResponse.json({ message: 'No valid parameter provided for update' }, { status: 400 });
+    }
 
     if (result.rowCount === 0) {
       return NextResponse.json({ message: 'Pitch not found' }, { status: 404 });
@@ -18,8 +31,8 @@ export async function PUT(req, { params }) {
 
     return NextResponse.json(result.rows[0], { status: 200 });
   } catch (error) {
-    console.error('Error updating score:', error); // Log the error for debugging
-    return NextResponse.json({ message: 'Error updating score', error: error.message }, { status: 500 });
+    console.error('Error updating pitch:', error); // Log the error for debugging
+    return NextResponse.json({ message: 'Error updating pitch', error: error.message }, { status: 500 });
   }
 }
 

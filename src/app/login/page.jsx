@@ -24,6 +24,8 @@ import Footer from "@/components/Footer";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import useCheckSession from "@/lib/checkSession";
+import axios from "axios";
+import moment from "moment";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,12 +36,13 @@ export default function Page() {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const checkSession = useCheckSession();
   const toast = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     try {
       checkSession().then((res) => {
-        if(res.error){
-          console.log(res.error)
+        if (res.error) {
+          console.log(res.error);
         }
         setLoading(false);
       });
@@ -55,20 +58,27 @@ export default function Page() {
   }, [email, password]);
 
   const handleLogin = async () => {
-    signInWithEmailAndPassword(auth, email, password).then(()=>{
-      setLoading(false)
-    }).catch((e) => {
-      
-      toast({
-        title: "Error",
-        description: e.message,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setLoading(false);
+    axios.get(`/api/userdetail/${email}`).then((response) => {
+      handleAuthLogin(response.data);
     });
   };
+
+  async function handleAuthLogin(data) {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: e.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        setLoading(false);
+      });
+  }
 
   return (
     <>

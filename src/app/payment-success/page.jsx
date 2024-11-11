@@ -52,15 +52,28 @@ export default function Page() {
         paymentIntentId: paymentIntentId,
       })
       .then((response) => {
-        setMessage("Payment Successfull");
+        if (response.data.success) {
+          setMessage("Payment Verified Updating Record");
+          axios
+            .post("/api/updatetier", {
+              user_id: UserState.value.data.id,
+              plan: plan,
+            })
+            .then(() => {
+              callTimeout();
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        } else {
+          setMessage("Payment Verified");
+          callTimeout();
+        }
       })
       .catch((e) => {
         console.log(e);
         setMessage(e.response.data.message);
       })
-      .finally(() => {
-        callTimeout();
-      });
   }
 
   function callTimeout() {
