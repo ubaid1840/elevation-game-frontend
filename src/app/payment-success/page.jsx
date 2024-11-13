@@ -63,6 +63,7 @@ export default function Page() {
               callTimeout();
             })
             .catch((e) => {
+              setMessage("Something went wrong, refresh the page");
               console.log(e);
             });
         } else {

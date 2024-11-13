@@ -60,7 +60,16 @@ export default function Page() {
   const handleLogin = async () => {
     axios.get(`/api/userdetail/${email}`).then((response) => {
       handleAuthLogin(response.data);
-    });
+    }).catch((e)=>{
+      toast({
+        title: "Error",
+        description: e?.response?.data?.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+    })
   };
 
   async function handleAuthLogin(data) {

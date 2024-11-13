@@ -62,6 +62,7 @@ export default function GameDetail({ params }) {
                 setProgress((current / total) * 100)
             }
             setGameDetailData(response.data);
+            setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
             console.error("Error fetching game details:", error);
         }
@@ -93,18 +94,7 @@ export default function GameDetail({ params }) {
             .then(() => {
                 setNewComment("");
                 setLoading(false);
-
-                let oldComments = [...gameDetailData.pitches[ind].comments];
-                oldComments.push({
-                    pitch_id: pitchid,
-                    comment_text: newComment,
-                    user_id: UserState.value.data.id,
-                });
-                setGameDetailData((prevState) => {
-                    const newState = { ...prevState };
-                    newState.pitches[ind].comments = [...oldComments];
-                    return newState;
-                });
+                fetchData()
             })
             .catch((e) => {
                 setLoading(false);
@@ -156,10 +146,10 @@ export default function GameDetail({ params }) {
                     </GridItem>
                     <GridItem >
                         <Text fontWeight="bold" color="purple.600">
-                            Winner: <span>{gameDetailData?.game?.winner || "TBA"}</span>
+                            Winner: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'}  color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
                         </Text>
                     </GridItem>
-                    <GridItem colSpan={2}>
+                    <GridItem >
                         <Text fontWeight="bold" color="purple.600">
                             Additional Judges:
                         </Text>
@@ -168,6 +158,11 @@ export default function GameDetail({ params }) {
                                 <Text key={index}>{judge}</Text>
                             ))}
                         </Stack>
+                    </GridItem>
+                    <GridItem >
+                        <Text fontWeight="bold" color="purple.600">
+                            Current Round: <span>{gameDetailData?.game?.currentround || "0"}</span>
+                        </Text>
                     </GridItem>
                 </Grid>
 
@@ -194,7 +189,7 @@ export default function GameDetail({ params }) {
                         Previous Round
                     </Button>
                     <Text fontWeight="bold" color="purple.700">
-                        Current Round: {currentRound}/{gameDetailData?.game?.totalrounds}
+                        Round: {currentRound}/{gameDetailData?.game?.totalrounds}
                     </Text>
                     <Button
                         colorScheme="purple"
@@ -231,7 +226,7 @@ export default function GameDetail({ params }) {
                                         {pitch.videoLink}
                                     </Link>
                                 </Text>
-                                <Text>Status: {pitch.status}</Text>
+                                <Text>Status: <Badge color={pitch.status &&  pitch.status == 'Disqualify' ? 'red' : "green"}>{pitch.status}</Badge></Text>
                                 <Text>Score: {pitch.score}</Text>
 
                                 <Divider my={4} />
@@ -269,7 +264,7 @@ export default function GameDetail({ params }) {
                         </Box>
                     ))}
                 </Stack>
-                {gameDetailData && (
+                {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && (
                     <Button
                         w={"full"}
                         as={Link}

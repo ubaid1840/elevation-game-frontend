@@ -27,11 +27,15 @@ import {
   HStack,
   Spacer,
   Input,
+  useToast,
+  Select,
+  Badge,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
+import { GhostButton } from "@/components/ui/Button";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -39,17 +43,26 @@ export default function Page({ params }) {
   const [gameData, setGameData] = useState(null);
   const { state: UserState } = useContext(UserContext);
   const [currentRound, setCurrentRound] = useState(1);
+  const [winnersList, setWinnersList] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isOpenScore,
     onOpen: onOpenScore,
     onClose: onCloseScore,
   } = useDisclosure();
+
+  const {
+    isOpen: isOpenWinner,
+    onOpen: onOpenWinner,
+    onClose: onCloseWinner,
+  } = useDisclosure();
   const [selectedPitch, setSelectedPitch] = useState();
   const [loading, setLoading] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [newScore, setNewScore] = useState("");
   const [roundLoading, setRoundLoading] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -58,13 +71,23 @@ export default function Page({ params }) {
   }, [UserState.value.data]);
 
   async function fetchData() {
-    try {
-      const response = await axios.get(`/api/games/${params.id}/judge`);
-      setGameData(response.data);
-      setCurrentRound(Number(response.data.currentround || 1));
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    axios
+      .get(`/api/games/${params.id}/judge`)
+      .then((response) => {
+        console.log(response.data);
+        setGameData(response.data);
+        setCurrentRound(Number(response.data.currentround || 1));
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: e.response.data.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        console.error("Error fetching data:", e);
+      });
   }
 
   const handleNextRound = () => {
@@ -135,7 +158,7 @@ export default function Page({ params }) {
     axios
       .put(`/api/nextround`, {
         id: gameData.id,
-        round: (Number(gameData.currentround) + 1),
+        round: Number(gameData.currentround) + 1,
       })
       .then(() => {
         fetchData();
@@ -145,6 +168,34 @@ export default function Page({ params }) {
       })
       .finally(() => {
         setRoundLoading(false);
+      });
+  }
+
+  async function handleWinner() {
+    onCloseWinner();
+    axios
+      .put(`/api/games/${gameData.id}`, {
+        winnerid: selectedUserId,
+      })
+      .then(() => {
+        toast({
+          title: "Success",
+          description: "Prize awarded successfully!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        fetchData();
+      })
+      .catch((e) => {
+        console.log(e);
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       });
   }
 
@@ -167,10 +218,17 @@ export default function Page({ params }) {
               <strong>Level:</strong> {gameData?.level}
             </Text>
             <Text>
-              <strong>Prize Amount:</strong> {gameData?.prize_amount}
+              <strong>Prize Amount: </strong>%{gameData?.prize_amount}
             </Text>
             <Text>
-              <strong>Winner:</strong> {gameData?.winner || "N/A"}
+              <strong>Winner:</strong>{" "}
+              {gameData?.winner ? (
+                <Badge fontSize={"lg"} color={"green"}>
+                  {gameData?.winner_name}
+                </Badge>
+              ) : (
+                "TBA"
+              )}
             </Text>
             <Text>
               <strong>Additional Judges:</strong>{" "}
@@ -348,22 +406,48 @@ export default function Page({ params }) {
             ))}
         </Stack>
       </Box>
-      {gameData?.totalrounds && (
-        <Button
-          isDisabled={gameData.currentround === gameData.totalrounds}
-          isLoading={roundLoading}
-          m={4}
-          colorScheme="purple"
-          size={"lg"}
-          onClick={() => {
-            setRoundLoading(true);
-            handleMoveToNextRound();
-          }}
-        >
-          Move To Next Round
-        </Button>
-      )}
-
+      {gameData?.totalrounds &&
+        gameData.currentround === currentRound &&
+        !gameData.winner && (
+          <Button
+            isDisabled={gameData.currentround === gameData.totalrounds}
+            isLoading={roundLoading}
+            m={4}
+            colorScheme="purple"
+            size={"lg"}
+            onClick={() => {
+              setRoundLoading(true);
+              handleMoveToNextRound();
+            }}
+          >
+            Move To Next Round
+          </Button>
+        )}
+      {gameData &&
+        !gameData.winner &&
+        UserState.value.data?.id === Number(gameData?.created_by || 0) && (
+          <Button
+            m={4}
+            colorScheme="teal"
+            size={"lg"}
+            onClick={() => {
+              const validUsers = gameData.enrollments
+                .filter((enrollment) =>
+                  enrollment.pitches.every(
+                    (pitch) => pitch.pitch_status !== "Disqualify"
+                  )
+                )
+                .map((enrollment) => ({
+                  user_id: enrollment.user_id,
+                  user_name: enrollment.user_name,
+                }));
+              setWinnersList(validUsers);
+              onOpenWinner();
+            }}
+          >
+            Announce Winner
+          </Button>
+        )}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -439,6 +523,45 @@ export default function Page({ params }) {
               }}
             >
               Submit Score
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpenWinner} onClose={onCloseWinner}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Award Prize</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <FormControl id="user_id" mb={4}>
+              <FormLabel>Select Winner</FormLabel>
+              <Select
+                placeholder="Select a winner"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+              >
+                {winnersList.map((winner) => (
+                  <option key={winner.user_id} value={winner.user_id}>
+                    {winner.user_name}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"outline"} onClick={onCloseWinner}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={!selectedUserId}
+              colorScheme="blue"
+              mr={3}
+              onClick={handleWinner}
+            >
+              Submit
             </Button>
           </ModalFooter>
         </ModalContent>

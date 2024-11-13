@@ -116,6 +116,7 @@ export default function Page() {
             gap={6}
           >
             {packages.map((pkg) => (
+              pkg.label !== 'Silver' &&
               <Box
                 key={pkg.label}
                 borderWidth="1px"

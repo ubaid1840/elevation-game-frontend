@@ -41,8 +41,7 @@ const GameManagement = () => {
   }, []);
 
   async function fetchData() {
-    axios.get("/api/games").then((response) => {
-      console.log(response.data)
+    axios.get("/api/games/admin").then((response) => {
       setGames(response.data);
     });
   }
@@ -69,16 +68,16 @@ const GameManagement = () => {
     onClose();
   };
 
-  const handleEditGame = (game) => {
-    setGameName(game.name);
-    setSpots(game.spots);
-    setEditingGame(game);
-    onOpen();
-  };
+  // const handleEditGame = (game) => {
+  //   setGameName(game.name);
+  //   setSpots(game.spots);
+  //   setEditingGame(game);
+  //   onOpen();
+  // };
 
-  const handleDeleteGame = (id) => {
-    setGames((prev) => prev.filter((game) => game.id !== id));
-  };
+  // const handleDeleteGame = (id) => {
+  //   setGames((prev) => prev.filter((game) => game.id !== id));
+  // };
 
   const resetForm = () => {
     setGameName("");

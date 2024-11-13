@@ -42,6 +42,7 @@ import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
+import { CgProfile } from "react-icons/cg";
 
 export default function Sidebar({ children, LinkItems, settingsLink, currentPage, id }) {
 
@@ -144,6 +145,15 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, ...rest }) => {
                 <Divider color={'#EAECF0'} width={'250px'} alignSelf={'center'} />
                 {UserState.value.data?.email &&
                     <>
+                        {UserState.value.data?.role != 'admin' &&
+                            <NavItem
+                                isActive={pathname.includes('profile')}
+                                icon={CgProfile}
+                                path={`/${UserState.value.data?.role}/profile`}
+                            >
+                                Profile
+                            </NavItem>
+                        }
                         {UserState.value.data?.role == 'admin'
                             ?
                             <NavItem
@@ -204,7 +214,7 @@ const NavItem = ({ icon, children, path, isActive, ...rest }) => {
                     <Icon
                         mr="4"
                         _groupHover={{
-                            color: theme.color.primary,
+                            color: "purple.500",
                         }}
                         boxSize={5}
                         as={icon}

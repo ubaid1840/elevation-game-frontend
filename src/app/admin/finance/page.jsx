@@ -24,6 +24,7 @@ const FinancialOverview = () => {
   const [payments, setPayments] = useState([]);
   const [emailContent, setEmailContent] = useState("");
   const toast = useToast();
+  const [notificationType, setNotificationType] = useState("email");
 
   useEffect(() => {
     fetchData();
@@ -39,15 +40,22 @@ const FinancialOverview = () => {
     });
   }
 
-  const handleSendNotifications = () => {
-    toast({
-      title: "Notifications Sent",
-      description: "Bulk email and text notifications sent to participants.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-  };
+  async function handleSendNotifications(msg) {
+    axios
+      .post("/api/notification", {
+        msg: msg,
+        type : notificationType
+      })
+      .then(() => {
+        toast({
+          title: "Notifications Sent",
+          description: "Notifications sent to participants.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
+  }
 
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
@@ -89,20 +97,22 @@ const FinancialOverview = () => {
         </Table>
 
         {/* Export Reports */}
-        <CSVLink
-        href="#"
-          data={payments.map(({ name, tier1, tier2, tier3 }) => ({
-            Participant: name,
-            Amount: Number(tier1) + Number(tier2) + Number(tier3),
-          }))}
-          filename={"financial-overview.csv"}
-          className="btn btn-primary"
-          target="_blank"
-        >
-          <Button colorScheme="purple" mb={4}>
-            Export Financial Data
-          </Button>
-        </CSVLink>
+        {payments.length > 0 && (
+          <CSVLink
+            href="#"
+            data={payments.map(({ name, tier1, tier2, tier3 }) => ({
+              Participant: name,
+              Amount: Number(tier1) + Number(tier2) + Number(tier3),
+            }))}
+            filename={"financial-overview.csv"}
+            className="btn btn-primary"
+            target="_blank"
+          >
+            <Button colorScheme="purple" mb={4}>
+              Export Financial Data
+            </Button>
+          </CSVLink>
+        )}
 
         {/* Email Notifications */}
         <Heading size="md" mb={4}>
@@ -114,11 +124,31 @@ const FinancialOverview = () => {
           onChange={(e) => setEmailContent(e.target.value)}
           mb={4}
         />
-        <Select placeholder="Select Notification Type" mb={4}>
+        <Select
+          value={notificationType}
+          onChange={(e) => setNotificationType(e.target.value)}
+          placeholder="Select Notification Type"
+          mb={4}
+        >
           <option value="email">Email</option>
           <option value="sms">SMS</option>
         </Select>
-        <Button colorScheme="green" onClick={handleSendNotifications}>
+        <Button
+          isDisabled={!emailContent || !notificationType}
+          colorScheme="green"
+          onClick={() => {
+            toast({
+              title: "Sending",
+              description: "Notifications in progress...",
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+            });
+            const msg = emailContent;
+            handleSendNotifications(msg);
+            setEmailContent("");
+          }}
+        >
           Send Notifications
         </Button>
       </Box>

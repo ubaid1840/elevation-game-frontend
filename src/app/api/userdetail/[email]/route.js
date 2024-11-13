@@ -6,7 +6,7 @@ export async function GET(req, { params }) {
         const { email } = params;
      
         if (!email) {
-            return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+            return NextResponse.json({ message: 'Email is required' }, { status: 400 });
         }
 
         const data = await pool.query(
@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
 
 
         if (data.rows.length === 0) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
 
@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
         return NextResponse.json(data.rows[0]);
     } catch (error) {
         console.error('Error fetching role:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 

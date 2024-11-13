@@ -23,7 +23,7 @@ export async function POST(req) {
     );
 
     if (firstReferrerResult.rows.length === 0) {
-      return NextResponse.json({ error: 'No referrer found for the user' }, { status: 404 });
+      return NextResponse.json({ message: 'No referrer found for the user' }, { status: 200 });
     }
 
     const referrer_id = firstReferrerResult.rows[0].referrer_id;

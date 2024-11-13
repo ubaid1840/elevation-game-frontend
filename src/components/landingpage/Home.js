@@ -25,12 +25,12 @@ export default function HomePage() {
                 <Text variant={'heading'} fontSize={{ base: '5xl', md: '8xl' }} color={'white'}>
                     THE GAME OF CHALLENGES
                 </Text>
-                <VStack gap={{base : 5, md :10}}>
+                <VStack gap={{ base: 5, md: 10 }}>
                     <Text fontSize={'2xl'} color={'white'}>
                         Join the Virtual Three-Minute Elevator Pitch and complete for exciting prizes!
                     </Text>
 
-                    <Img  height={'300px'} src={"/logo.png"} />
+                    <Img height={'300px'} src={"/logo.png"} />
                     <div>
                         <Button size={'lg'} as={Link} href={"/login"}>
                             GET STARTED

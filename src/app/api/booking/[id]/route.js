@@ -30,54 +30,30 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   const { id } = params;
-  const { meeting_link } = await req.json();
+  const { meeting_link, status } = await req.json();
 
-  if (!meeting_link) {
-    return NextResponse.json({ message: 'Meeting link is required' }, { status: 400 });
+  if (!status) {
+    return NextResponse.json({ message: 'Status is required' }, { status: 400 });
   }
 
-  const today = moment().format('YYYY-MM-DD');
-
   try {
-    const bookingsResult = await query(
+    const updateResult = await query(
       `
-      SELECT * FROM bookings
-      WHERE status = 'Not started' AND booked_for = $1;
+      UPDATE bookings
+      SET meeting_link = $1, status = $2
+      WHERE id = $3
+      RETURNING *;
       `,
-      [id]
+      [meeting_link, status, id]
     );
 
-    if (bookingsResult.rowCount === 0) {
-      return NextResponse.json({ message: 'No bookings found for the given ID' }, { status: 404 });
-    }
-
-    const updatedBookings = [];
-
-    for (const booking of bookingsResult.rows) {
-      const bookingDate = moment(parseInt(booking.booking_date)).format('YYYY-MM-DD');
-      if (bookingDate === today) {
-      
-        const updateResult = await query(
-          `
-          UPDATE bookings
-          SET meeting_link = $1, status = 'Started'
-          WHERE id = $2
-          RETURNING *;
-          `,
-          [meeting_link, booking.id]
-        );
-
-        updatedBookings.push(updateResult.rows[0]); 
-      }
-    }
-
-    if (updatedBookings.length === 0) {
-      return NextResponse.json({ message: 'No bookings updated' }, { status: 404 });
+    if (updateResult.rowCount === 0) {
+      return NextResponse.json({ message: 'No matching booking found or already started' }, { status: 404 });
     }
 
     return NextResponse.json({
       message: 'Meeting link and status updated successfully',
-      updatedBookings: updatedBookings,
+      updatedBooking: updateResult.rows[0],
     });
   } catch (error) {
     console.error('Error updating meeting link:', error);
@@ -99,11 +75,11 @@ export async function POST(req, { params }) {
     const result = await query(
       `
       UPDATE bookings
-      SET meeting_link = $1, status = $2
-      WHERE booked_for = $3 AND status = 'Started'
+      SET meeting_link = $1, status = 'Ended'
+      WHERE id = $2
       RETURNING *
       `,
-      ["", status, id]
+      ["", id]
     );
 
     if (result.rowCount === 0) {

@@ -21,6 +21,7 @@ import CheckoutPage from "../stripe/Checkout";
 import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
 import { UserContext } from "@/store/context/UserContext";
 import axios from "axios";
+import moment from "moment";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
@@ -56,9 +57,14 @@ export default function SubscriptionPage({page}) {
     return (
         <Sidebar LinkItems={GetLinkItems(page)}>
             <Box p={8} bg="white">
-                <Heading mb={6} color="purple.700">
+                <Heading mb={2} color="purple.700">
                     Current Plan: <Text as="span" color="green.500">{currentPlan}</Text>
                 </Heading>
+                {currentPlan &&
+                <Text fontSize={'lg'} mb={6} color="purple.700">
+                    Expiry: <Text as="span" color="green.500">{moment(UserState.value.data.package_expiry).format("MMM DD, yyyy") }</Text>
+                </Text>
+}
 
                 <Heading mb={6} color="purple.700">
                     Choose Your Subscription Plan
@@ -67,6 +73,7 @@ export default function SubscriptionPage({page}) {
                 <RadioGroup onChange={handlePlanChange} value={selectedPlan} mb={6}>
                     <Stack spacing={4}>
                         {subscriptionOptions.length > 0 && subscriptionOptions.map((option) => (
+                            option.label !== "Silver" &&
                             <Radio key={option.id} value={option.label}>
                                 {option.label} - ${option.price}
                             </Radio>

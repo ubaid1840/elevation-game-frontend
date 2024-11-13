@@ -66,25 +66,27 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   const { id } = params;
-  const { title, description, totalRounds, category, currentRound, spotsRemaining, judges, winnerid } = await req.json();
+  const { winnerid } = await req.json();
+
+  if (!winnerid || !id) {
+    return NextResponse.json({ message: 'Required information missing' }, { status: 404 });
+  }
 
   try {
-    if (winnerid) {
-      await pool.query(
-        `UPDATE users 
+
+    await pool.query(
+      `UPDATE users 
          SET winner_earnings = winner_earnings + (SELECT prize_amount FROM games WHERE games.id = $1) 
          WHERE users.id = $2`,
-        [id, winnerid]
-      );
-    }
+      [id, winnerid]
+    );
 
     const updatedGame = await pool.query(
       `UPDATE games 
-       SET title = $1, description = $2, totalRounds = $3, category = $4, 
-           spots_remaining = $5, judges = $6, currentRound = $7, winner = $8 
-       WHERE id = $9 
+       SET winner = $1 
+       WHERE id = $2 
        RETURNING *`,
-      [title, description, totalRounds, category, spotsRemaining, judges, currentRound, winnerid, id]
+      [winnerid, id]
     );
 
     return NextResponse.json(updatedGame.rows[0], { status: 200 });

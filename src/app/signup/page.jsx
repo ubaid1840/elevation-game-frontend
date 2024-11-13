@@ -36,11 +36,22 @@ export default function Page() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const checkSession = useCheckSession();
-  const router = useRouter()
+  const router = useRouter();
+  const toast = useToast()  
 
-  // useEffect(() => {
-  //   checkSession();
-  // }, []);
+  useEffect(() => {
+    try {
+      checkSession().then((res) => {
+        if (res.error) {
+          console.log(res.error);
+        }
+        setLoading(false);
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
@@ -57,14 +68,27 @@ export default function Page() {
         schedule: {},
       })
       .then(() => {
-        createUserWithEmailAndPassword(auth, email, password).catch((e)=>{
-          setLoading(false)
-        console.log(e)
-        })
-      }).catch((e)=>{
-        setLoading(false)
-        console.log(e)
+        createUserWithEmailAndPassword(auth, email, password).catch((e) => {
+          setLoading(false);
+          toast({
+            title: "Error",
+            description: e?.message,
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        });
       })
+      .catch((e) => {
+        setLoading(false);
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
   };
 
   return (
@@ -175,7 +199,7 @@ export default function Page() {
             </FormControl>
             <Stack mt={5}>
               <Button
-              isLoading={loading}
+                isLoading={loading}
                 borderRadius={"2px"}
                 colorScheme={"purple"}
                 isDisabled={!isEmailValid || !isPasswordValid}

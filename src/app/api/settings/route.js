@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db'; 
+import { query } from '@/lib/db';
 
 
 export async function GET(req) {
@@ -73,5 +73,42 @@ export async function PUT(req) {
         }, { status: 500 });
     }
 }
+
+export async function POST(req) {
+    try {
+        const { label, price } = await req.json();
+        if (!label || !price) {
+            return NextResponse.json({
+                message: 'Missing required fields: label and price'
+            }, { status: 400 });
+        }
+        const checkExisting = await query(
+            'SELECT * FROM settings WHERE label = $1',
+            [label]
+        );
+
+        if (checkExisting.rowCount > 0) {
+            return NextResponse.json({
+                message: 'Package already exists'
+            }, { status: 400 });
+        }
+
+        const result = await query(
+            'INSERT INTO settings (label, price) VALUES ($1, $2) RETURNING *',
+            [label, price]
+        );
+
+        return NextResponse.json({
+            success: true,
+            newSetting: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Error adding new setting:', error);
+        return NextResponse.json({
+            message: `Internal Server Error: ${error.message}`
+        }, { status: 500 });
+    }
+}
+
 
 export const revalidate = 0;

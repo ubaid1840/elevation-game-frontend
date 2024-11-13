@@ -17,7 +17,7 @@ function randomID(len = 5) {
     return result;
 }
 
-export default function Meeting({ page, onEndMeeting }) {
+export default function Meeting({ page, onEndMeeting, group }) {
     const callContainerRef = useRef(null);
     const [roomID, setRoomID] = useState(randomID(5));
     const { state: UserState } = useContext(UserContext)
@@ -27,31 +27,39 @@ export default function Meeting({ page, onEndMeeting }) {
 
     async function handleJoinRoom(room) {
         router.push(`/judge/meeting?roomID=${room}`, undefined, { shallow: true })
-        handleShareMeeting(`${pathname}?roomID=${room}`, "Started")
+        handleShareMeeting(`${pathname}?roomID=${room}`)
     }
 
     async function handleEndRoom(room) {
         handleEndMeeting()
     }
-    async function handleShareMeeting(val, stat) {
+    async function handleShareMeeting(val) {
         const meeting_link = val.replace("judge", "user")
-        axios.put(`/api/booking/${UserState.value.data.id}`, {
-            meeting_link: meeting_link,
-            status: stat
-        })
-            .then((response) => {
-                console.log(response.data)
+        group.data.map((eachItem) => {
+            axios.put(`/api/booking/${eachItem.id}`, {
+                meeting_link: meeting_link,
+                status: 'Started'
             })
+                .then((response) => {
+                    // console.log(response.data)
+                })
+        })
+
     }
 
     async function handleEndMeeting() {
-        axios.post(`/api/booking/${UserState.value.data.id}`, {
-            status : "Ended"
-        })
-            .then((response) => {
-                console.log(response.data)
+        const localData = group
+        localData.data.map((eachItem) => {
+            axios.put(`/api/booking/${eachItem.id}`, {
+                meeting_link: "",
+                status: "Ended"
             })
-            onEndMeeting(false)
+                .then((response) => {
+                    // console.log(response.data)
+                })
+        })
+        onEndMeeting()
+
     }
 
     useEffect(() => {
@@ -87,16 +95,16 @@ export default function Meeting({ page, onEndMeeting }) {
                         mode: ZegoUIKitPrebuilt.VideoConference,
                     },
                     onJoinRoom: () => {
-                        if(page == 'judge'){
+                        if (page == 'judge' && group.data[0].status !== "Started") {
                             handleJoinRoom(roomID)
                         }
-                       
+
                     },
                     onLeaveRoom: () => {
-                        if(page == 'judge'){
+                        if (page == 'judge') {
                             handleEndRoom(roomID)
                         }
-                        
+
                     }
                 });
             } else {

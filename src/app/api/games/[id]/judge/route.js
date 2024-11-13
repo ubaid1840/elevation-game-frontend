@@ -46,6 +46,15 @@ export async function GET(req, { params }) {
     }
     game.additional_judges_names = judgeNames;
 
+    // Check if there is a winner and replace winner ID with winner's name
+    if (game.winner) {
+      const winnerResult = await pool.query(
+        `SELECT name FROM users WHERE id = $1`,
+        [game.winner]
+      );
+      game.winner_name = winnerResult.rows[0]?.name || 'Unknown';
+    }
+
     // Fetch game_enrollments for the current game
     const enrollmentsResult = await pool.query(
       `SELECT ge.user_id, ge.status
@@ -114,4 +123,3 @@ export async function GET(req, { params }) {
 }
 
 export const revalidate = 0;
-

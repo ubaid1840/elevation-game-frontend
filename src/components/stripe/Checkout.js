@@ -43,7 +43,7 @@ const CheckoutPage = ({ amount, userID, plan }) => {
         const { error } = await stripe.confirmPayment({
             elements,
             clientSecret,
-            confirmParams: { return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success?amount=${amount}&plan=${plan}` }
+            confirmParams: { return_url: `${window.location.origin}/payment-success?amount=${amount}&plan=${plan}` }
         })
            
         if (error) {
