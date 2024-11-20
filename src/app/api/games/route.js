@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const games = await query(
-      `SELECT id, title, total_participants, prize_amount, level, spots_remaining, currentRound, totalRounds, total_spots, 
+      `SELECT id, title, total_participants, prize_amount, level, spots_remaining, currentRound, totalRounds, total_spots, deadline, 
        array_length(additional_judges, 1) + 1 as totalJudges 
        FROM games WHERE winner IS NULL`
     );

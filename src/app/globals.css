@@ -66,3 +66,11 @@ html {
 .p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
   box-shadow: none !important;
 }
+
+.custom-calendar {
+  z-index: 9999;
+}
+
+.p-datepicker {
+  z-index: 9999 !important; 
+}

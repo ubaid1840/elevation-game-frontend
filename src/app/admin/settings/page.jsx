@@ -121,7 +121,7 @@ export default function Page() {
       ) : (
         <Box p={8} bg="white">
           <Heading mb={6} color="purple.700">
-            Settings Management
+            Settings
           </Heading>
           {availablePackages?.length > 0 && (
             <Button colorScheme="green" mb={4} onClick={onAddModalOpen}>

@@ -82,7 +82,7 @@ export default function GameEnrollmentPage({ params }) {
               <Text fontSize="sm">${game?.prize_amount}</Text>
             </GridItem>
             <GridItem>
-              <Text fontWeight="bold">Level:</Text>
+              <Text fontWeight="bold">Tier:</Text>
               <Text fontSize="sm">{game?.level}</Text>
             </GridItem>
           </Grid>

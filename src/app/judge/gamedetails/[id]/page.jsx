@@ -36,6 +36,8 @@ import { UserContext } from "@/store/context/UserContext";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { GhostButton } from "@/components/ui/Button";
+import { Calendar } from "primereact/calendar";
+import moment from "moment";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -44,6 +46,7 @@ export default function Page({ params }) {
   const { state: UserState } = useContext(UserContext);
   const [currentRound, setCurrentRound] = useState(1);
   const [winnersList, setWinnersList] = useState([]);
+  const [deadline, setDeadline] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isOpenScore,
@@ -56,6 +59,12 @@ export default function Page({ params }) {
     onOpen: onOpenWinner,
     onClose: onCloseWinner,
   } = useDisclosure();
+  const {
+    isOpen: isOpenStart,
+    onClose: onCloseStart,
+    onOpen: onOpenStart,
+  } = useDisclosure();
+  const {isOpen : isOpenNextRound, onOpen : onOpenNextRound, onClose : onCloseNextRound} = useDisclosure()
   const [selectedPitch, setSelectedPitch] = useState();
   const [loading, setLoading] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -74,7 +83,6 @@ export default function Page({ params }) {
     axios
       .get(`/api/games/${params.id}/judge`)
       .then((response) => {
-        console.log(response.data);
         setGameData(response.data);
         setCurrentRound(Number(response.data.currentround || 1));
       })
@@ -159,6 +167,7 @@ export default function Page({ params }) {
       .put(`/api/nextround`, {
         id: gameData.id,
         round: Number(gameData.currentround) + 1,
+        deadline: deadline,
       })
       .then(() => {
         fetchData();
@@ -199,6 +208,12 @@ export default function Page({ params }) {
       });
   }
 
+  async function handleStartGame() {
+    setRoundLoading()
+    onCloseStart();
+    handleMoveToNextRound();
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
       <Box p={6} minH="100vh" bg="gray.50">
@@ -211,14 +226,20 @@ export default function Page({ params }) {
               <strong>Created By:</strong> {gameData?.created_by_name}
             </Text>
             <Text>
-              <strong>Current Round:</strong> {gameData?.currentround} /{" "}
-              {gameData?.totalrounds}
+              <strong>Current Round:</strong>{" "}
+              {gameData && gameData.currentround === 0 ? (
+                <Badge colorScheme="yellow">Waiting for game to start</Badge>
+              ) : gameData ? (
+                `${gameData.currentround} / ${gameData.totalrounds}`
+              ) : (
+                "NA"
+              )}
             </Text>
             <Text>
-              <strong>Level:</strong> {gameData?.level}
+              <strong>Tier:</strong> {gameData?.level}
             </Text>
             <Text>
-              <strong>Prize Amount: </strong>%{gameData?.prize_amount}
+              <strong>Prize Amount: </strong> ${gameData?.prize_amount}
             </Text>
             <Text>
               <strong>Winner:</strong>{" "}
@@ -234,29 +255,48 @@ export default function Page({ params }) {
               <strong>Additional Judges:</strong>{" "}
               {gameData?.additional_judges_names.join(", ")}
             </Text>
+            <Text>
+              <strong>Deadline: </strong>
+              {gameData?.deadline
+                ? moment(gameData?.deadline).format("MM/DD/YYYY")
+                : "NA"}
+            </Text>
           </VStack>
         </Box>
-
-        <Box display="flex" justifyContent="space-between" my={4}>
+        {gameData &&
+        <>
+          {gameData.currentround === 0 ? (
           <Button
+            isLoading={roundLoading}
             colorScheme="purple"
-            onClick={handlePreviousRound}
-            disabled={currentRound === 1}
+            mt={5}
+            onClick={() => {
+              onOpenStart();
+            }}
           >
-            Previous Round
+            Start Game
           </Button>
-          <Text fontWeight="bold" color="purple.700">
-            Round: {currentRound}/{gameData?.totalrounds}
-          </Text>
-          <Button
-            colorScheme="purple"
-            onClick={handleNextRound}
-            disabled={currentRound === gameData?.totalrounds}
-          >
-            Next Round
-          </Button>
-        </Box>
-
+        ) : (
+          <Box display="flex" justifyContent="space-between" my={4}>
+            <Button
+              colorScheme="purple"
+              onClick={handlePreviousRound}
+              disabled={currentRound === 1}
+            >
+              Previous Round
+            </Button>
+            <Text fontWeight="bold" color="purple.700">
+              Round: {currentRound}/{gameData?.totalrounds}
+            </Text>
+            <Button
+              colorScheme="purple"
+              onClick={handleNextRound}
+              disabled={currentRound === gameData?.totalrounds}
+            >
+              Next Round
+            </Button>
+          </Box>
+        )}
         <Heading as="h2" size="lg" mt={10} mb={6} color="teal.500">
           Enrollments
         </Heading>
@@ -405,6 +445,8 @@ export default function Page({ params }) {
               </Box>
             ))}
         </Stack>
+        </>}
+      
       </Box>
       {gameData?.totalrounds &&
         gameData.currentround === currentRound &&
@@ -416,14 +458,13 @@ export default function Page({ params }) {
             colorScheme="purple"
             size={"lg"}
             onClick={() => {
-              setRoundLoading(true);
-              handleMoveToNextRound();
+              onOpenNextRound()
             }}
           >
             Move To Next Round
           </Button>
         )}
-      {gameData &&
+      {gameData && gameData.currentround === gameData.totalrounds && 
         !gameData.winner &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
           <Button
@@ -562,6 +603,117 @@ export default function Page({ params }) {
               onClick={handleWinner}
             >
               Submit
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpenStart} onClose={onCloseStart}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Start Game</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <Text fontWeight={"600"}>Deadline</Text>
+            <Box
+              border={"1px solid"}
+              borderColor={"#D0D5DD"}
+              borderRadius={"md"}
+              display={"flex"}
+              justifyContent={"center"}
+              alignItems={"center"}
+              height={"40px"}
+              px={4}
+            >
+              <Calendar
+                id="deadline"
+                value={deadline}
+                onChange={(e) => {
+                  setDeadline(e.value);
+                }}
+                showIcon
+                className="custom-calendar"
+                dateFormat="mm/dd/yy"
+                style={{ width: "100%", zIndex: 99999 }}
+              />
+            </Box>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"outline"} onClick={onCloseStart}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={
+                !deadline ||
+                !gameData ||
+                moment(deadline).isSameOrBefore(
+                  moment(new Date(gameData.deadline))
+                )
+              }
+              colorScheme="blue"
+              ml={3}
+              onClick={handleStartGame}
+            >
+              Start
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpenNextRound} onClose={onCloseNextRound}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Next Round</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <Text fontWeight={"600"}>Deadline</Text>
+            <Box
+              border={"1px solid"}
+              borderColor={"#D0D5DD"}
+              borderRadius={"md"}
+              display={"flex"}
+              justifyContent={"center"}
+              alignItems={"center"}
+              height={"40px"}
+              px={4}
+            >
+              <Calendar
+                id="deadline"
+                value={deadline}
+                onChange={(e) => {
+                  setDeadline(e.value);
+                }}
+                showIcon
+                className="custom-calendar"
+                dateFormat="mm/dd/yy"
+                style={{ width: "100%", zIndex: 99999 }}
+              />
+            </Box>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"outline"} onClick={onCloseNextRound}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={
+                !deadline ||
+                !gameData ||
+                moment(deadline).isSameOrBefore(
+                  moment(new Date(gameData.deadline))
+                )
+              }
+              colorScheme="blue"
+              ml={3}
+              onClick={()=>{
+                setRoundLoading(true)
+                onCloseNextRound()
+                handleMoveToNextRound()}}
+            >
+              Next Round
             </Button>
           </ModalFooter>
         </ModalContent>

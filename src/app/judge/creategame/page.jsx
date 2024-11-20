@@ -74,7 +74,7 @@ export default function Page() {
       creator_id: UserState.value.data.id,
       prize_amount: prize,
       deadline,
-      currentround: 1,
+      currentround: 0,
       level,
     };
 
@@ -149,16 +149,16 @@ export default function Page() {
         )}
 
         <FormControl mb={6}>
-          <FormLabel htmlFor="level">Level</FormLabel>
+          <FormLabel htmlFor="level">Tier</FormLabel>
           <Select
             value={level}
             id="level"
             onChange={(e) => setLevel(e.target.value)}
-            placeholder="Select level"
+            placeholder="Select tier"
           >
-            <option value={"Beginner"}>Beginner</option>
-            <option value={"Intermediate"}>Intermediate</option>
-            <option value={"Advance"}>Advance</option>
+            <option value={"Platinum"}>Platinum</option>
+            <option value={"Gold"}>Gold</option>
+            <option value={"Iridium"}>Iridium</option>
           </Select>
         </FormControl>
 
@@ -268,6 +268,17 @@ export default function Page() {
         </Stack>
 
         <Button
+          isDisabled={
+            !title ||
+            !gameDescription ||
+            !rounds ||
+            !totalSpots ||
+            selectedJudges.length === 0 ||
+            prize === 0 ||
+            !level ||
+            !category  ||
+            !deadline 
+          }
           isLoading={loading}
           colorScheme="purple"
           onClick={() => {

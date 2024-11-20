@@ -13,6 +13,7 @@ export async function GET(req, { params }) {
         g.currentround, 
         g.totalrounds, 
         g.level, 
+        g.deadline,
         g.prize_amount, 
         g.winner, 
         g.created_by, 

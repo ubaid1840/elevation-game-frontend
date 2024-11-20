@@ -16,6 +16,7 @@ import {
   Input,
 } from "@chakra-ui/react";
 import axios from "axios";
+import moment from "moment";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 
@@ -108,41 +109,55 @@ export default function Page() {
           </Heading>
           <Grid templateColumns="repeat(3, 1fr)" gap={6}>
             {availableGames
-              .filter(
-                (game) => !myGames.some((myGame) => myGame.id === game.id)
-              )
-              .map((game, index) =>
-                game.spots_remaining && game.spots_remaining === 0 ? null : (
-                  <GridItem
-                    key={index}
-                    p={6}
-                    bg="gray.100"
-                    borderRadius="lg"
-                    boxShadow="md"
-                    transition="transform 0.2s"
-                    _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+              .filter((game) => {
+                if (myGames.some((myGame) => myGame.id === game.id))
+                  return false;
+                if (game.spots_remaining === 0) return false;
+                if (game.deadline && moment(game.deadline).isBefore(moment()))
+                  return false;
+                const userPackage = UserState.value.data?.package;
+                if (
+                  userPackage === "Platinum" ||
+                  (userPackage === "Gold" && game.level !== "Platinum") ||
+                  (userPackage === "Iridium" && game.level === "Iridium") ||
+                  !["Platinum", "Gold", "Iridium"].includes(game.level)
+                ) {
+                  return true;
+                }
+
+                return false;
+              })
+              .map((game) => (
+                <GridItem
+                  key={game.id}
+                  p={6}
+                  bg="gray.100"
+                  borderRadius="lg"
+                  boxShadow="md"
+                  transition="transform 0.2s"
+                  _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+                >
+                  <Heading size="md" mb={2}>
+                    {game.title}
+                  </Heading>
+                  <Text fontSize="lg">
+                    Spots Remaining: {game.spots_remaining}
+                  </Text>
+                  <Text fontSize="lg">Entry Level: {game.level}</Text>
+
+                  <Button
+                    as={Link}
+                    href={`dashboard/enrollment/${game.id}`}
+                    mt={4}
+                    colorScheme="purple"
+                    variant="solid"
+                    size="md"
+                    _hover={{ bg: "purple.600" }}
                   >
-                    <Heading size="md" mb={2}>
-                      {game.title}
-                    </Heading>
-                    <Text fontSize="lg">
-                      Spots Remaining: {game.spots_remaining}
-                    </Text>
-                    <Text fontSize="lg">Entry Level: {game.level}</Text>
-                    <Button
-                      as={Link}
-                      href={`dashboard/enrollment/${game.id}`}
-                      mt={4}
-                      colorScheme="purple"
-                      variant="solid"
-                      size="md"
-                      _hover={{ bg: "purple.600" }}
-                    >
-                      Enroll
-                    </Button>
-                  </GridItem>
-                )
-              )}
+                    Enroll
+                  </Button>
+                </GridItem>
+              ))}
           </Grid>
         </VStack>
 

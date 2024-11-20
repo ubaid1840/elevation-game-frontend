@@ -31,6 +31,7 @@ import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
+import moment from "moment";
 
 export default function GameDetail({ params }) {
 
@@ -119,7 +120,7 @@ export default function GameDetail({ params }) {
                     </GridItem>
                     <GridItem>
                         <Text fontWeight="bold" color="purple.600">
-                            Level: <span>{gameDetailData?.game?.level}</span>
+                            Tier: <span>{gameDetailData?.game?.level}</span>
                         </Text>
                     </GridItem>
                     <GridItem>
@@ -146,7 +147,17 @@ export default function GameDetail({ params }) {
                     </GridItem>
                     <GridItem >
                         <Text fontWeight="bold" color="purple.600">
-                            Winner: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'}  color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
+                            Winner: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
+                        </Text>
+                    </GridItem>
+                    <GridItem >
+                        <Text fontWeight="bold" color="purple.600">
+                            Deadline: <span>{gameDetailData?.game?.deadline ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY") : ""}</span>
+                        </Text>
+                    </GridItem>
+                    <GridItem >
+                        <Text fontWeight="bold" color="purple.600">
+                            Current Round: {gameDetailData?.game?.currentround == 0 ? <Badge colorScheme="yellow">Waiting for game to start</Badge> : <span>{gameDetailData?.game?.currentround}</span>}
                         </Text>
                     </GridItem>
                     <GridItem >
@@ -159,123 +170,123 @@ export default function GameDetail({ params }) {
                             ))}
                         </Stack>
                     </GridItem>
-                    <GridItem >
-                        <Text fontWeight="bold" color="purple.600">
-                            Current Round: <span>{gameDetailData?.game?.currentround || "0"}</span>
-                        </Text>
-                    </GridItem>
                 </Grid>
 
-                {gameDetailData &&
-                    <Progress
-                        value={progress}
-                        colorScheme="purple"
-                        size="lg"
-                        width="100%"
-                        borderRadius="md"
-                    />
-                }
-
-                <Divider my={6} />
-
-
-                {/* Round Navigation */}
-                <Box display="flex" justifyContent="space-between" mb={4}>
-                    <Button
-                        colorScheme="purple"
-                        onClick={handlePreviousRound}
-                        disabled={currentRound === 1}
-                    >
-                        Previous Round
-                    </Button>
-                    <Text fontWeight="bold" color="purple.700">
-                        Round: {currentRound}/{gameDetailData?.game?.totalrounds}
-                    </Text>
-                    <Button
-                        colorScheme="purple"
-                        onClick={handleNextRound}
-                        disabled={currentRound === gameDetailData?.game?.totalrounds}
-                    >
-                        Next Round
-                    </Button>
-                </Box>
-
-                <Divider my={6} />
-
-                {/* Pitches for Current Round */}
-                <Text fontWeight="bold" fontSize="xl" color="purple.600" mb={4}>
-                    Pitches for Round {currentRound}:
-                </Text>
-                <Stack spacing={6}>
-                    {currentRoundPitches?.map((pitch, index) => (
-                        <Box key={pitch.id}>
-                            <Box borderWidth="1px" borderRadius="md" p={4}>
-                                <Text fontWeight="bold">
-                                    Pitch:{" "}
-                                    <Text
-                                        color={"purple.400"}
-                                        as={Link}
-                                        href={pitch.video_link}
-                                        target="blank"
-                                    >
-                                        Watch
-                                    </Text>
-                                </Text>
-                                <Text color="blue.500">
-                                    <Link href={pitch.videoLink} isExternal>
-                                        {pitch.videoLink}
-                                    </Link>
-                                </Text>
-                                <Text>Status: <Badge color={pitch.status &&  pitch.status == 'Disqualify' ? 'red' : "green"}>{pitch.status}</Badge></Text>
-                                <Text>Score: {pitch.score}</Text>
-
-                                <Divider my={4} />
-
-                                <Text fontWeight="bold" color="purple.600" mb={2}>
-                                    Comments:
-                                </Text>
-                                <Stack spacing={3} mb={4}>
-                                    {pitch.comments?.map((comment, i) => (
-                                        <Box key={i} borderWidth="1px" borderRadius="md" p={3}>
-                                            <Text fontWeight="bold">
-                                                {comment.user_id == UserState.value.data.id
-                                                    ? UserState.value.data.name
-                                                    : "Judge"}
-                                                :
-                                            </Text>
-                                            <Text>{comment.comment_text}</Text>
-                                        </Box>
-                                    ))}
-                                </Stack>
-                            </Box>
-                            <Button
-                                mt={4}
+                {gameDetailData && gameDetailData.game.currentround !== 0 &&
+                    <>
+                        {gameDetailData &&
+                            <Progress
+                                value={progress}
                                 colorScheme="purple"
-                                onClick={() => {
-                                    setSelectedPitch({
-                                        pitch: pitch,
-                                        ind: index,
-                                    });
-                                    onOpen();
-                                }}
+                                size="lg"
+                                width="100%"
+                                borderRadius="md"
+                            />
+                        }
+
+                        <Divider my={6} />
+
+
+                        {/* Round Navigation */}
+                        <Box display="flex" justifyContent="space-between" mb={4}>
+                            <Button
+                                colorScheme="purple"
+                                onClick={handlePreviousRound}
+                                disabled={currentRound === 1}
                             >
-                                Add Comment
+                                Previous Round
+                            </Button>
+                            <Text fontWeight="bold" color="purple.700">
+                                Round: {currentRound}/{gameDetailData?.game?.totalrounds}
+                            </Text>
+                            <Button
+                                colorScheme="purple"
+                                onClick={handleNextRound}
+                                disabled={currentRound === gameDetailData?.game?.totalrounds}
+                            >
+                                Next Round
                             </Button>
                         </Box>
-                    ))}
-                </Stack>
-                {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && (
-                    <Button
-                        w={"full"}
-                        as={Link}
-                        href={`/user/enrolledgames/${params.id}/recording`}
-                        colorScheme="teal"
-                        mt={4}
-                        _hover={{ textDecoration: "none" }}
-                    >
-                        Submit Pitch
-                    </Button>
-                )}
+
+                        <Divider my={6} />
+
+                        {/* Pitches for Current Round */}
+                        <Text fontWeight="bold" fontSize="xl" color="purple.600" mb={4}>
+                            Pitches for Round {currentRound}:
+                        </Text>
+                        <Stack spacing={6}>
+                            {currentRoundPitches?.map((pitch, index) => (
+                                <Box key={pitch.id}>
+                                    <Box borderWidth="1px" borderRadius="md" p={4}>
+                                        <Text fontWeight="bold">
+                                            Pitch:{" "}
+                                            <Text
+                                                color={"purple.400"}
+                                                as={Link}
+                                                href={pitch.video_link}
+                                                target="blank"
+                                            >
+                                                Watch
+                                            </Text>
+                                        </Text>
+                                        <Text color="blue.500">
+                                            <Link href={pitch.videoLink} isExternal>
+                                                {pitch.videoLink}
+                                            </Link>
+                                        </Text>
+                                        <Text>Status: <Badge color={pitch.status && pitch.status == 'Disqualify' ? 'red' : "green"}>{pitch.status}</Badge></Text>
+                                        <Text>Score: {pitch.score}</Text>
+
+                                        <Divider my={4} />
+
+                                        <Text fontWeight="bold" color="purple.600" mb={2}>
+                                            Comments:
+                                        </Text>
+                                        <Stack spacing={3} mb={4}>
+                                            {pitch.comments?.map((comment, i) => (
+                                                <Box key={i} borderWidth="1px" borderRadius="md" p={3}>
+                                                    <Text fontWeight="bold">
+                                                        {comment.user_id == UserState.value.data.id
+                                                            ? UserState.value.data.name
+                                                            : "Judge"}
+                                                        :
+                                                    </Text>
+                                                    <Text>{comment.comment_text}</Text>
+                                                </Box>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                    <Button
+                                        mt={4}
+                                        colorScheme="purple"
+                                        onClick={() => {
+                                            setSelectedPitch({
+                                                pitch: pitch,
+                                                ind: index,
+                                            });
+                                            onOpen();
+                                        }}
+                                    >
+                                        Add Comment
+                                    </Button>
+                                </Box>
+                            ))}
+                        </Stack>
+                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && (
+                            <Button
+                                w={"full"}
+                                as={Link}
+                                href={`/user/enrolledgames/${params.id}/recording`}
+                                colorScheme="teal"
+                                mt={4}
+                                _hover={{ textDecoration: "none" }}
+                            >
+                                Submit Pitch
+                            </Button>
+                        )}
+                    </>
+                }
+
             </Box>
 
             <Modal isOpen={isOpen} onClose={onClose}>
