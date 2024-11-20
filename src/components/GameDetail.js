@@ -272,7 +272,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isAfter(moment()) (
+                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) (
                             <Button
                                 w={"full"}
                                 as={Link}
