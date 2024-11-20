@@ -95,7 +95,6 @@ export default function GameEnrollmentPage({ params }) {
 
           <Divider />
 
-          {/* Submit Video Link Section */}
           <VStack align="start" spacing={4} mt={8}>
             <Heading size="lg" color="purple.700">
               Submit the Video Link of Your Pitch
