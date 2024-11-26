@@ -62,6 +62,7 @@ export default function GameDetail({ params }) {
                 const total = Number(response.data?.game?.totalrounds || 1)
                 setProgress((current / total) * 100)
             }
+            console.log(response.data)
             setGameDetailData(response.data);
             setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
@@ -272,7 +273,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) (
+                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) && (
                             <Button
                                 w={"full"}
                                 as={Link}
