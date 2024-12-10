@@ -11,6 +11,14 @@ import {
   FormLabel,
   Text,
   Select,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
+  ModalFooter,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -18,6 +26,7 @@ import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Calendar } from "primereact/calendar";
+import { CloseIcon } from "@chakra-ui/icons";
 
 export default function Page() {
   const [title, setTitle] = useState("");
@@ -31,14 +40,18 @@ export default function Page() {
   const [deadline, setDeadline] = useState(null);
   const [loading, setLoading] = useState(false);
   const [availableJudges, setAvailableJudges] = useState([]);
-  const [level, setLevel] = useState(null);
+  const [level, setLevel] = useState("");
   const route = useRouter();
   const { state: UserState } = useContext(UserContext);
+  const [allCategories, setAllCategories] = useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
     if (UserState.value.data?.id) {
       fetchData();
-    }
+      fetchCategories();
+    } 
   }, [UserState.value.data]);
 
   async function fetchData() {
@@ -47,6 +60,12 @@ export default function Page() {
         (item) => item.id !== UserState.value.data.id
       );
       setAvailableJudges([...temp]);
+    });
+  }
+
+  async function fetchCategories() {
+    axios.get("/api/categories").then((response) => {
+      setAllCategories(response.data);
     });
   }
 
@@ -93,9 +112,42 @@ export default function Page() {
     }
   };
 
+  const handleRemoveJudge = (index) => {
+    const temp = selectedJudges.filter((item, i) => i !== index);
+    setSelectedJudges([...temp]);
+  };
+
+  const RenderJudges = ({ item, index, onClick }) => {
+    return (
+      <Box
+        borderWidth="1px"
+        borderRadius="md"
+        p={4}
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
+        <Text>{item.name}</Text>
+        <CloseIcon
+          color={"red"}
+          _hover={{ opacity: 0.7, cursor: "pointer" }}
+          onClick={() => onClick(index)}
+        />
+      </Box>
+    );
+  };
+
+  
+  const handleAddNewCategory = () => {
+    axios.post("/api/categories", { value: newCategory }).then(() => {
+      onClose()
+      fetchCategories();
+    });
+  };
+
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
-      <Box p={8} bg="white">
+      <Box p={8} bg="white" opacity={isOpen ? 0.3 : 1}>
         <Heading mb={6} color="purple.700">
           Create Game
         </Heading>
@@ -159,6 +211,7 @@ export default function Page() {
             <option value={"Platinum"}>Platinum</option>
             <option value={"Gold"}>Gold</option>
             <option value={"Iridium"}>Iridium</option>
+            <option value={"Silver"}>Silver</option>
           </Select>
         </FormControl>
 
@@ -228,18 +281,20 @@ export default function Page() {
             id="category"
             placeholder="Select category"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+             
+              if (e.target.value === "Add New Category") onOpen();
+              else setCategory(e.target.value);
+            }}
           >
-            <option value="Action">Action</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Puzzle">Puzzle</option>
-            <option value="Strategy">Strategy</option>
-            <option value="Sports">Sports</option>
-            <option value="Racing">Racing</option>
-            <option value="Role-Playing">Role-Playing</option>
-            <option value="Simulation">Simulation</option>
-            <option value="Arcade">Arcade</option>
-            <option value="Trivia">Trivia</option>
+            {allCategories.length > 0 &&
+              allCategories.map((item, index) => (
+                <option key={index} value={item?.value}>
+                  {item?.value}
+                </option>
+              ))}
+
+            <option value="Add New Category">Add New Category</option>
           </Select>
         </FormControl>
 
@@ -261,9 +316,12 @@ export default function Page() {
         <Stack spacing={4} mb={6}>
           <Text fontWeight="bold">Selected Judges:</Text>
           {selectedJudges.map((judge, index) => (
-            <Box key={index} borderWidth="1px" borderRadius="md" p={4}>
-              <Text>{judge.name}</Text>
-            </Box>
+            <RenderJudges
+              key={index}
+              item={judge}
+              index={index}
+              onClick={handleRemoveJudge}
+            />
           ))}
         </Stack>
 
@@ -289,6 +347,32 @@ export default function Page() {
           Initiate Game
         </Button>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        {/* <ModalOverlay /> */}
+        <ModalContent>
+          <ModalHeader>Add New Category</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing={4}>
+              <Input
+                placeholder="Category name"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={handleAddNewCategory}>
+              Save
+            </Button>
+            <Button ml={3} onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
     </Sidebar>
   );
 }

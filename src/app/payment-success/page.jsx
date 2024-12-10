@@ -44,7 +44,7 @@ export default function Page() {
 
   async function handleUpdatePackage(plan, paymentIntentId) {
     let currentDate = new Date();
-    currentDate.setDate(currentDate.getDate() + 30);
+    currentDate.setDate(currentDate.getDate() + 30); 
     axios
       .post(`/api/users/${UserState.value.data.id}/payment`, {
         subscription: plan,
@@ -58,6 +58,7 @@ export default function Page() {
             .post("/api/updatetier", {
               user_id: UserState.value.data.id,
               plan: plan,
+              intent_id : UserState.value.data?.package_intent_id || null
             })
             .then(() => {
               callTimeout();

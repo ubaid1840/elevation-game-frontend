@@ -16,14 +16,14 @@ const CheckoutPage = ({ amount, userID, plan }) => {
     useEffect(() => {
         axios.post("/api/create-payment-intent", {
             amount: convertToSubcurrency(amount),
-            plan : plan
+            plan: plan
         })
             .then((response) => {
                 setClientSecret(response.data.clientSecret)
             })
     }, [amount])
 
-  
+
 
     async function handleSubmit() {
 
@@ -45,7 +45,7 @@ const CheckoutPage = ({ amount, userID, plan }) => {
             clientSecret,
             confirmParams: { return_url: `${window.location.origin}/payment-success?amount=${amount}&plan=${plan}` }
         })
-           
+
         if (error) {
             setErrorMessage(error.message)
             setLoading(false)

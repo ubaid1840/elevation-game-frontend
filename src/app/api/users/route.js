@@ -1,7 +1,6 @@
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-// Function to generate a random referral code
 function generateReferralCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
@@ -25,18 +24,15 @@ export async function POST(req) {
   let referrer_id = null;
 
   try {
-    // Check if the email already exists in the users table
     const existingUser = await query(
       'SELECT * FROM users WHERE email = $1',
       [email]
     );
 
-    // If the user exists and the role is 'user', throw an error
     if (existingUser.rows.length > 0) {
       if (existingUser.rows[0].role === 'user') {
         return NextResponse.json({ message: 'User already signed up' }, { status: 400 });
       } else if (existingUser.rows[0].role === 'judge') {
-        // If the role is 'judge', update the name and return the updated user details
         const updatedUser = await query(
           'UPDATE users SET name = $1 WHERE email = $2 RETURNING *',
           [name, email]
@@ -47,14 +43,12 @@ export async function POST(req) {
       }
     }
 
-    // Check for a valid referral code (refered_by) and insert into referrals if so
     if (refered_by) {
       const referrer = await query(
         'SELECT id FROM users WHERE referral_code = $1',
         [refered_by]
       );
 
-      // If referrer exists, insert into referrals
       if (referrer.rows.length > 0) {
         referrer_id = referrer.rows[0].id;
       } else {
@@ -62,7 +56,6 @@ export async function POST(req) {
       }
     }
 
-    // Insert new user into the users table
     const newUser = await query(
       'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [name, email, role || 'user', referral_code, schedule]

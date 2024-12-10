@@ -29,3 +29,5 @@ export async function GET() {
     return NextResponse.json({ message: 'Error fetching games', error: error.message }, { status: 500 });
   }
 }
+
+export const revalidate = 0;

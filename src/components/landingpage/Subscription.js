@@ -27,12 +27,13 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function SubscriptionPage({page}) {
     const [selectedPlan, setSelectedPlan] = useState("");
-    const [amount, setAmount] = useState(null);
+    const [amount, setAmount] = useState(0);
     const { state: UserState } = useContext(UserContext);
     const [subscriptionOptions, setSubscriptionOptions] = useState([]);
     const [currentPlan, setCurrentPlan] = useState("");
 
     useEffect(() => {
+
         if (UserState.value.data?.email) {
             setCurrentPlan(UserState.value.data.package || "No current plan")
             fetchData();
@@ -73,7 +74,7 @@ export default function SubscriptionPage({page}) {
                 <RadioGroup onChange={handlePlanChange} value={selectedPlan} mb={6}>
                     <Stack spacing={4}>
                         {subscriptionOptions.length > 0 && subscriptionOptions.map((option) => (
-                            option.label !== "Silver" &&
+                            // option.label !== "Silver" &&
                             <Radio key={option.id} value={option.label}>
                                 {option.label} - ${option.price}
                             </Radio>

@@ -118,9 +118,9 @@ export default function Page() {
                 const userPackage = UserState.value.data?.package;
                 if (
                   userPackage === "Platinum" ||
-                  (userPackage === "Gold" && game.level !== "Platinum") ||
-                  (userPackage === "Iridium" && game.level === "Iridium") ||
-                  !["Platinum", "Gold", "Iridium"].includes(game.level)
+                  (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
+                  (userPackage === "Iridium" && ["Iridium", "Silver"].includes(game.level)) ||
+                  (userPackage === "Silver" && game.level === "Silver")
                 ) {
                   return true;
                 }

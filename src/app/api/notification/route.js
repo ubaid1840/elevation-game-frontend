@@ -4,8 +4,6 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
     const { msg, type } = await req.json();
-    console.log(msg)
-    console.log(type)
     if (!msg) {
         return NextResponse.json({ message: 'Cannot send empty notification' }, { status: 404 });
     }
