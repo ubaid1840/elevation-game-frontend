@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -17,10 +17,14 @@ import {
   Text,
   UnorderedList,
   ListItem,
+  Flex,
+  Icon,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
+import moment from "moment";
+import TableData from "@/components/ui/TableData";
 
 const UserManagement = () => {
   const [filter, setFilter] = useState("");
@@ -53,7 +57,9 @@ const UserManagement = () => {
 
   const filteredUsers = users.filter((user) => {
     const matchesName = user.name.toLowerCase().includes(filter.toLowerCase());
-    const matchesRole = selectedRole ? user.role === selectedRole.toLowerCase() : true;
+    const matchesRole = selectedRole
+      ? user.role === selectedRole.toLowerCase()
+      : true;
     return matchesName && matchesRole;
   });
 
@@ -62,6 +68,36 @@ const UserManagement = () => {
       setLogs(response.data);
     });
   }
+
+  const RenderTable = useCallback(() => {
+    return (
+      <TableData
+        data={filteredUsers.map((item) => {
+          return {
+            id: item.id,
+            name: item.name,
+            email: item.email,
+            role: item.role,
+            last_active: item.last_active
+              ? moment(new Date(item.last_active)).format("MM/DD/YYYY hh:mm A")
+              : "",
+          };
+        })}
+        columns={[
+          { key: "name", value: "Name" },
+          { key: "email", value: "Email" },
+          { key: "role", value: "Role" },
+          { key: "last_active", value: "Last Active" },
+          { value: "Activity Log" },
+        ]}
+        button={true}
+        buttonText={"View Logs"}
+        onButtonClick={(val) => {
+          handleLogs(val);
+        }}
+      />
+    );
+  }, [filteredUsers]);
 
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
@@ -78,7 +114,7 @@ const UserManagement = () => {
             onChange={handleFilterChange}
           />
           <Select
-            placeholder="Filter by role"
+            placeholder="All"
             value={selectedRole}
             onChange={handleRoleChange}
           >
@@ -90,7 +126,7 @@ const UserManagement = () => {
             onClick={() => {
               setFilter("");
               setSelectedRole("");
-              setLogs([])
+              setLogs([]);
             }}
           >
             Clear Filters
@@ -98,43 +134,7 @@ const UserManagement = () => {
         </Stack>
 
         {/* User Table */}
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Email</Th>
-              <Th>Role</Th>
-              <Th>Last Active</Th>
-              <Th>Activity Log</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
-                <Tr key={user.id}>
-                  <Td>{user.name}</Td>
-                  <Td>{user.email}</Td>
-                  <Td>{user.role}</Td>
-                  <Td>{user.lastActive}</Td>
-                  <Td>
-                    <Button
-                      colorScheme="blue"
-                      onClick={() => handleLogs(user.id)}
-                    >
-                      View Logs
-                    </Button>
-                  </Td>
-                </Tr>
-              ))
-            ) : (
-              <Tr>
-                <Td colSpan={5} textAlign="center">
-                  No users found.
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        </Table>
+        <RenderTable />
 
         {/* Activity Logs Section (optional) */}
         <VStack spacing={4} mt={8} align="start">

@@ -73,8 +73,8 @@ export default function Meeting({ page, onEndMeeting, group }) {
             const userName = UserState.value.data.email;
 
             const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
-                58911582,
-                "38ab2dbdfd68c429298a1dfbf8de2a5c",
+                process.env.NEXT_PUBLIC_ZEGO_APPID,
+                process.env.NEXT_PUBLIC_ZEGO_SECRET,
                 roomID,
                 userID,
                 userName

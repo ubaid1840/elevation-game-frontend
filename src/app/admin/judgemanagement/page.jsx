@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -24,8 +24,7 @@ import {
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import TableData from "@/components/ui/TableData";
 
 const JudgeManagement = () => {
   const [judges, setJudges] = useState([]);
@@ -34,6 +33,8 @@ const JudgeManagement = () => {
   const [editingJudge, setEditingJudge] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     fetchData();
@@ -46,22 +47,6 @@ const JudgeManagement = () => {
   }
 
   const handleAddOrEditJudge = () => {
-    // if (editingJudge) {
-    //   setJudges((prev) =>
-    //     prev.map((judge) =>
-    //       judge.id === editingJudge.id
-    //         ? { ...judge, name: judgeName, email: email }
-    //         : judge
-    //     )
-    //   );
-    // } else {
-    //   const newJudge = {
-    //     id: judges.length + 1,
-    //     name: judgeName,
-    //     email: email,
-    //   };
-    //   setJudges((prev) => [...prev, newJudge]);
-    // }
     axios
       .post("/api/users", {
         name: judgeName,
@@ -79,18 +64,47 @@ const JudgeManagement = () => {
       });
   };
 
-  const handleDeleteJudge = (id) => {
-    axios.delete(`/api/users/${id}`).then(() => {
-      setJudges((prev) => prev.filter((judge) => judge.id !== id));
-    });
-  };
-
   const resetForm = () => {
     setJudgeName("");
     setEmail("");
     setEditingJudge(null);
     setLoading(false);
   };
+
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  const handleSort = (key) => {
+    const sortedData = [...judges].sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a[key] > b[key] ? 1 : -1;
+      } else {
+        return a[key] < b[key] ? 1 : -1;
+      }
+    });
+    setJudges(sortedData);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  const filteredJudges = judges.filter((judge) => {
+    const matchesName = judge.name.toLowerCase().includes(filter.toLowerCase());
+    return matchesName;
+  });
+
+  const RenderTable = useCallback(() => {
+    return (
+      <TableData
+        data={filteredJudges.map((item) => {
+          return { id: item.id, name: item.name, email: item.email };
+        })}
+        columns={[
+          { key: "name", value: "Name" },
+          { key: "email", value: "Email" },
+        ]}
+      />
+    );
+  }, [filteredJudges]);
 
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
@@ -99,48 +113,19 @@ const JudgeManagement = () => {
           Judge Management
         </Heading>
 
-        <Button colorScheme="purple" mb={4} onClick={onOpen}>
+        <Input
+          placeholder="Search by name"
+          value={filter}
+          onChange={handleFilterChange}
+        />
+
+        <Button colorScheme="purple" my={4} onClick={onOpen}>
           Add New Judge
         </Button>
 
         {/* Judge Table */}
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>email</Th>
-              {/* <Th>Actions</Th> */}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {judges.length > 0 ? (
-              judges.map((judge, index) => (
-                <Tr key={index}>
-                  <Td>{judge.name}</Td>
-                  <Td>{judge.email}</Td>
-                  <Td>
-                    {/* <Button colorScheme="blue" onClick={() => handleEditJudge(judge)}>
-                    Edit
-                  </Button> */}
-                    {/* <Button
-                      colorScheme="red"
-                      onClick={() => handleDeleteJudge(judge.id)}
-                      ml={2}
-                    >
-                      Delete
-                    </Button> */}
-                  </Td>
-                </Tr>
-              ))
-            ) : (
-              <Tr>
-                <Td colSpan={3} textAlign="center">
-                  No judges found.
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        </Table>
+
+        <RenderTable />
 
         {/* Modal for Add/Edit Judge */}
         <Modal isOpen={isOpen} onClose={onClose}>

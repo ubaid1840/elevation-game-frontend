@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -14,17 +14,20 @@ import {
   Textarea,
   Select,
   useToast,
+  Input,
 } from "@chakra-ui/react";
 import { CSVLink } from "react-csv";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
+import TableData from "@/components/ui/TableData";
 
 const FinancialOverview = () => {
   const [payments, setPayments] = useState([]);
   const [emailContent, setEmailContent] = useState("");
   const toast = useToast();
   const [notificationType, setNotificationType] = useState("email");
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -44,7 +47,7 @@ const FinancialOverview = () => {
     axios
       .post("/api/notification", {
         msg: msg,
-        type : notificationType
+        type: notificationType,
       })
       .then(() => {
         toast({
@@ -57,6 +60,36 @@ const FinancialOverview = () => {
       });
   }
 
+  const filteredUsers = payments.filter((payment) => {
+    const matchesName = payment.name
+      .toLowerCase()
+      .includes(filter.toLowerCase());
+    return matchesName;
+  });
+
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  const RenderTable = useCallback(() => {
+    return (
+      <TableData
+        data={filteredUsers.map((item) => {
+          return {
+            id: item.id,
+            name: item.name,
+            amount:
+              Number(item.tier1) + Number(item.tier2) + Number(item.tier3),
+          };
+        })}
+        columns={[
+          { key: "name", value: "Name" },
+          { key: "amount", value: "Amount ($)" },
+        ]}
+      />
+    );
+  }, [filteredUsers]);
+
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
       <Box p={8} bg="white">
@@ -64,37 +97,14 @@ const FinancialOverview = () => {
           Financial Overview
         </Heading>
 
+        <Input
+            placeholder="Search by name"
+            value={filter}
+            onChange={handleFilterChange}
+          />
+
         {/* Payments Table */}
-        <Table variant="simple" mb={8}>
-          <Thead>
-            <Tr>
-              <Th>Participant</Th>
-              <Th>Amount ($)</Th>
-              {/* <Th>Date</Th> */}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {payments.length > 0 ? (
-              payments.map((payment) => (
-                <Tr key={payment.id}>
-                  <Td>{payment.name}</Td>
-                  <Td>
-                    {Number(payment.tier1) +
-                      Number(payment.tier2) +
-                      Number(payment.tier3)}
-                  </Td>
-                  {/* <Td>{payment.date}</Td> */}
-                </Tr>
-              ))
-            ) : (
-              <Tr>
-                <Td colSpan={3} textAlign="center">
-                  No payments found.
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        </Table>
+        <RenderTable />
 
         {/* Export Reports */}
         {payments.length > 0 && (
@@ -108,7 +118,7 @@ const FinancialOverview = () => {
             className="btn btn-primary"
             target="_blank"
           >
-            <Button colorScheme="purple" mb={4}>
+            <Button colorScheme="purple" my={4}>
               Export Financial Data
             </Button>
           </CSVLink>
