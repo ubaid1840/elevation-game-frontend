@@ -52,25 +52,27 @@ export default function Page() {
         paymentIntentId: paymentIntentId,
       })
       .then((response) => {
-        if (response.data.success) {
-          setMessage("Payment Verified Updating Record");
-          axios
-            .post("/api/updatetier", {
-              user_id: UserState.value.data.id,
-              plan: plan,
-              intent_id : UserState.value.data?.package_intent_id || null
-            })
-            .then(() => {
-              callTimeout();
-            })
-            .catch((e) => {
-              setMessage("Something went wrong, refresh the page");
-              console.log(e);
-            });
-        } else {
-          setMessage("Payment Verified");
-          callTimeout();
-        }
+        setMessage("Payment Verified");
+        callTimeout();
+        // if (response.data.success) {
+        //   setMessage("Payment Verified Updating Record");
+        //   axios
+        //     .post("/api/updatetier", {
+        //       user_id: UserState.value.data.id,
+        //       plan: plan,
+        //       intent_id : UserState.value.data?.package_intent_id || null
+        //     })
+        //     .then(() => {
+        //       callTimeout();
+        //     })
+        //     .catch((e) => {
+        //       setMessage("Something went wrong, refresh the page");
+        //       console.log(e);
+        //     });
+        // } else {
+        //   setMessage("Payment Verified");
+        //   callTimeout();
+        // }
       })
       .catch((e) => {
         console.log(e);
