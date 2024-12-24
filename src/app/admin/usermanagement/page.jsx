@@ -69,6 +69,24 @@ const UserManagement = () => {
     });
   }
 
+  async function handleChangeStatus(item) {
+    axios
+      .put(`/api/users/${item.id}`, {
+        status: item.status,
+      })
+      .then(() => {
+        let temp = [];
+        users.map((eachUser) => {
+          if (item.id === eachUser.id) {
+            temp.push({ ...eachUser, active: item.status });
+          } else {
+            temp.push(eachUser);
+          }
+        });
+        setUsers([...temp]);
+      });
+  }
+
   const RenderTable = useCallback(() => {
     return (
       <TableData
@@ -81,6 +99,7 @@ const UserManagement = () => {
             last_active: item.last_active
               ? moment(new Date(item.last_active)).format("MM/DD/YYYY hh:mm A")
               : "",
+            active: item.active,
           };
         })}
         columns={[
@@ -88,12 +107,16 @@ const UserManagement = () => {
           { key: "email", value: "Email" },
           { key: "role", value: "Role" },
           { key: "last_active", value: "Last Active" },
+          { key: "active", value: "Active" },
           { value: "Activity Log" },
         ]}
         button={true}
         buttonText={"View Logs"}
         onButtonClick={(val) => {
           handleLogs(val);
+        }}
+        onSwitchClick={(val) => {
+          handleChangeStatus(val);
         }}
       />
     );

@@ -100,8 +100,48 @@ export async function DELETE(req, { params }) {
   const { id } = params;
 
   try {
-    await pool.query('DELETE FROM games WHERE id = $1', [id]);
-    return NextResponse.json(null, { status: 204 });
+    await pool.query(
+      `
+      DELETE FROM comments
+      WHERE pitch_id IN (
+        SELECT id FROM pitches
+        WHERE enrollment_id IN (
+          SELECT id FROM game_enrollments
+          WHERE game_id = $1
+        )
+      )
+      `,
+      [id]
+    );
+
+    await pool.query(
+      `
+      DELETE FROM pitches
+      WHERE enrollment_id IN (
+        SELECT id FROM game_enrollments
+        WHERE game_id = $1
+      )
+      `,
+      [id]
+    );
+
+    await pool.query(
+      `
+      DELETE FROM game_enrollments
+      WHERE game_id = $1
+      `,
+      [id]
+    );
+
+    await pool.query(
+      `
+      DELETE FROM games
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    return NextResponse.json({ message: "Game deleted" }, { status: 200 });
   } catch (error) {
     console.error('Error deleting game:', error);
     return NextResponse.json({ message: 'Error deleting game', error: error.message }, { status: 500 });

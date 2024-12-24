@@ -32,6 +32,7 @@ import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
 import moment from "moment";
+import Head from "next/head";
 
 export default function GameDetail({ params }) {
 
@@ -106,6 +107,13 @@ export default function GameDetail({ params }) {
             });
     }
 
+    const handleShareGame = () => {
+        const gameLink = `${window.location.origin}/game/${params.id}`;
+        navigator.clipboard.writeText(gameLink).then(() => {
+            alert("Game link copied to clipboard!");
+        });
+    };
+
     return (
         <Sidebar LinkItems={GetLinkItems("user")}>
             <Box p={8} bg="white">
@@ -175,6 +183,9 @@ export default function GameDetail({ params }) {
 
                 {gameDetailData && gameDetailData.game.currentround !== 0 &&
                     <>
+                        <Button colorScheme="teal" onClick={handleShareGame} mb={4}>
+                            Share Game Link
+                        </Button>
                         {gameDetailData &&
                             <Progress
                                 value={progress}

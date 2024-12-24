@@ -12,3 +12,5 @@ export async function GET(req, { params }) {
       return NextResponse.json({ message: 'Error fetching user', error: error.message }, { status: 500 });
     }
   }
+
+  export const revalidate = 0

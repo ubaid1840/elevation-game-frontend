@@ -58,7 +58,7 @@ export default function Page() {
   }, [email, password]);
 
   const handleLogin = async () => {
-    axios.get(`/api/userdetail/${email}`).then((response) => {
+    axios.get(`/api/userdetail/${email.toLocaleLowerCase()}`).then((response) => {
       handleAuthLogin(response.data);
     }).catch((e)=>{
       toast({
@@ -73,7 +73,7 @@ export default function Page() {
   };
 
   async function handleAuthLogin(data) {
-    signInWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email.toLocaleLowerCase(), password)
       .then(() => {
         setLoading(false);
       })

@@ -1,9 +1,10 @@
 import { useState } from "react"
 import Pagination from "./Pagination"
-import { Box, Table, Thead, Tr, Tbody, Th, Td, Button} from '@chakra-ui/react'
+import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch, Spinner, Icon, Text } from '@chakra-ui/react'
+import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick }) => {
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2 }) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
@@ -11,8 +12,14 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick })
     const indexOfLastRow = currentPage * rowsPerPage;
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = localData.slice(indexOfFirstRow, indexOfLastRow);
+    const [columnIndex, setColumnIndex] = useState(Array.from({ length: columns && columns.length }, () => ({ active: false })))
 
-    const handleSort = (key) => {
+    const handleSort = (key, index) => {
+        setColumnIndex((prevState) =>
+            prevState.map((eachState, i) => ({
+                active: i === index
+            }))
+        );
         const sortedData = [...localData].sort((a, b) => {
             if (sortOrder === "asc") {
                 return a[key] > b[key] ? 1 : -1;
@@ -23,6 +30,26 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick })
         setLocalData(sortedData);
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
+
+    const RenderRow = ({ value, user }) => {
+        const [rowLoading, setRowLoading] = useState(false)
+
+        return (
+            <Td width={'350px'}>
+                {
+                    typeof value === "boolean" ?
+                        rowLoading ?
+                            <Spinner />
+                            :
+                            <Switch isChecked={value} onChange={(e) => {
+                                setRowLoading(true)
+                                onSwitchClick({ id: user.id, status: e.target.checked })
+                            }} /> :
+                        value
+                }
+            </Td>
+        )
+    }
 
 
     return (
@@ -38,12 +65,18 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick })
                                     key={index}
                                     onClick={() => {
                                         if (item.key) {
-                                            handleSort(item.key)
+                                            handleSort(item.key, index)
                                         }
                                     }}
                                     _hover={{ cursor: "pointer" }}
                                 >
-                                    {item.value}
+                                    <HStack gap={0}>
+                                        <Text>{item.value}</Text>
+                                        {columnIndex && columnIndex.length > 0 && columnIndex[index]?.active &&
+                                            <Icon as={sortOrder === 'desc' ? IoIosArrowRoundDown : IoIosArrowRoundUp} boxSize={5} />}
+                                    </HStack>
+
+
                                 </Th>
                             ))}
 
@@ -54,19 +87,29 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick })
                             currentRows.map((user) => (
                                 <Tr key={user.id}>
                                     {Object.entries(user).map(([key, value], i) => (
-                                        key === "id" ? null :
-                                            <Td key={i}>{value}</Td>
-
+                                        key && key === "id" ? null :
+                                            <RenderRow key={i} value={value} user={user} />
                                     ))}
 
                                     {button && (
                                         <Td>
-                                            <Button
-                                                colorScheme="blue"
-                                                onClick={() => onButtonClick(user.id)}
-                                            >
-                                                {buttonText}
-                                            </Button>
+                                            <HStack>
+                                                <Button
+                                                    colorScheme="blue"
+                                                    onClick={() => onButtonClick(user.id)}
+                                                >
+                                                    {buttonText}
+                                                </Button>
+                                                {button2 &&
+                                                    <Button
+                                                        colorScheme="teal"
+                                                        onClick={() => onButtonClick2(user.id)}
+                                                    >
+                                                        {buttonText2}
+                                                    </Button>
+                                                }
+                                            </HStack>
+
                                         </Td>
                                     )}
                                 </Tr>

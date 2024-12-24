@@ -38,13 +38,22 @@ export default function Page() {
 
   useEffect(() => {
     checkSession().then((val) => {
-      setUser(val.user);
+      if (val.user) {
+        setUser(val.user);
+      }
     });
   }, []);
 
   async function handleUpdatePackage(plan, paymentIntentId) {
     let currentDate = new Date();
-    currentDate.setDate(currentDate.getDate() + 30); 
+    if (plan == "Silver") {
+      currentDate.setFullYear(currentDate.getFullYear() + 100);
+    } else if (plan == "Promotion") {
+      currentDate.setFullYear(currentDate.getFullYear() + 1);
+    } else {
+      currentDate.setDate(currentDate.getDate() + 30);
+    }
+
     axios
       .post(`/api/users/${UserState.value.data.id}/payment`, {
         subscription: plan,
@@ -77,7 +86,7 @@ export default function Page() {
       .catch((e) => {
         console.log(e);
         setMessage(e.response.data.message);
-      })
+      });
   }
 
   function callTimeout() {

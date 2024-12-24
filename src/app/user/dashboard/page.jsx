@@ -173,7 +173,7 @@ export default function Page() {
             </Text>
             <Input
               onChange={() => {}}
-              value={UserState.value.data?.referral_code}
+              value={UserState.value.data?.referral_code || ""}
               readOnly
               size="md"
               width="auto"

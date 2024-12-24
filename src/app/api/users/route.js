@@ -10,7 +10,7 @@ export async function GET(req) {
   const role = searchParams.get('role');
 
   try {
-    const users = await query('SELECT id, name, email, role, last_active, schedule FROM users WHERE role = $1', [role]);
+    const users = await query('SELECT id, name, email, role, last_active, schedule, active FROM users WHERE role = $1', [role]);
     return NextResponse.json(users.rows );
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -86,7 +86,5 @@ export async function POST(req) {
     return NextResponse.json({ message: 'Error creating user', error: error.message }, { status: 500 });
   }
 }
-
-
 
 export const revalidate = 0;

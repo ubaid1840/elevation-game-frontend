@@ -61,14 +61,14 @@ export default function Page() {
   const handleSignup = async () => {
     axios
       .post("/api/users", {
-        email: email,
+        email: email.toLocaleLowerCase(),
         name: name,
         role: "user",
         refered_by: referral,
         schedule: {},
       })
       .then(() => {
-        createUserWithEmailAndPassword(auth, email, password).catch((e) => {
+        createUserWithEmailAndPassword(auth, email.toLocaleLowerCase(), password).catch((e) => {
           setLoading(false);
           toast({
             title: "Error",

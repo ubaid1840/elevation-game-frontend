@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -26,6 +26,7 @@ import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
 import { Link } from "react-feather";
 import { usePathname, useRouter } from "next/navigation";
+import TableData from "@/components/ui/TableData";
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
@@ -33,8 +34,9 @@ const GameManagement = () => {
   const [spots, setSpots] = useState("");
   const [editingGame, setEditingGame] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -85,6 +87,57 @@ const GameManagement = () => {
     setEditingGame(null);
   };
 
+  const filteredGames = games.filter((game) => {
+    const matchesName = game.title.toLowerCase().includes(filter.toLowerCase());
+    return matchesName;
+  });
+
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  async function handleRemoveGame(val) {
+    axios.delete(`/api/games/${val}`).then(() => {
+      fetchData();
+    });
+  }
+
+  function handleShareGame(id) {
+    const gameLink = `${window.location.origin}/game/${id}`;
+    navigator.clipboard.writeText(gameLink).then(() => {
+      alert("Game link copied to clipboard!");
+    });
+  }
+
+  const RenderTable = useCallback(() => {
+    return (
+      <TableData
+        data={filteredGames.map((item) => {
+          return {
+            id: item.id,
+            title: item.title,
+            spots_remaining: item.spots_remaining || 0,
+            totalEnrollments: item.totalEnrollments,
+            prize_amount: item.prize_amount,
+          };
+        })}
+        columns={[
+          { key: "title", value: "Name" },
+          { key: "spots_remaining", value: "Spots Remaining" },
+          { key: "totalEnrollments", value: "Participants" },
+          { key: "prize_amount", value: "Grand Prize" },
+          { value: "Action" },
+        ]}
+        button={true}
+        buttonText={"Remove"}
+        onButtonClick={(val) => handleRemoveGame(val)}
+        button2={true}
+        buttonText2={"Share"}
+        onButtonClick2={(val) => handleShareGame(val)}
+      />
+    );
+  }, [filteredGames]);
+
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
       <Box p={8} bg="white">
@@ -92,55 +145,23 @@ const GameManagement = () => {
           Game Management
         </Heading>
 
-        <Button  colorScheme="purple" mb={4} onClick={()=> router.push(`${pathname}/creategame`)}>
+        <Input
+          placeholder="Search by name"
+          value={filter}
+          onChange={handleFilterChange}
+        />
+
+        <Button
+          colorScheme="purple"
+          my={4}
+          onClick={() => router.push(`${pathname}/creategame`)}
+        >
           Add New Game
         </Button>
 
         {/* Game Table */}
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Spots Remaining</Th>
-              <Th>Participants</Th>
-              <Th>Grand Prize</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {games.length > 0 ? (
-              games.map((game, index) => (
-                <Tr key={index}>
-                  <Td>{game.title}</Td>
-                  <Td>{game.spots_remaining|| 0}</Td>
-                  <Td>{game.totalEnrollments || 0}</Td>
-                  <Td>{game.prize_amount}</Td>
-                  {/* <Td>
-                    <Button
-                      colorScheme="blue"
-                      onClick={() => handleEditGame(game)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      colorScheme="red"
-                      onClick={() => handleDeleteGame(game.id)}
-                      ml={2}
-                    >
-                      Delete
-                    </Button>
-                  </Td> */}
-                </Tr>
-              ))
-            ) : (
-              <Tr>
-                <Td colSpan={4} textAlign="center">
-                  No games found.
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        </Table>
 
+        <RenderTable />
         {/* Modal for Add/Edit Game */}
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />

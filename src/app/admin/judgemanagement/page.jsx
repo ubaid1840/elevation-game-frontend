@@ -34,7 +34,6 @@ const JudgeManagement = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     fetchData();
@@ -75,22 +74,21 @@ const JudgeManagement = () => {
     setFilter(e.target.value);
   };
 
-  const handleSort = (key) => {
-    const sortedData = [...judges].sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a[key] > b[key] ? 1 : -1;
-      } else {
-        return a[key] < b[key] ? 1 : -1;
-      }
-    });
-    setJudges(sortedData);
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  };
-
   const filteredJudges = judges.filter((judge) => {
     const matchesName = judge.name.toLowerCase().includes(filter.toLowerCase());
     return matchesName;
   });
+
+  async function handleJudgeStatus(id) {
+    axios
+      .put(`/api/users/${id}`, {
+        role: "user",
+      })
+      .then(() => {
+        const temp = judges.filter((item)=> item.id !== id)
+        setJudges([...temp])
+      });
+  }
 
   const RenderTable = useCallback(() => {
     return (
@@ -101,7 +99,11 @@ const JudgeManagement = () => {
         columns={[
           { key: "name", value: "Name" },
           { key: "email", value: "Email" },
+          { value: "Suspend" },
         ]}
+        button={true}
+        buttonText={"Remove"}
+        onButtonClick={(val) => handleJudgeStatus(val)}
       />
     );
   }, [filteredJudges]);

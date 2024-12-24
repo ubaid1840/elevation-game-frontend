@@ -48,7 +48,7 @@ const FinancialOverview = () => {
       .post("/api/notification", {
         msg: msg,
         type: notificationType,
-      })
+      })  
       .then(() => {
         toast({
           title: "Notifications Sent",
