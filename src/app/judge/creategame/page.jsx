@@ -27,6 +27,8 @@ import { UserContext } from "@/store/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Calendar } from "primereact/calendar";
 import { CloseIcon } from "@chakra-ui/icons";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/config/firebase";
 
 export default function Page() {
   const [title, setTitle] = useState("");
@@ -46,12 +48,13 @@ export default function Page() {
   const [allCategories, setAllCategories] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newCategory, setNewCategory] = useState("");
+  const [pitchInstruction, setPitchInstruction] = useState("")
 
   useEffect(() => {
     if (UserState.value.data?.id) {
       fetchData();
       fetchCategories();
-    } 
+    }
   }, [UserState.value.data]);
 
   async function fetchData() {
@@ -95,12 +98,20 @@ export default function Page() {
       deadline,
       currentround: 0,
       level,
+      pitch_instruction : pitchInstruction
     };
 
     try {
       axios
         .post("/api/games", data)
-        .then(() => {
+        .then(async () => {
+          await addDoc(collection(db, "notifications"), {
+            to: "admin@gmail.com",
+            title: "Game created",
+            message: `${UserState.value.data?.name} initiated new game - ${title} `,
+            timestamp: moment().valueOf(),
+            status: "pending",
+          });
           route.push("/judge/gamedetails");
         })
         .catch((e) => {
@@ -137,10 +148,9 @@ export default function Page() {
     );
   };
 
-  
   const handleAddNewCategory = () => {
     axios.post("/api/categories", { value: newCategory }).then(() => {
-      onClose()
+      onClose();
       fetchCategories();
     });
   };
@@ -180,6 +190,17 @@ export default function Page() {
             placeholder="Describe the game, rules, judging criteria, and resources."
             value={gameDescription}
             onChange={(e) => setGameDescription(e.target.value)}
+            minHeight="200px"
+          />
+        </FormControl>
+
+        <FormControl mb={6}>
+          <FormLabel htmlFor="pitchInstruction">Pitch Instructions</FormLabel>
+          <Textarea
+            id="pitchInstruction"
+            placeholder="Describe pitch instructions."
+            value={pitchInstruction}
+            onChange={(e) => setPitchInstruction(e.target.value)}
             minHeight="200px"
           />
         </FormControl>
@@ -282,7 +303,6 @@ export default function Page() {
             placeholder="Select category"
             value={category}
             onChange={(e) => {
-             
               if (e.target.value === "Add New Category") onOpen();
               else setCategory(e.target.value);
             }}
@@ -334,8 +354,8 @@ export default function Page() {
             selectedJudges.length === 0 ||
             prize === 0 ||
             !level ||
-            !category  ||
-            !deadline 
+            !category ||
+            !deadline
           }
           isLoading={loading}
           colorScheme="purple"
@@ -372,7 +392,6 @@ export default function Page() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
     </Sidebar>
   );
 }

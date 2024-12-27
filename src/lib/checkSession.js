@@ -22,6 +22,7 @@ export default function useCheckSession() {
                                     }
                                 }
 
+                               
                                 if (pathname.includes("/forgetpassword")) {
                                     router.push(`/${response.data.role}`)
                                 } else if (pathname.includes("/login") || pathname.includes("/signup")) {
@@ -33,9 +34,14 @@ export default function useCheckSession() {
                                         router.push(`/${response.data.role}`)
                                     }
                                 }
-                                if(!pathname.includes("/payment") && !pathname.includes("/payment-success")){
+                                if (!pathname.includes("/payment") && !pathname.includes("/judgepayment") && !pathname.includes("/payment-success")) {
                                     if (!response.data.package_expiry || moment().isAfter(moment(response.data.package_expiry))) {
                                         router.push("/payment");
+                                    }
+                                    if (response.data?.role === 'judge') {
+                                        if (!response.data?.annual_package_expiry || moment().isAfter(moment(response.data.annual_package_expiry))){
+                                            router.push("/judgepayment");
+                                        }
                                     }
                                 }
                                 resolve({ user: { ...response.data, ...user } })

@@ -88,11 +88,18 @@ export default function SubscriptionPage({ page }) {
                     Current Plan: <Text as="span" color="green.500">{currentPlan}</Text>
                 </Heading>
 
+
+
                 {currentPlan &&
                     <Text fontSize={'lg'} color="purple.700">
                         Expiry: <Text as="span" color="green.500">{moment(UserState.value.data.package_expiry).format("MMM DD, yyyy")}</Text>
                     </Text>
                 }
+
+                {page === 'judge' &&
+                    <Text fontSize={'lg'} color="purple.700">
+                        Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>} 
+                    </Text>}
 
                 {subscriptionOptions.length > 0 && page == 'user' &&
                     <Tooltip fontSize={'md'} hasArrow label={

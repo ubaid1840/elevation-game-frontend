@@ -38,6 +38,8 @@ import GetLinkItems from "@/utils/SideBarItems";
 import { GhostButton } from "@/components/ui/Button";
 import { Calendar } from "primereact/calendar";
 import moment from "moment";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/config/firebase";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -98,6 +100,7 @@ export default function Page({ params }) {
       });
   }
 
+ 
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
       setCurrentRound(currentRound + 1);
@@ -110,14 +113,21 @@ export default function Page({ params }) {
     }
   };
 
-  async function handleSubmitComment(pitchid, pitchIndex, enrollmentIndex) {
+  async function handleSubmitComment(pitchid, userID) {
     axios
       .post("/api/comments", {
         pitch_id: pitchid,
         comment_text: newComment,
         user_id: UserState.value.data.id,
       })
-      .then(() => {
+      .then(async() => {
+        await addDoc(collection(db, "notifications"), {
+          to: userID,
+          title: "Comment",
+          message: `Got a new comment on your pitch in ${gameData.title}`,
+          timestamp: moment().valueOf(),
+          status : "pending"
+        });
         setNewComment("");
         fetchData();
         setLoading(false);
@@ -186,13 +196,28 @@ export default function Page({ params }) {
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
       })
-      .then(() => {
+      .then(async() => {
         toast({
           title: "Success",
           description: "Prize awarded successfully!",
           status: "success",
           duration: 3000,
           isClosable: true,
+        });
+        const temp = winnersList.filter((eachWinner) => eachWinner.user_id === selectedUserId)
+        await addDoc(collection(db, "notifications"), {
+          to: selectedUserId,
+          title: "Winner Announced",
+          message: `${temp[0].user_name} have won ${gameData.title}`,
+          timestamp: moment().valueOf(),
+          status : "pending"
+        });
+        await addDoc(collection(db, "notifications"), {
+          to: "admin@gmail.com",
+          title: "Winner Announced",
+          message: `${temp[0].user_name} have won ${gameData.title}`,
+          timestamp: moment().valueOf(),
+          status : "pending"
         });
         fetchData();
       })
@@ -404,9 +429,9 @@ export default function Page({ params }) {
                           <Heading size="sm" mt={4} color="teal.500">
                             Comments:
                           </Heading>
-                          {pitch.comments.map((comment) => (
+                          {pitch.comments.map((comment, ind) => (
                             <Box
-                              key={comment.commented_by}
+                              key={ind}
                               mt={2}
                               p={3}
                               bg="white"
@@ -428,10 +453,9 @@ export default function Page({ params }) {
                             mt={4}
                             colorScheme="purple"
                             onClick={() => {
+                             
                               setSelectedPitch({
                                 pitch: pitch,
-                                pitchIndex: index,
-                                enrollmentIndex: enrolIndex,
                               });
                               onOpen();
                             }}
@@ -520,8 +544,7 @@ export default function Page({ params }) {
                 setLoading(true);
                 handleSubmitComment(
                   selectedPitch.pitch.pitch_id,
-                  selectedPitch.pitchIndex,
-                  selectedPitch.enrollmentIndex
+                  selectedPitch.pitch_user_id
                 );
               }}
             >

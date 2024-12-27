@@ -16,6 +16,7 @@ import {
   Divider,
   Input,
   Stack,
+  Textarea,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ export default function GameEnrollmentPage({ params }) {
   const [videoLink, setVideoLink] = useState("");
   const [game, setGame] = useState();
   const [loading, setLoading] = useState(false);
+  const [pitchInstruction, setPitchInstruction] = useState([]);
 
   const router = useRouter();
   const { state: UserState } = useContext(UserContext);
@@ -38,6 +40,9 @@ export default function GameEnrollmentPage({ params }) {
   async function fetchData() {
     axios.get(`/api/games/${params.id}`).then((response) => {
       setGame(response.data);
+      if (response.data?.pitch_instruction) {
+        setPitchInstruction(response.data.pitch_instruction.split("\n"));
+      }
     });
   }
 
@@ -90,6 +95,20 @@ export default function GameEnrollmentPage({ params }) {
                 <strong>Recommendation:</strong>
               </Text>
               <Text fontSize="sm">- Upload youtube link.</Text>
+              {pitchInstruction.length > 0 && (
+                <>
+                  <Text fontSize="md">
+                    <strong>Additional Instructions:</strong>
+                  </Text>
+                  <VStack gap={0}>
+                    {pitchInstruction.map((eachInstruction, index) => (
+                      <Text key={index} fontSize="sm">
+                        {`- ${eachInstruction}`}
+                      </Text>
+                    ))}
+                  </VStack>
+                </>
+              )}
             </VStack>
           </Box>
 

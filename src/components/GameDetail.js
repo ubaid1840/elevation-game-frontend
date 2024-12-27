@@ -33,6 +33,8 @@ import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
 import moment from "moment";
 import Head from "next/head";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/config/firebase";
 
 export default function GameDetail({ params }) {
 
@@ -63,7 +65,7 @@ export default function GameDetail({ params }) {
                 const total = Number(response.data?.game?.totalrounds || 1)
                 setProgress((current / total) * 100)
             }
-            console.log(response.data)
+           
             setGameDetailData(response.data);
             setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
@@ -94,7 +96,16 @@ export default function GameDetail({ params }) {
                 comment_text: newComment,
                 user_id: UserState.value.data.id,
             })
-            .then(() => {
+            .then(async () => {
+                gameDetailData.game.additional_judges.map(async (eachJudge) => {
+                    await addDoc(collection(db, "notifications"), {
+                        to: eachJudge,
+                        title: "Comment",
+                        message: `${UserState.value.data?.name || UserState.value.data.email} commented on pitch in ${gameDetailData.game.title}`,
+                        timestamp: moment().valueOf(),
+                        status: "pending"
+                    });
+                })
                 setNewComment("");
                 setLoading(false);
                 fetchData()

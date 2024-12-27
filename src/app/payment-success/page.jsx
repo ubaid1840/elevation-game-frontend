@@ -1,12 +1,16 @@
 "use client";
 
+import { db } from "@/config/firebase";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
+import { debounce } from "@/utils/debounce";
 import { Button, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 import axios from "axios";
+import { addDoc, collection } from "firebase/firestore";
+import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export default function Page() {
   const { state: UserState, setUser } = useContext(UserContext);
@@ -19,20 +23,7 @@ export default function Page() {
       "payment_intent"
     );
     if (paymentIntentId && UserState.value.data?.id) {
-      axios
-        .post("/api/verify-payment", {
-          paymentIntentId: paymentIntentId,
-        })
-        .then((response) => {
-          if (response.data.plan) {
-            handleUpdatePackage(response.data.plan, paymentIntentId);
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          setMessage("Payment verification failed");
-          callTimeout();
-        });
+      fetchPaymentVerification(paymentIntentId);
     }
   }, [UserState.value.data]);
 
@@ -43,6 +34,24 @@ export default function Page() {
       }
     });
   }, []);
+
+  const fetchPaymentVerification = useCallback(
+    debounce((paymentIntentId) => {
+      axios
+        .post("/api/verify-payment", { paymentIntentId })
+        .then((response) => {
+          if (response.data.plan) {
+            handleUpdatePackage(response.data.plan, paymentIntentId);
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          setMessage("Payment verification failed");
+          callTimeout();
+        });
+    }, 1000),
+    []
+  );
 
   async function handleUpdatePackage(plan, paymentIntentId) {
     let currentDate = new Date();
@@ -60,8 +69,18 @@ export default function Page() {
         expiry: currentDate,
         paymentIntentId: paymentIntentId,
       })
-      .then((response) => {
+      .then(async (response) => {
         setMessage("Payment Verified");
+        await addDoc(collection(db, "notifications"), {
+          to: "admin@gmail.com",
+          title: "Payment",
+          message: `${
+            UserState.value.data?.name || UserState.value.data.email
+          } made payment against ${plan} subscription`,
+          timestamp: moment().valueOf(),
+          status : "pending"
+        });
+
         callTimeout();
         // if (response.data.success) {
         //   setMessage("Payment Verified Updating Record");

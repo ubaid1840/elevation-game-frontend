@@ -21,6 +21,7 @@ export async function GET(req, { params }) {
         g.prize_amount,
         g.currentround,
         g.deadline,
+        g.pitch_instruction,
         u.id AS participant_id, 
         u.name AS participant_name, 
         p.video_link AS pitch_video_link, 

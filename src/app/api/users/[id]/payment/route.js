@@ -14,10 +14,10 @@ export async function POST(req, { params }) {
             if (!user) {
                 return NextResponse.json({ message: 'User not found', success: false }, { status: 404 });
             }
-            
+
             await query(
-                'UPDATE users SET role = $1 WHERE id = $2',
-                ["judge", id]
+                'UPDATE users SET role = $1, annual_package = $2, annual_package_expiry = $3, annual_package_intent_id = $4, last_active = $5 WHERE id = $6',
+                ["judge", subscription, expiry, paymentIntentId, new Date(), id]
             );
 
             await query(
@@ -25,6 +25,7 @@ export async function POST(req, { params }) {
                 [id, `User promoted to judge`]
             );
 
+            return NextResponse.json({ success: true }, { status: 200 });
 
         } else {
             const userResult = await query('SELECT * FROM users WHERE id = $1', [id]);
@@ -35,7 +36,7 @@ export async function POST(req, { params }) {
             }
             if (user.package_intent_id) {
                 if (user.package_intent_id === paymentIntentId) {
-                    return NextResponse.json({ message: 'PaymentIntentId already processed', success: false });
+                    return NextResponse.json({ message: 'PaymentIntentId already processed', success: false }, { status: 200 });
                 }
             }
 
@@ -125,7 +126,7 @@ export async function POST(req, { params }) {
                 [id, `Subscription changed to ${subscription}`]
             );
 
-            return NextResponse.json({ success: true, user: updatedUser.rows[0] });
+            return NextResponse.json({ success: true, user: updatedUser.rows[0] }, { status: 200 });
         }
 
     } catch (error) {

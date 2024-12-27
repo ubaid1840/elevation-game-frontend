@@ -46,14 +46,15 @@ export async function POST(req) {
       prize_amount,
       deadline,
       currentround,
-      level
+      level,
+      pitch_instruction
     } = await req.json();
 
     const newGame = await pool.query(
       `INSERT INTO games 
        (title, description, totalRounds, category, spots_remaining, created_at, 
-        additional_judges, total_spots, video_link, created_by, prize_amount, deadline, currentround, level) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+        additional_judges, total_spots, video_link, created_by, prize_amount, deadline, currentround, level, pitch_instruction) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) 
        RETURNING *`,
       [
         title,
@@ -69,7 +70,8 @@ export async function POST(req) {
         prize_amount,
         deadline,
         currentround,
-        level
+        level,
+        pitch_instruction
       ]
     );
 
