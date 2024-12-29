@@ -77,9 +77,10 @@ export async function GET(req, { params }) {
 
       // Fetch pitches associated with this user
       const pitchResult = await pool.query(
-        `SELECT p.id AS pitch_id, p.user_id AS pitch_user_id, p.status AS pitch_status, p.video_link, p.score, p.round
+        `SELECT p.id AS pitch_id, p.user_id AS pitch_user_id, p.status AS pitch_status, p.video_link, p.score, p.round, p.scores
          FROM pitches p
-         WHERE p.game_id = $1 AND p.user_id = $2`,
+         WHERE p.game_id = $1 AND p.user_id = $2
+         ORDER BY p.created_at ASC`,
         [game.id, enrollment.user_id]
       );
 

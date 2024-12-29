@@ -5,14 +5,24 @@ export async function PUT(req, { params }) {
   const { id } = params;
 
   try {
-    const { score, status } = await req.json();
+    const { score, by, status } = await req.json();
 
     let result;
     if (score !== undefined) {
-      // Update score if score is provided
+
       result = await query(
-        'UPDATE pitches SET score = $1 WHERE id = $2 RETURNING *',
-        [score, id]
+        `
+        UPDATE pitches
+        SET scores = jsonb_set(
+          scores, 
+          $1, 
+          $2, 
+          true 
+        )
+        WHERE id = $3
+        RETURNING *;
+        `,
+        [`{${by}}`, JSON.stringify(score), id]
       );
     } else if (status !== undefined) {
       // Update status if status is provided

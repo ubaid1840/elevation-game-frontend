@@ -29,6 +29,7 @@ import { Calendar } from "primereact/calendar";
 import { CloseIcon } from "@chakra-ui/icons";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import moment from "moment";
 
 export default function Page() {
   const [title, setTitle] = useState("");
@@ -48,7 +49,7 @@ export default function Page() {
   const [allCategories, setAllCategories] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newCategory, setNewCategory] = useState("");
-  const [pitchInstruction, setPitchInstruction] = useState("")
+  const [pitchInstruction, setPitchInstruction] = useState("");
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -98,7 +99,7 @@ export default function Page() {
       deadline,
       currentround: 0,
       level,
-      pitch_instruction : pitchInstruction
+      pitch_instruction: pitchInstruction,
     };
 
     try {
@@ -108,13 +109,16 @@ export default function Page() {
           await addDoc(collection(db, "notifications"), {
             to: "admin@gmail.com",
             title: "Game created",
-            message: `${UserState.value.data?.name} initiated new game - ${title} `,
+            message: `${
+              UserState.value.data?.name || UserState.value.data?.email
+            } initiated new game - ${title} `,
             timestamp: moment().valueOf(),
             status: "pending",
           });
           route.push("/judge/gamedetails");
         })
         .catch((e) => {
+          console.log(e);
           setLoading(false);
         });
     } catch (error) {

@@ -52,7 +52,7 @@ export async function GET(req, { params }) {
 
     // Fetch pitches and comments
     const pitchesResult = await query(
-      'SELECT * FROM pitches WHERE user_id = $1 AND game_id = $2',
+      'SELECT * FROM pitches WHERE user_id = $1 AND game_id = $2 ORDER BY created_at ASC',
       [id, gid]
     );
 

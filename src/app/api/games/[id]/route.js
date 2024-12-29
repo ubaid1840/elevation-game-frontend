@@ -27,6 +27,7 @@ export async function GET(req, { params }) {
         p.video_link AS pitch_video_link, 
         p.status AS pitch_status, 
         p.created_at AS pitch_created_at, 
+        p.scores AS pitched_scores,
         c.comment_text AS comment, 
         c.created_at AS comment_created_at, 
         c.user_id AS commented_by 
@@ -55,6 +56,7 @@ export async function GET(req, { params }) {
 
     // Replace the IDs with names
     game.createdBy = creatorName;
+    game.additional_judges_ids = game.additional_judges || []
     game.additional_judges = judgeNames;
 
     return NextResponse.json(game, { status: 200 });

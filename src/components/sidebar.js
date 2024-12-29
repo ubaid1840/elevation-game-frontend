@@ -65,7 +65,7 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
     useEffect(() => {
         if (UserState.value.data?.email) {
             const searchEmail = UserState.value.data?.email
-            const searchId = UserState.value.data?.id.toString()
+            const searchId = UserState.value.data?.id
             let q = null
             if(UserState.value.data?.role === 'admin'){
                 q = query(

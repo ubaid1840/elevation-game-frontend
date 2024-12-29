@@ -66,7 +66,11 @@ export default function Page({ params }) {
     onClose: onCloseStart,
     onOpen: onOpenStart,
   } = useDisclosure();
-  const {isOpen : isOpenNextRound, onOpen : onOpenNextRound, onClose : onCloseNextRound} = useDisclosure()
+  const {
+    isOpen: isOpenNextRound,
+    onOpen: onOpenNextRound,
+    onClose: onCloseNextRound,
+  } = useDisclosure();
   const [selectedPitch, setSelectedPitch] = useState();
   const [loading, setLoading] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -100,7 +104,6 @@ export default function Page({ params }) {
       });
   }
 
- 
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
       setCurrentRound(currentRound + 1);
@@ -120,13 +123,13 @@ export default function Page({ params }) {
         comment_text: newComment,
         user_id: UserState.value.data.id,
       })
-      .then(async() => {
+      .then(async () => {
         await addDoc(collection(db, "notifications"), {
           to: userID,
           title: "Comment",
           message: `Got a new comment on your pitch in ${gameData.title}`,
           timestamp: moment().valueOf(),
-          status : "pending"
+          status: "pending",
         });
         setNewComment("");
         fetchData();
@@ -142,15 +145,32 @@ export default function Page({ params }) {
   }
 
   async function handleSubmitScore(pitch_id) {
+    let userID = null;
+    gameData.enrollments.map((eachEnrollment) => {
+      eachEnrollment.pitches.map((eachPitch) => {
+        if (eachPitch.pitch_id === pitch_id) {
+          userID = eachPitch.pitch_user_id;
+        }
+      });
+    });
     axios
       .put(`/api/pitches/${pitch_id}`, {
         score: Number(newScore),
+        by: UserState.value.data.id,
       })
-      .then((response) => {
+      .then(async (response) => {
+        await addDoc(collection(db, "notifications"), {
+          to: userID,
+          title: "Score",
+          message: `${UserState.value.data.name} has scored on your pitch in game - ${gameData.title}`,
+          timestamp: moment().valueOf(),
+          status: "pending",
+        });
         setNewScore("");
         fetchData();
       })
       .catch((e) => {
+        setLoading(false);
         console.log(e);
       })
       .finally(() => {
@@ -196,7 +216,7 @@ export default function Page({ params }) {
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
       })
-      .then(async() => {
+      .then(async () => {
         toast({
           title: "Success",
           description: "Prize awarded successfully!",
@@ -204,20 +224,22 @@ export default function Page({ params }) {
           duration: 3000,
           isClosable: true,
         });
-        const temp = winnersList.filter((eachWinner) => eachWinner.user_id === selectedUserId)
+        const temp = winnersList.filter(
+          (eachWinner) => eachWinner.user_id === selectedUserId
+        );
         await addDoc(collection(db, "notifications"), {
           to: selectedUserId,
           title: "Winner Announced",
           message: `${temp[0].user_name} have won ${gameData.title}`,
           timestamp: moment().valueOf(),
-          status : "pending"
+          status: "pending",
         });
         await addDoc(collection(db, "notifications"), {
           to: "admin@gmail.com",
           title: "Winner Announced",
           message: `${temp[0].user_name} have won ${gameData.title}`,
           timestamp: moment().valueOf(),
-          status : "pending"
+          status: "pending",
         });
         fetchData();
       })
@@ -234,7 +256,7 @@ export default function Page({ params }) {
   }
 
   async function handleStartGame() {
-    setRoundLoading()
+    setRoundLoading();
     onCloseStart();
     handleMoveToNextRound();
   }
@@ -288,189 +310,210 @@ export default function Page({ params }) {
             </Text>
           </VStack>
         </Box>
-        {gameData &&
-        <>
-          {gameData.currentround === 0 ? (
-          <Button
-            isLoading={roundLoading}
-            colorScheme="purple"
-            mt={5}
-            onClick={() => {
-              onOpenStart();
-            }}
-          >
-            Start Game
-          </Button>
-        ) : (
-          <Box display="flex" justifyContent="space-between" my={4}>
-            <Button
-              colorScheme="purple"
-              onClick={handlePreviousRound}
-              disabled={currentRound === 1}
-            >
-              Previous Round
-            </Button>
-            <Text fontWeight="bold" color="purple.700">
-              Round: {currentRound}/{gameData?.totalrounds}
-            </Text>
-            <Button
-              colorScheme="purple"
-              onClick={handleNextRound}
-              disabled={currentRound === gameData?.totalrounds}
-            >
-              Next Round
-            </Button>
-          </Box>
-        )}
-        <Heading as="h2" size="lg" mt={10} mb={6} color="teal.500">
-          Enrollments
-        </Heading>
-
-        <Stack spacing={6}>
-          {gameData?.enrollments &&
-            gameData.enrollments.map((enrollment, enrolIndex) => (
-              <Box
-                key={enrollment.user_id}
-                p={6}
-                bg="white"
-                borderRadius="lg"
-                boxShadow="md"
+        {gameData && (
+          <>
+            {gameData.currentround === 0 ? (
+              <Button
+                isLoading={roundLoading}
+                colorScheme="purple"
+                mt={5}
+                onClick={() => {
+                  onOpenStart();
+                }}
               >
-                <Stack spacing={4}>
-                  <Heading size="md" color="gray.700">
-                    {enrollment.user_name}
-                  </Heading>
+                Start Game
+              </Button>
+            ) : (
+              <Box display="flex" justifyContent="space-between" my={4}>
+                <Button
+                  colorScheme="purple"
+                  onClick={handlePreviousRound}
+                  disabled={currentRound === 1}
+                >
+                  Previous Round
+                </Button>
+                <Text fontWeight="bold" color="purple.700">
+                  Round: {currentRound}/{gameData?.totalrounds}
+                </Text>
+                <Button
+                  colorScheme="purple"
+                  onClick={handleNextRound}
+                  disabled={currentRound === gameData?.totalrounds}
+                >
+                  Next Round
+                </Button>
+              </Box>
+            )}
+            <Heading as="h2" size="lg" mt={10} mb={6} color="teal.500">
+              Enrollments
+            </Heading>
 
-                  {enrollment.pitches.map(
-                    (pitch, index) =>
-                      pitch.round === currentRound && (
-                        <Box
-                          key={pitch.pitch_id}
-                          p={5}
-                          mt={4}
-                          bg="gray.100"
-                          borderRadius="md"
-                          border="1px solid"
-                          borderColor="gray.200"
-                        >
-                          <HStack>
-                            <VStack align={"flex-start"}>
-                              <Text>
-                                <strong>Round:</strong> {pitch.round}
-                              </Text>
-                              <Text>
-                                <strong>Status:</strong> {pitch.pitch_status}
-                              </Text>
-                              <Text>
-                                <strong>Score:</strong> {pitch.score}
-                              </Text>
-                              <Text>
-                                <strong>Video Link:</strong>{" "}
-                                <Text
-                                  as={Link}
-                                  href={pitch.video_link}
-                                  target="_blank"
-                                  color={"purple.300"}
-                                  fontWeight={"bold"}
-                                >
-                                  Watch
-                                </Text>
-                              </Text>
-                            </VStack>
-                            <Spacer />
-                            <VStack align={"flex-end"}>
-                              {!pitch.score && (
-                                <Button
-                                  size={"sm"}
-                                  colorScheme="purple"
-                                  onClick={() => {
-                                    setSelectedPitch({
-                                      pitch: pitch,
-                                      pitchIndex: index,
-                                      enrollmentIndex: enrolIndex,
-                                    });
-                                    onOpenScore();
-                                  }}
-                                >
-                                  Add Score
-                                </Button>
-                              )}
-                              {!pitch.pitch_status && (
-                                <>
-                                  <Button
-                                    size={"sm"}
-                                    colorScheme="teal"
-                                    onClick={() => {
-                                      handlePitchStatus(
-                                        "Qualify",
-                                        pitch.pitch_id
-                                      );
-                                    }}
-                                  >
-                                    Qualify
-                                  </Button>
-                                  <Button
-                                    size={"sm"}
-                                    colorScheme="red"
-                                    onClick={() => {
-                                      handlePitchStatus(
-                                        "Disqualify",
-                                        pitch.pitch_id
-                                      );
-                                    }}
-                                  >
-                                    Disqualify
-                                  </Button>
-                                </>
-                              )}
-                            </VStack>
-                          </HStack>
+            <Stack spacing={6}>
+              {gameData?.enrollments &&
+                gameData.enrollments.map((enrollment, enrolIndex) => (
+                  <Box
+                    key={enrollment.user_id}
+                    p={6}
+                    bg="white"
+                    borderRadius="lg"
+                    boxShadow="md"
+                  >
+                    <Stack spacing={4}>
+                      <Heading size="md" color="gray.700">
+                        {enrollment.user_name}
+                      </Heading>
 
-                          <Heading size="sm" mt={4} color="teal.500">
-                            Comments:
-                          </Heading>
-                          {pitch.comments.map((comment, ind) => (
+                      {enrollment.pitches.map(
+                        (pitch, index) =>
+                          pitch.round === currentRound && (
                             <Box
-                              key={ind}
-                              mt={2}
-                              p={3}
-                              bg="white"
+                              key={pitch.pitch_id}
+                              p={5}
+                              mt={4}
+                              bg="gray.100"
                               borderRadius="md"
                               border="1px solid"
                               borderColor="gray.200"
-                              boxShadow="sm"
                             >
-                              <Text>
-                                <strong>{comment.commented_by_name}</strong>:{" "}
-                                {comment.comment_text}
-                              </Text>
-                              <Text fontSize="sm" color="gray.500">
-                                {new Date(comment.created_at).toLocaleString()}
-                              </Text>
+                              <HStack>
+                                <VStack align={"flex-start"}>
+                                  <Text>
+                                    <strong>Round:</strong> {pitch.round}
+                                  </Text>
+                                  <Text>
+                                    <strong>Status:</strong>{" "}
+                                    {pitch.pitch_status || "TBD"}
+                                  </Text>
+                                  <HStack>
+                                    <Text>
+                                      <strong>Score:</strong>
+                                    </Text>
+                                    <VStack>
+                                      {pitch.scores &&
+                                        pitch.scores[
+                                          UserState.value.data.id
+                                        ] !== undefined && (
+                                          <Text>
+                                            {
+                                              pitch.scores[
+                                                UserState.value.data.id
+                                              ]
+                                            }
+                                          </Text>
+                                        )}
+                                    </VStack>
+                                  </HStack>
+
+                                  <Text>
+                                    <strong>Video Link:</strong>{" "}
+                                    <Text
+                                      as={Link}
+                                      href={pitch.video_link}
+                                      target="_blank"
+                                      color={"purple.300"}
+                                      fontWeight={"bold"}
+                                    >
+                                      Watch
+                                    </Text>
+                                  </Text>
+                                </VStack>
+                                <Spacer />
+                                <VStack align={"flex-end"}>
+                                  {!pitch.scores ||
+                                    (pitch.scores[UserState.value.data.id] ==
+                                      undefined && (
+                                      <Button
+                                        size={"sm"}
+                                        colorScheme="purple"
+                                        onClick={() => {
+                                          setSelectedPitch({
+                                            pitch: pitch,
+                                            pitchIndex: index,
+                                            enrollmentIndex: enrolIndex,
+                                          });
+                                          onOpenScore();
+                                        }}
+                                      >
+                                        Add Score
+                                      </Button>
+                                    ))}
+                                  {!pitch.pitch_status && (
+                                    <>
+                                      <Button
+                                        size={"sm"}
+                                        colorScheme="teal"
+                                        onClick={() => {
+                                          handlePitchStatus(
+                                            "Qualify",
+                                            pitch.pitch_id
+                                          );
+                                        }}
+                                      >
+                                        Qualify
+                                      </Button>
+                                      <Button
+                                        size={"sm"}
+                                        colorScheme="red"
+                                        onClick={() => {
+                                          handlePitchStatus(
+                                            "Disqualify",
+                                            pitch.pitch_id
+                                          );
+                                        }}
+                                      >
+                                        Disqualify
+                                      </Button>
+                                    </>
+                                  )}
+                                </VStack>
+                              </HStack>
+
+                              <Heading size="sm" mt={4} color="teal.500">
+                                Comments:
+                              </Heading>
+                              {pitch.comments.map((comment, ind) => (
+                                <Box
+                                  key={ind}
+                                  mt={2}
+                                  p={3}
+                                  bg="white"
+                                  borderRadius="md"
+                                  border="1px solid"
+                                  borderColor="gray.200"
+                                  boxShadow="sm"
+                                >
+                                  <Text>
+                                    <strong>{comment.commented_by_name}</strong>
+                                    : {comment.comment_text}
+                                  </Text>
+                                  <Text fontSize="sm" color="gray.500">
+                                    {new Date(
+                                      comment.created_at
+                                    ).toLocaleString()}
+                                  </Text>
+                                </Box>
+                              ))}
+                              <Button
+                                mt={4}
+                                colorScheme="purple"
+                                onClick={() => {
+                                  setSelectedPitch({
+                                    pitch: pitch,
+                                  });
+                                  onOpen();
+                                }}
+                              >
+                                Add Comment
+                              </Button>
                             </Box>
-                          ))}
-                          <Button
-                            mt={4}
-                            colorScheme="purple"
-                            onClick={() => {
-                             
-                              setSelectedPitch({
-                                pitch: pitch,
-                              });
-                              onOpen();
-                            }}
-                          >
-                            Add Comment
-                          </Button>
-                        </Box>
-                      )
-                  )}
-                </Stack>
-              </Box>
-            ))}
-        </Stack>
-        </>}
-      
+                          )
+                      )}
+                    </Stack>
+                  </Box>
+                ))}
+            </Stack>
+          </>
+        )}
       </Box>
       {gameData?.totalrounds &&
         gameData.currentround === currentRound &&
@@ -482,13 +525,14 @@ export default function Page({ params }) {
             colorScheme="purple"
             size={"lg"}
             onClick={() => {
-              onOpenNextRound()
+              onOpenNextRound();
             }}
           >
             Move To Next Round
           </Button>
         )}
-      {gameData && gameData.currentround === gameData.totalrounds && 
+      {gameData &&
+        gameData.currentround === gameData.totalrounds &&
         !gameData.winner &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
           <Button
@@ -731,10 +775,11 @@ export default function Page({ params }) {
               }
               colorScheme="blue"
               ml={3}
-              onClick={()=>{
-                setRoundLoading(true)
-                onCloseNextRound()
-                handleMoveToNextRound()}}
+              onClick={() => {
+                setRoundLoading(true);
+                onCloseNextRound();
+                handleMoveToNextRound();
+              }}
             >
               Next Round
             </Button>

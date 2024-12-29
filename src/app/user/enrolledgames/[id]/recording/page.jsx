@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "@/components/sidebar";
+import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
 import GetLinkItems from "@/utils/SideBarItems";
 import {
@@ -19,6 +20,8 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { addDoc, collection } from "firebase/firestore";
+import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
@@ -59,7 +62,23 @@ export default function GameEnrollmentPage({ params }) {
         video_link: videoLink,
         status: "",
       })
-      .then(() => {
+      .then(async () => {
+        let notificationToSend = [];
+        notificationToSend.push(Number(game.createdby));
+        game.additional_judges_ids.map((eachJudge) => {
+          notificationToSend.push(eachJudge);
+        });
+        const promises = notificationToSend.map((notification) => {
+          return addDoc(collection(db, "notifications"), {
+            to: notification,
+            title: "Pitch submitted",
+            message: `${UserState.value.data.name} submitted a pitch on game - ${game.title}`,
+            timestamp: moment().valueOf(),
+            status: "pending",
+          });
+        });
+
+        await Promise.all(promises);
         router.push(`/user/enrolledgames/${params.id}`);
       });
   };

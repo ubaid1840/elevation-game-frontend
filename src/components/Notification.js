@@ -31,7 +31,7 @@ const NotificationManagement = ({ page }) => {
         if (UserState.value.data?.email) {
 
             const searchEmail = UserState.value.data?.email
-            const searchId = UserState.value.data?.id.toString()
+            const searchId = UserState.value.data?.id
             let q = null
             if (page === 'admin') {
                 q = query(

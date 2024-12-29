@@ -26,6 +26,8 @@ import {
     Badge,
     useDisclosure,
     Progress,
+    HStack,
+    VStack,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -53,6 +55,10 @@ export default function GameDetail({ params }) {
         }
     }, [UserState.value.data]);
 
+    useEffect(() => {
+        console.log(gameDetailData)
+    }, [gameDetailData])
+
     async function fetchData() {
         try {
             const response = await axios.get(
@@ -65,7 +71,7 @@ export default function GameDetail({ params }) {
                 const total = Number(response.data?.game?.totalrounds || 1)
                 setProgress((current / total) * 100)
             }
-           
+
             setGameDetailData(response.data);
             setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
@@ -257,8 +263,29 @@ export default function GameDetail({ params }) {
                                                 {pitch.videoLink}
                                             </Link>
                                         </Text>
-                                        <Text>Status: <Badge color={pitch.status && pitch.status == 'Disqualify' ? 'red' : "green"}>{pitch.status}</Badge></Text>
-                                        <Text>Score: {pitch.score}</Text>
+                                        <Text>Status: <Badge color={pitch.status && pitch.status == 'Disqualify' ? 'red' : "green"}>{pitch?.status || "TBD"}</Badge></Text>
+                                        <HStack align={'flex-start'}>
+                                            <Text>Scores:</Text>
+                                            <VStack align={'flex-start'} gap={0}>
+                                                <Text >{`${gameDetailData?.game?.createdby}: ${pitch.scores[gameDetailData?.game?.created_by] || "Not Scored"} `}</Text>
+                                                {gameDetailData?.game?.additional_judges.map((id, index) => {
+                                                    return {
+                                                        name: gameDetailData?.game?.judges[index],
+                                                        score: pitch.scores[id] || "Not Scored",
+                                                    };
+                                                }).map(({ name, score }, idx) => (
+                                                    <Text key={idx}>{`${name}: ${score} `}</Text>
+                                                ))}
+                                            </VStack>
+                                        </HStack>
+                                        {pitch.scores && (() => {
+                                            const scores = Object.values(pitch.scores);
+                                            const totalScore = scores.reduce((acc, score) => acc + score, 0);
+                                            const averageScore = scores.length > 0 ? (totalScore / scores.length) : 0;
+                                            return (
+                                                <Text>{`Average Score: `} <strong>{averageScore}</strong></Text>
+                                            );
+                                        })()}
 
                                         <Divider my={4} />
 
