@@ -78,19 +78,19 @@ const NotificationManagement = ({ page }) => {
     }
 
     async function handleClearNotifications() {
-        const promises = notifications.map((notification) => {
+        const promises = notifications.map(async (notification) => {
             const notificationRef = doc(db, "notifications", notification.id);
-            return deleteDoc(notificationRef);
-          });
-        
-          try {
+            return await deleteDoc(notificationRef);
+        });
+
+        try {
             await Promise.all(promises);
             console.log("All notifications cleared!");
-          } catch (error) {
+        } catch (error) {
             console.error("Error clearing notifications:", error);
-          }
+        }
     }
-    
+
     return (
         <Sidebar LinkItems={GetLinkItems(page)}>
             <Box p={8} bg="white" minH="100vh">

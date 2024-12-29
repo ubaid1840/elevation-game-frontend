@@ -68,17 +68,29 @@ export default function GameEnrollmentPage({ params }) {
         game.additional_judges_ids.map((eachJudge) => {
           notificationToSend.push(eachJudge);
         });
-        const promises = notificationToSend.map((notification) => {
-          return addDoc(collection(db, "notifications"), {
-            to: notification,
-            title: "Pitch submitted",
-            message: `${UserState.value.data.name} submitted a pitch on game - ${game.title}`,
-            timestamp: moment().valueOf(),
-            status: "pending",
-          });
+        const promises = notificationToSend.map(async (notification) => {
+          try {
+            return await addDoc(collection(db, "notifications"), {
+              to: notification,
+              title: "Pitch submitted",
+              message: `${UserState.value.data.name} submitted a pitch on game - ${game.title}`,
+              timestamp: moment().valueOf(),
+              status: "pending",
+            });
+          } catch (error) {
+            console.error(
+              `Failed to add notification for ${notification}:`,
+              error
+            );
+          }
         });
 
-        await Promise.all(promises);
+        try {
+          await Promise.all(promises);
+          console.log("All notifications sent successfully");
+        } catch (error) {
+          console.error("Error sending notifications:", error);
+        }
         router.push(`/user/enrolledgames/${params.id}`);
       });
   };

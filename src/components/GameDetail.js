@@ -103,15 +103,32 @@ export default function GameDetail({ params }) {
                 user_id: UserState.value.data.id,
             })
             .then(async () => {
-                gameDetailData.game.additional_judges.map(async (eachJudge) => {
-                    await addDoc(collection(db, "notifications"), {
-                        to: eachJudge,
-                        title: "Comment",
-                        message: `${UserState.value.data?.name || UserState.value.data.email} commented on pitch in ${gameDetailData.game.title}`,
-                        timestamp: moment().valueOf(),
-                        status: "pending"
-                    });
+                let notify = []
+                notify.push(Number(gameDetailData?.game?.created_by))
+                gameDetailData.game.additional_judges.map((eachJudge) => {
+                    notify.push(eachJudge)
                 })
+                const promises = notify.map(async (eachJudge) => {
+                    try {
+                        return await addDoc(collection(db, "notifications"), {
+                            to: eachJudge,
+                            title: "Comment",
+                            message: `${UserState.value.data?.name || UserState.value.data.email} commented on pitch in ${gameDetailData.game.title}`,
+                            timestamp: moment().valueOf(),
+                            status: "pending"
+                        });
+                    } catch (error) {
+                        console.error(`Failed to add notification for ${eachJudge}:`, error);
+
+                    }
+                });
+
+                try {
+                    await Promise.all(promises);
+                    console.log("All notifications sent successfully");
+                } catch (error) {
+                    console.error("Error sending notifications:", error);
+                }
                 setNewComment("");
                 setLoading(false);
                 fetchData()
@@ -267,7 +284,7 @@ export default function GameDetail({ params }) {
                                         <HStack align={'flex-start'}>
                                             <Text>Scores:</Text>
                                             <VStack align={'flex-start'} gap={0}>
-                                                <Text >{`${gameDetailData?.game?.createdby}: ${pitch.scores[gameDetailData?.game?.created_by] || "Not Scored"} `}</Text>
+                                                {gameDetailData?.game?.created_by !== "1" && <Text >{`${gameDetailData?.game?.createdby}: ${pitch.scores[gameDetailData?.game?.created_by] || "Not Scored"} `}</Text>}
                                                 {gameDetailData?.game?.additional_judges.map((id, index) => {
                                                     return {
                                                         name: gameDetailData?.game?.judges[index],
