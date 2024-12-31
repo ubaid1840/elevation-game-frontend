@@ -77,6 +77,7 @@ export default function Page({ params }) {
   const [newScore, setNewScore] = useState("");
   const [roundLoading, setRoundLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [finalScore, setFinalScore] = useState({});
   const toast = useToast();
 
   useEffect(() => {
@@ -103,6 +104,24 @@ export default function Page({ params }) {
         console.error("Error fetching data:", e);
       });
   }
+
+  useEffect(() => {
+    if (gameData) {
+      let temp = {};
+      gameData.enrollments.map((eachEnrollment) => {
+        if (eachEnrollment.pitches.length > 0) {
+          const lastPitch =
+            eachEnrollment.pitches[eachEnrollment.pitches.length - 1];
+          const scores = Object.values(lastPitch.scores);
+          const totalScore = scores.reduce((acc, score) => acc + score, 0);
+          const averageScore =
+            scores.length > 0 ? totalScore / scores.length : 0;
+          temp = { ...temp, [eachEnrollment.user_id]: averageScore };
+        }
+      });
+      setFinalScore(temp);
+    }
+  }, [gameData]);
 
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
@@ -652,7 +671,7 @@ export default function Page({ params }) {
               >
                 {winnersList.map((winner) => (
                   <option key={winner.user_id} value={winner.user_id}>
-                    {winner.user_name}
+                    {winner.user_name} - Score: {finalScore && finalScore[winner.user_id]}
                   </option>
                 ))}
               </Select>
@@ -666,7 +685,7 @@ export default function Page({ params }) {
             <Button
               isDisabled={!selectedUserId}
               colorScheme="blue"
-              mr={3}
+              ml={3}
               onClick={handleWinner}
             >
               Submit

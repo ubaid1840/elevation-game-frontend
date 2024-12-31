@@ -159,6 +159,16 @@ export default function Page() {
     });
   };
 
+  function formatYouTubeURL(url) {
+    if (url.includes("youtu.be")) {
+      const videoId = url.split("youtu.be/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    } else if (url.includes("watch?v=")) {
+      return url.replace("watch?v=", "embed/");
+    }
+    return url;
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
       <Box p={8} bg="white" opacity={isOpen ? 0.3 : 1}>
@@ -217,7 +227,7 @@ export default function Page() {
             <iframe
               width="100%"
               height="315"
-              src={videoLink.replace("watch?v=", "embed/")}
+              src={formatYouTubeURL(videoLink)}
               title="Challenge Video"
               frameBorder="0"
               allowFullScreen
