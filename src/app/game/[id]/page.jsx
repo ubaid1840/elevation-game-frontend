@@ -5,9 +5,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata({ params, searchParams }, parent) {
-  const response = await axios.get(
-    `https://d92wqcbk-3000.inc1.devtunnels.ms/api/games/${params.id}`
-  );
+  const headerList = headers();
+  let pathname = headerList.get("x-current-path-elevation");
+  if (pathname.includes("http://")) {
+    pathname = pathname.replace("http://", "https://");
+  }
+
+  const response = await axios.get(`${pathname}/api/games/${params.id}`);
   const game = response.data;
 
   return {
@@ -18,7 +22,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
     openGraph: {
       images: [
         {
-          url: ["https://d92wqcbk-3000.inc1.devtunnels.ms/logo.png"],
+          url: [`${pathname}/logo.png`],
           width: 100,
           height: 100,
         },
@@ -33,12 +37,10 @@ export default async function Page({ params }) {
   // const response = await axios.get(`https://d92wqcbk-3000.inc1.devtunnels.ms/api/games/${params.id}`);
 
   // if (!response.data?.redirect) {
-    redirect(`${pathname}/signup`);
+  redirect(`${pathname}/signup`);
   // }
 
   // const game = response.data;
-
-  
 
   return (
     <>
