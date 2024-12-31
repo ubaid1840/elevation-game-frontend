@@ -4,47 +4,45 @@ import Head from "next/head";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function getServerSideProps(context) {
-  const { id } = context.params;
+export async function generateMetadata({ params, searchParams }, parent) {
+  const response = await axios.get(
+    `https://d92wqcbk-3000.inc1.devtunnels.ms/api/games/${params.id}`
+  );
+  const game = response.data;
 
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/games/${id}`
-    );
-
-    if (!response.data?.redirect) {
-      return {
-        redirect: {
-          destination: `/signup`,
-          permanent: false,
+  return {
+    title: `${game?.title || "Game Details"}`,
+    description: `Win a grand prize of $${
+      game?.prize_amount
+    }. Deadline: ${moment(game?.deadline).format("MM/DD/YYYY")}`,
+    openGraph: {
+      images: [
+        {
+          url: ["https://d92wqcbk-3000.inc1.devtunnels.ms/logo.png"],
+          width: 100,
+          height: 100,
         },
-      };
-    }
-
-    return {
-      props: {
-        game: response.data,
-      },
-    };
-  } catch (error) {
-    return {
-      notFound: true,
-    };
-  }
+      ],
+    },
+  };
 }
 
-export default async function Page({ params, game }) {
+export default async function Page({ params }) {
   const headerList = headers();
   const pathname = headerList.get("x-current-path-elevation");
-  const response = await axios.get(`${pathname}/api/games/${params.id}`);
+  // const response = await axios.get(`https://d92wqcbk-3000.inc1.devtunnels.ms/api/games/${params.id}`);
 
-  if (!response.data?.redirect) {
+  // if (!response.data?.redirect) {
     redirect(`${pathname}/signup`);
-  }
+  // }
+
+  // const game = response.data;
+
+  
 
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{game?.title || "Game Details"}</title>
         <meta property="og:title" content={`${game?.title} - Join Now!`} />
         <meta
@@ -53,13 +51,10 @@ export default async function Page({ params, game }) {
             game?.prize_amount
           }. Deadline: ${moment(game?.deadline).format("MM/DD/YYYY")}`}
         />
-        <meta property="og:url" content={`${pathname}/games/${params.id}`} />
+        <meta property="og:url" content={`https://d92wqcbk-3000.inc1.devtunnels.ms/games/${params.id}`} />
+        <meta property="og:image" content={`/logo.png`} />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:image"
-          content={`${pathname}/logo.png`}
-        />
-      </Head>
+      </Head> */}
     </>
   );
 }

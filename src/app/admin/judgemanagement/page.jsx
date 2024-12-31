@@ -49,7 +49,7 @@ const JudgeManagement = () => {
     axios
       .post("/api/users", {
         name: judgeName,
-        email: email,
+        email: email.toLocaleLowerCase(),
         schedule: {},
         role: "judge",
       })
