@@ -36,6 +36,7 @@ export default function Page() {
   useEffect(() => {
     try {
       checkSession().then((res) => {
+        console.log(res)
         if (res.error) {
           console.log(res.error);
         }

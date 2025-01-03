@@ -27,8 +27,8 @@ export default function useCheckSession() {
                                         ) {
                                             router.push("/payment");
                                         }
-                                        resolve({ error: "Package expired" });
-                                        return;
+                                        // resolve({ error: "Package expired" });
+                                        // return;
                                     }
 
                                     if (userData.role === 'judge') {
@@ -36,8 +36,8 @@ export default function useCheckSession() {
                                             if (!pathname.includes("/judgepayment") && !pathname.includes("/payment-success")) {
                                                 router.push("/judgepayment");
                                             }
-                                            resolve({ error: "Annual package expired" });
-                                            return;
+                                            // resolve({ error: "Annual package expired" });
+                                            // return;
                                         }
                                     }
                                 }
@@ -47,8 +47,8 @@ export default function useCheckSession() {
                                     !pathname.includes("/judgepayment") &&
                                     !pathname.includes("/payment-success")) {
                                     router.push(`/${userData.role}`);
-                                    resolve({ error: "Wrong route" });
-                                    return
+                                    // resolve({ error: "Wrong route" });
+                                    // return
                                 }
 
                                 resolve({ user: { ...userData, ...user } });

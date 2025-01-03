@@ -31,6 +31,8 @@ export default function Page() {
   const [allGames, setAllGames] = useState([]);
   const [filter, setFilter] = useState("");
 
+  
+
   useEffect(() => {
     if (UserState.value.data?.id) {
       debouncedFetchData(UserState.value.data.id);
@@ -68,18 +70,20 @@ export default function Page() {
           Dashboard
         </Heading>
 
+        <Input
+              mb={4}
+              placeholder="Search by title"
+              value={filter}
+              onChange={handleFilterChange}
+            />
+
         {filteredGames.length == 0 ? (
           <Center>
             <Text>No games available</Text>
           </Center>
         ) : (
           <>
-            <Input
-              mb={4}
-              placeholder="Search by title"
-              value={filter}
-              onChange={handleFilterChange}
-            />
+          
             <Tabs>
               <TabList>
                 <Tab>Pending</Tab>

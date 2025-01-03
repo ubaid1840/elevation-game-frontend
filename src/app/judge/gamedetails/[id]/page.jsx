@@ -77,7 +77,7 @@ export default function Page({ params }) {
   const [newScore, setNewScore] = useState("");
   const [roundLoading, setRoundLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [finalScore, setFinalScore] = useState({});
+  const [finalScore, setFinalScore] = useState([]);
   const toast = useToast();
 
   useEffect(() => {
@@ -107,19 +107,26 @@ export default function Page({ params }) {
 
   useEffect(() => {
     if (gameData) {
-      let temp = {};
-      gameData.enrollments.map((eachEnrollment) => {
-        if (eachEnrollment.pitches.length > 0) {
-          const lastPitch =
-            eachEnrollment.pitches[eachEnrollment.pitches.length - 1];
-          const scores = Object.values(lastPitch.scores);
-          const totalScore = scores.reduce((acc, score) => acc + score, 0);
-          const averageScore =
-            scores.length > 0 ? totalScore / scores.length : 0;
-          temp = { ...temp, [eachEnrollment.user_id]: averageScore };
-        }
-      });
-      setFinalScore(temp);
+      const qualifiedPitchesWithAverageScore = gameData.enrollments
+        .flatMap((enrollment) =>
+          enrollment.pitches
+            .filter((pitch) => pitch.pitch_status === "Qualify")
+            .map((pitch) => {
+              const scores = Object.values(pitch.scores);
+              const totalScore = scores.reduce((acc, score) => acc + score, 0);
+              const averageScore =
+                scores.length > 0 ? totalScore / scores.length : 0;
+
+              return {
+                ...pitch,
+                user_id: enrollment.user_id,
+                averageScore,
+              };
+            })
+        )
+        .sort((a, b) => a.round - b.round);
+
+      setFinalScore(qualifiedPitchesWithAverageScore);
     }
   }, [gameData]);
 
@@ -656,43 +663,81 @@ export default function Page({ params }) {
       </Modal>
 
       <Modal isOpen={isOpenWinner} onClose={onCloseWinner}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Award Prize</ModalHeader>
-          <ModalCloseButton />
+  <ModalOverlay />
+  <ModalContent
+    minW={{ base: "90%", md: "800px" }}
+    minH={{ base: "90%", md: "500px" }}
+    maxH="90vh"
+  >
+    <ModalHeader>Award Prize</ModalHeader>
+    <ModalCloseButton />
 
-          <ModalBody>
-            <FormControl id="user_id" mb={4}>
-              <FormLabel>Select Winner</FormLabel>
-              <Select
-                placeholder="Select a winner"
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-              >
-                {winnersList.map((winner) => (
-                  <option key={winner.user_id} value={winner.user_id}>
-                    {winner.user_name} - Score: {finalScore && finalScore[winner.user_id]}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button variant={"outline"} onClick={onCloseWinner}>
-              Cancel
-            </Button>
-            <Button
-              isDisabled={!selectedUserId}
-              colorScheme="blue"
-              ml={3}
-              onClick={handleWinner}
+    <ModalBody>
+      <VStack
+        gap={{ base: 4, md: 6 }}
+        align="stretch"
+        spacing={{ base: 4, md: 6 }}
+      >
+        <Box flex={1}>
+          <FormControl id="user_id" mb={4}>
+            <FormLabel>Select Winner</FormLabel>
+            <Select
+              placeholder="Select a winner"
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
             >
-              Submit
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              {winnersList.map((winner) => (
+                <option key={winner.user_id} value={winner.user_id}>
+                  {winner.user_name}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+        <Box
+          flex={1}
+          overflowY="auto"
+          maxH={{ base: "250px", md: "450px" }}
+          w="100%"
+        >
+          <Text mb={2} fontSize="xl" fontWeight="bold">
+            Final Scores
+          </Text>
+          {winnersList.map((eachWinner, ind) => (
+            <Box key={ind} mb={4}>
+              <Text fontWeight="bold">{eachWinner.user_name}</Text>
+              {finalScore
+                .filter(
+                  (eachScore) =>
+                    eachWinner?.user_id === eachScore?.pitch_user_id
+                )
+                .map((eachScore, i) => (
+                  <Text key={i}>
+                    Round {eachScore?.round} Average Score:{" "}
+                    {eachScore?.averageScore}
+                  </Text>
+                ))}
+            </Box>
+          ))}
+        </Box>
+      </VStack>
+    </ModalBody>
+
+    <ModalFooter>
+      <Button variant="outline" onClick={onCloseWinner}>
+        Cancel
+      </Button>
+      <Button
+        isDisabled={!selectedUserId}
+        colorScheme="blue"
+        ml={3}
+        onClick={handleWinner}
+      >
+        Submit
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
 
       <Modal isOpen={isOpenStart} onClose={onCloseStart}>
         <ModalOverlay />
