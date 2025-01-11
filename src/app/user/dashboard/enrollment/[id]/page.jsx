@@ -46,6 +46,32 @@ export default function GameEnrollmentPage({ params }) {
       });
   };
 
+  function formatYouTubeURL(url) {
+    // Handle YouTube shortened URL (youtu.be)
+    if (url.includes("youtu.be")) {
+      const videoId = url.split("youtu.be/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    
+    // Handle standard YouTube watch URL (youtube.com/watch?v=VIDEO_ID)
+    } else if (url.includes("youtube.com/watch?v=")) {
+      const videoId = new URL(url).searchParams.get("v");
+      return `https://www.youtube.com/embed/${videoId}`;
+    
+    // Handle YouTube Shorts URL (youtube.com/shorts/VIDEO_ID)
+    } else if (url.includes("youtube.com/shorts/")) {
+      const videoId = url.split("youtube.com/shorts/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    
+    // Handle mobile YouTube URL (m.youtube.com/watch?v=VIDEO_ID)
+    } else if (url.includes("m.youtube.com/watch?v=")) {
+      const videoId = new URL(url).searchParams.get("v");
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  
+    // Return the URL as is if it's not recognized
+    return url;
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("user")}>
       <Box p={8} bg="white">
@@ -97,7 +123,7 @@ export default function GameEnrollmentPage({ params }) {
             <iframe
               width="100%"
               height="400"
-              src={game.video_link.replace("watch?v=", "embed/")}
+              src={formatYouTubeURL(game.video_link)}
               title="Challenge Video"
               frameBorder="0"
               allowFullScreen

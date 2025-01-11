@@ -21,8 +21,6 @@ export async function GET(req, { params }) {
       [id]
     );
 
-    console.log(gameResult.rows)
-
     const games = gameResult.rows;
 
     if (games.length === 0) {

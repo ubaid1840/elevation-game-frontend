@@ -4,7 +4,7 @@ import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch,
 import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2 }) => {
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false }) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
@@ -100,7 +100,14 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                                                 >
                                                     {buttonText}
                                                 </Button>
-                                                {button2 &&
+                                                {special ? button2 && user?.role === 'user' &&
+                                                    <Button
+                                                        colorScheme="teal"
+                                                        onClick={() => onButtonClick2(user.id)}
+                                                    >
+                                                        {buttonText2}
+                                                    </Button>
+                                                    : button2 &&
                                                     <Button
                                                         colorScheme="teal"
                                                         onClick={() => onButtonClick2(user.id)}

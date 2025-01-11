@@ -102,7 +102,9 @@ export default function Page({ params }) {
           isClosable: true,
         });
         console.error("Error fetching data:", e);
-      });
+      }).finally(()=>{
+        setLoading(false);
+      })
   }
 
   useEffect(() => {
@@ -121,6 +123,7 @@ export default function Page({ params }) {
                 ...pitch,
                 user_id: enrollment.user_id,
                 averageScore,
+                totalScore,
               };
             })
         )
@@ -150,7 +153,7 @@ export default function Page({ params }) {
         user_id: UserState.value.data.id,
       })
       .then(async () => {
-        await addDoc(collection(db, "notifications"), {
+        addDoc(collection(db, "notifications"), {
           to: userID,
           title: "Comment",
           message: `Got a new comment on your pitch in ${gameData.title}`,
@@ -159,7 +162,7 @@ export default function Page({ params }) {
         });
         setNewComment("");
         fetchData();
-        setLoading(false);
+        
       })
       .catch((e) => {
         setLoading(false);
@@ -185,7 +188,7 @@ export default function Page({ params }) {
         by: UserState.value.data.id,
       })
       .then(async (response) => {
-        await addDoc(collection(db, "notifications"), {
+        addDoc(collection(db, "notifications"), {
           to: userID,
           title: "Score",
           message: `${UserState.value.data.name} has scored on your pitch in game - ${gameData.title}`,
@@ -253,14 +256,14 @@ export default function Page({ params }) {
         const temp = winnersList.filter(
           (eachWinner) => eachWinner.user_id === selectedUserId
         );
-        await addDoc(collection(db, "notifications"), {
+        addDoc(collection(db, "notifications"), {
           to: selectedUserId,
           title: "Winner Announced",
           message: `${temp[0].user_name} have won ${gameData.title}`,
           timestamp: moment().valueOf(),
           status: "pending",
         });
-        await addDoc(collection(db, "notifications"), {
+        addDoc(collection(db, "notifications"), {
           to: "admin@gmail.com",
           title: "Winner Announced",
           message: `${temp[0].user_name} have won ${gameData.title}`,
@@ -663,81 +666,83 @@ export default function Page({ params }) {
       </Modal>
 
       <Modal isOpen={isOpenWinner} onClose={onCloseWinner}>
-  <ModalOverlay />
-  <ModalContent
-    minW={{ base: "90%", md: "800px" }}
-    minH={{ base: "90%", md: "500px" }}
-    maxH="90vh"
-  >
-    <ModalHeader>Award Prize</ModalHeader>
-    <ModalCloseButton />
-
-    <ModalBody>
-      <VStack
-        gap={{ base: 4, md: 6 }}
-        align="stretch"
-        spacing={{ base: 4, md: 6 }}
-      >
-        <Box flex={1}>
-          <FormControl id="user_id" mb={4}>
-            <FormLabel>Select Winner</FormLabel>
-            <Select
-              placeholder="Select a winner"
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-            >
-              {winnersList.map((winner) => (
-                <option key={winner.user_id} value={winner.user_id}>
-                  {winner.user_name}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-        <Box
-          flex={1}
-          overflowY="auto"
-          maxH={{ base: "250px", md: "450px" }}
-          w="100%"
+        <ModalOverlay />
+        <ModalContent
+          minW={{ base: "90%", md: "800px" }}
+          minH={{ base: "90%", md: "500px" }}
+          maxH="90vh"
         >
-          <Text mb={2} fontSize="xl" fontWeight="bold">
-            Final Scores
-          </Text>
-          {winnersList.map((eachWinner, ind) => (
-            <Box key={ind} mb={4}>
-              <Text fontWeight="bold">{eachWinner.user_name}</Text>
-              {finalScore
-                .filter(
-                  (eachScore) =>
-                    eachWinner?.user_id === eachScore?.pitch_user_id
-                )
-                .map((eachScore, i) => (
-                  <Text key={i}>
-                    Round {eachScore?.round} Average Score:{" "}
-                    {eachScore?.averageScore}
-                  </Text>
-                ))}
-            </Box>
-          ))}
-        </Box>
-      </VStack>
-    </ModalBody>
+          <ModalHeader>Award Prize</ModalHeader>
+          <ModalCloseButton />
 
-    <ModalFooter>
-      <Button variant="outline" onClick={onCloseWinner}>
-        Cancel
-      </Button>
-      <Button
-        isDisabled={!selectedUserId}
-        colorScheme="blue"
-        ml={3}
-        onClick={handleWinner}
-      >
-        Submit
-      </Button>
-    </ModalFooter>
-  </ModalContent>
-</Modal>
+          <ModalBody>
+            <VStack
+              gap={{ base: 4, md: 6 }}
+              align="stretch"
+              spacing={{ base: 4, md: 6 }}
+            >
+              <Box flex={1}>
+                <FormControl id="user_id" mb={4}>
+                  <FormLabel>Select Winner</FormLabel>
+                  <Select
+                    placeholder="Select a winner"
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                  >
+                    {winnersList.map((winner) => (
+                      <option key={winner.user_id} value={winner.user_id}>
+                        {winner.user_name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box
+                flex={1}
+                overflowY="auto"
+                maxH={{ base: "250px", md: "450px" }}
+                w="100%"
+              >
+                <Text mb={2} fontSize="xl" fontWeight="bold">
+                  Final Scores
+                </Text>
+                {winnersList.map((eachWinner, ind) => (
+                  <Box key={ind} mb={4}>
+                    <Text fontWeight="bold">{eachWinner.user_name}</Text>
+                    {finalScore
+                      .filter(
+                        (eachScore) =>
+                          eachWinner?.user_id === eachScore?.pitch_user_id
+                      )
+                      .map((eachScore, i) => (
+                        <Text key={i}>
+                          Round {eachScore?.round} Total Score:{" "}
+                          {eachScore?.totalScore} <br /> Round{" "}
+                          {eachScore?.round} Average Score:{" "}
+                          {eachScore?.averageScore}
+                        </Text>
+                      ))}
+                  </Box>
+                ))}
+              </Box>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="outline" onClick={onCloseWinner}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={!selectedUserId}
+              colorScheme="blue"
+              ml={3}
+              onClick={handleWinner}
+            >
+              Submit
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       <Modal isOpen={isOpenStart} onClose={onCloseStart}>
         <ModalOverlay />

@@ -19,18 +19,22 @@ import {
   ListItem,
   Flex,
   Icon,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
 import moment from "moment";
 import TableData from "@/components/ui/TableData";
+import Loading from "@/app/loading";
 
 const UserManagement = () => {
   const [filter, setFilter] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     fetchData();
@@ -84,12 +88,31 @@ const UserManagement = () => {
           }
         });
         setUsers([...temp]);
-      });
+      }).finally(()=>{
+        setLoading(false)
+      })
+  }
+
+  async function handlePromote(id) {
+    axios
+      .put(`/api/users/${id}`, {
+        role: "judge",
+      })
+      .then(() => {
+        const updatedUsers = users.map((eachUser) =>
+          eachUser.id === id ? { ...eachUser, role: "judge" } : eachUser
+        );
+
+        setUsers([...updatedUsers]);
+      }).finally(()=>{
+        setLoading(false)
+      })
   }
 
   const RenderTable = useCallback(() => {
     return (
       <TableData
+        special={true}
         data={filteredUsers.map((item) => {
           return {
             id: item.id,
@@ -116,14 +139,29 @@ const UserManagement = () => {
           handleLogs(val);
         }}
         onSwitchClick={(val) => {
+          setLoading(true)
           handleChangeStatus(val);
         }}
+        button2={true}
+        buttonText2={"Promote to judge"}
+        onButtonClick2={(val) => {
+          setLoading(true)
+          handlePromote(val)}}
       />
     );
   }, [filteredUsers]);
 
+  const LoadingIndicator = () => {
+    return (
+      <Center height={'100vh'}>
+        <Spinner color="black"/>
+      </Center>
+    )
+  }
+
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
+      {loading ? <LoadingIndicator /> :
       <Box p={8} bg="white">
         <Heading mb={6} color="purple.700">
           User Management
@@ -173,6 +211,8 @@ const UserManagement = () => {
           </UnorderedList>
         </VStack>
       </Box>
+}
+     
     </Sidebar>
   );
 };

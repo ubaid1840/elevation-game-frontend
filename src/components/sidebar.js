@@ -119,7 +119,7 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
                 size="full"
             >
                 <DrawerContent>
-                    <SidebarContent haveNotifications={haveNotifications} settingsLink={settingsLink} LinkItems={LinkItems} display="flex" onClose={onClose} />
+                    <SidebarContent  id={id} haveNotifications={haveNotifications} settingsLink={settingsLink} LinkItems={LinkItems} display="flex" onClose={onClose} />
                 </DrawerContent>
             </Drawer>
             <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
@@ -161,6 +161,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                 {LinkItems.map((link, index) =>
                 (
                     <NavItem
+                    onClose={onClose}
                         isActive={pathname.includes(link.path)}
                         key={link.name}
                         icon={link.icon}
@@ -188,6 +189,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                         {UserState.value.data?.role != 'admin' &&
                             <NavItem
+                            onClose={onClose}
                                 isActive={pathname.includes('profile')}
                                 icon={CgProfile}
                                 path={`/${UserState.value.data?.role}/profile`}
@@ -196,6 +198,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                             </NavItem>
                         }
                         <NavItem
+                         onClose={onClose}
                             haveNotifications={haveNotifications}
                             isActive={pathname.includes('notifications')}
                             icon={MdNotificationsActive}
@@ -206,6 +209,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                         {UserState.value.data?.role == 'admin'
                             ?
                             <NavItem
+                            onClose={onClose}
                                 isActive={pathname.includes('settings')}
                                 icon={MdSettings}
                                 path={`/admin/settings`}
@@ -215,6 +219,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                             :
                             <NavItem
+                            onClose={onClose}
                                 isActive={pathname.includes('subscription')}
                                 icon={MdAttachMoney}
                                 path={`/${UserState.value.data?.role}/subscription`}
@@ -234,11 +239,12 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
     );
 };
 
-const NavItem = ({ icon, children, path, isActive, haveNotifications, ...rest }) => {
+const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, ...rest }) => {
 
 
     return (
         <Link
+        onClick={onClose}
             href={`${path}`}
             style={{ textDecoration: "none", fontSize: "14px", fontWeight: "300", height: '40px' }}
             _focus={{ boxShadow: "none" }}

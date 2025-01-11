@@ -55,10 +55,6 @@ export default function GameDetail({ params }) {
         }
     }, [UserState.value.data]);
 
-    useEffect(() => {
-        console.log(gameDetailData)
-    }, [gameDetailData])
-
     async function fetchData() {
         try {
             const response = await axios.get(
