@@ -1,6 +1,7 @@
 "use client";
 import Sidebar from "@/components/sidebar";
 import { UserContext } from "@/store/context/UserContext";
+import { debounce } from "@/utils/debounce";
 import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
@@ -14,33 +15,71 @@ import {
   Divider,
   HStack,
   Input,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export default function Page() {
   const { state: UserState } = useContext(UserContext);
   const [myGames, setMyGames] = useState([]);
   const [availableGames, setAvailableGames] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
-      fetchData();
+      debouncedFetchData(UserState.value.data?.id);
     }
   }, [UserState.value.data]);
 
-  async function fetchData() {
-    axios
-      .get(`/api/users/${UserState.value.data.id}/games`)
-      .then((response) => {
-        setMyGames(response.data);
-      });
+  const debouncedFetchData = useCallback(
+    debounce((id) => {
+      fetchData(id);
+    }, 1000),
+    []
+  );
 
-    axios.get(`/api/games`).then((response) => {
-      setAvailableGames(response.data);
+  async function fetchData(id) {
+    // axios
+    //   .get(`/api/users/${UserState.value.data.id}/games`)
+    //   .then((response) => {
+    //     console.log(response.data)
+    //     setMyGames(response.data);
+    //   });
+
+    // axios.get(`/api/games`).then((response) => {
+    //   console.log(response.data)
+    //   setAvailableGames(response.data);
+    // });
+
+    axios.get(`/api/users/${id}/games`).then((response) => {
+      setMyGames(response.data.myGames);
+      setAvailableGames(response.data.availableGames);
     });
+  }
+
+  function checkUrl(game) {
+    const userPackage = UserState.value.data?.package;
+    let status = false;
+    if (
+      userPackage === "Platinum" ||
+      (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
+      (userPackage === "Iridium" &&
+        ["Iridium", "Silver"].includes(game.level)) ||
+      (userPackage === "Silver" && game.level === "Silver")
+    ) {
+      status = true;
+    } else {
+      status = false;
+    }
+    if (status == true) {
+      return `dashboard/enrollment/${game.id}`;
+    } else {
+      return `#`;
+    }
   }
 
   return (
@@ -82,19 +121,24 @@ export default function Page() {
                       boxShadow: "xl",
                       cursor: "pointer",
                     }}
+                    justifyContent={"space-between"}
+                    display={"flex"}
+                    flexDir={"column"}
                   >
                     <Heading size="md" mb={2}>
                       {game.title}
                     </Heading>
-                    <Badge
-                      colorScheme={
-                        game.status === "COMPLETED" ? "green" : "yellow"
-                      }
-                      variant="solid"
-                      fontSize="1rem"
-                    >
-                      {game.completed ? "COMPLETED" : "PENDING"}
-                    </Badge>
+                    <div>
+                      <Badge
+                        colorScheme={
+                          game.status === "COMPLETED" ? "green" : "yellow"
+                        }
+                        variant="solid"
+                        fontSize="1rem"
+                      >
+                        {game.completed ? "COMPLETED" : "PENDING"}
+                      </Badge>
+                    </div>
                   </GridItem>
                 )
             )}
@@ -110,22 +154,20 @@ export default function Page() {
           <Grid templateColumns="repeat(3, 1fr)" gap={6}>
             {availableGames
               .filter((game) => {
-                if (myGames.some((myGame) => myGame.id === game.id))
-                  return false;
                 if (game.spots_remaining === 0) return false;
                 if (game.deadline && moment(game.deadline).isBefore(moment()))
                   return false;
-                const userPackage = UserState.value.data?.package;
-                if (
-                  userPackage === "Platinum" ||
-                  (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
-                  (userPackage === "Iridium" && ["Iridium", "Silver"].includes(game.level)) ||
-                  (userPackage === "Silver" && game.level === "Silver")
-                ) {
-                  return true;
-                }
+                // const userPackage = UserState.value.data?.package;
+                // if (
+                //   userPackage === "Platinum" ||
+                //   (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
+                //   (userPackage === "Iridium" && ["Iridium", "Silver"].includes(game.level)) ||
+                //   (userPackage === "Silver" && game.level === "Silver")
+                // ) {
+                //   return true;
+                // }
 
-                return false;
+                return true;
               })
               .map((game) => (
                 <GridItem
@@ -146,8 +188,33 @@ export default function Page() {
                   <Text fontSize="lg">Entry Level: {game.level}</Text>
 
                   <Button
+                    onClick={() => {
+                      const userPackage = UserState.value.data?.package;
+                      let status = false;
+                      if (
+                        userPackage === "Platinum" ||
+                        (userPackage === "Gold" &&
+                          !["Platinum"].includes(game.level)) ||
+                        (userPackage === "Iridium" &&
+                          ["Iridium", "Silver"].includes(game.level)) ||
+                        (userPackage === "Silver" && game.level === "Silver")
+                      ) {
+                        status = true;
+                      } else {
+                        status = false;
+                      }
+                      if (status == false) {
+                        toast({
+                          title: "Change Package",
+                          description: "Please upgrade your package to enroll",
+                          status: "success",
+                          duration: 3000,
+                          isClosable: true,
+                        });
+                      }
+                    }}
                     as={Link}
-                    href={`dashboard/enrollment/${game.id}`}
+                    href={checkUrl(game)}
                     mt={4}
                     colorScheme="purple"
                     variant="solid"
