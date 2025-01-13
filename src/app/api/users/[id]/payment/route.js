@@ -52,44 +52,126 @@ export async function POST(req, { params }) {
 
             const amountToSave = Number(userPlan.rows[0].price)
 
-            const referrer = await query(
+
+            const firstReferrerResult = await query(
                 'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
                 [id]
-            )
+            );
 
-            if (referrer.rows.length != 0) {
-                const referrer_id = referrer.rows[0].referrer_id
-                if (referrer_id) {
-                    const referrerInfo = await query(
-                        'SELECT package FROM users WHERE id = $1 LIMIT 1',
-                        [referrer_id]
-                    )
-                    if (referrerInfo.rows[0].package) {
-                        if (referrerInfo.rows[0].package === 'Silver') {
-                            await query(
-                                'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
-                                [amountToSave, referrer_id]
-                            );
+            if (firstReferrerResult.rows.length === 0) {
+                return NextResponse.json({ message: 'No referrer found for the user' }, { status: 200 });
+            }
 
-                        } else if (referrerInfo.rows[0].package === 'Platinum') {
-                            await query(
-                                'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
-                                [amountToSave, referrer_id]
-                            );
-                        } else if (referrerInfo.rows[0].package === 'Gold') {
-                            await query(
-                                'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
-                                [amountToSave, referrer_id]
-                            );
-                        } else if (referrerInfo.rows[0].package === 'Iridium') {
-                            await query(
-                                'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
-                                [amountToSave, referrer_id]
-                            );
-                        }
-                    }
+            const referrer_id = firstReferrerResult.rows[0].referrer_id;
+            let referrer2_id = null;
+            if (referrer_id) {
+                const secondReferrerResult = await query(
+                    'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
+                    [referrer_id]
+                );
+                if (secondReferrerResult.rows.length > 0) {
+                    referrer2_id = secondReferrerResult.rows[0].referrer_id;
                 }
             }
+            let referrer3_id = null;
+            if (referrer2_id) {
+                const thirdReferrerResult = await query(
+                    'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
+                    [referrer2_id]
+                );
+                if (thirdReferrerResult.rows.length > 0) {
+                    referrer3_id = thirdReferrerResult.rows[0].referrer_id;
+                }
+            }
+            if (referrer_id) {
+                const checkPlan = await query(
+                    'SELECT package FROM users WHERE id = $1 LIMIT 1',
+                    [referrer_id]
+                );
+                if (checkPlan === 'Silver') {
+                    await query(
+                        'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
+                        [amountToSave, referrer_id]
+                    );
+                } else {
+                    await query(
+                        'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
+                        [amountToSave, referrer_id]
+                    );
+                }
+
+            }
+            if (referrer2_id) {
+                const checkPlan = await query(
+                    'SELECT package FROM users WHERE id = $1 LIMIT 1',
+                    [referrer2_id]
+                );
+                if (checkPlan !== 'Silver') {
+                    await query(
+                        'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
+                        [amountToSave, referrer2_id]
+                    );
+                }
+            }
+
+            if (referrer3_id) {
+                const checkPlan = await query(
+                    'SELECT package FROM users WHERE id = $1 LIMIT 1',
+                    [referrer3_id]
+                );
+                if (checkPlan !== 'Silver') {
+                    await query(
+                        'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
+                        [amountToSave, referrer3_id]
+                    );
+                }
+            }
+
+
+            //// related to code above first ReferralResult
+
+            // const referrer = await query(
+            //     'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
+            //     [id]
+            // )
+
+            // if (referrer.rows.length != 0) {
+            //     const referrer_id = referrer.rows[0].referrer_id
+            //     if (referrer_id) {
+            //         const referrerInfo = await query(
+            //             'SELECT package FROM users WHERE id = $1 LIMIT 1',
+            //             [referrer_id]
+            //         )
+            //         if (referrerInfo.rows[0].package) {
+            //             if (referrerInfo.rows[0].package === 'Silver') {
+            //                 await query(
+            //                     'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
+            //                     [amountToSave, referrer_id]
+            //                 );
+
+            //             } else if (referrerInfo.rows[0].package === 'Platinum') {
+            //                 await query(
+            //                     'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
+            //                     [amountToSave, referrer_id]
+            //                 );
+            //             } else if (referrerInfo.rows[0].package === 'Gold') {
+            //                 await query(
+            //                     'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
+            //                     [amountToSave, referrer_id]
+            //                 );
+            //             } else if (referrerInfo.rows[0].package === 'Iridium') {
+            //                 await query(
+            //                     'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
+            //                     [amountToSave, referrer_id]
+            //                 );
+            //             }
+            //         }
+            //     }
+            // }
+
+            //// related to code above first ReferralResult ends here
+
+            ///// Old work below keep it for safety
 
             // if (!user.package_intent_id) {
             //     const silverReferrer = await query(
@@ -120,6 +202,8 @@ export async function POST(req, { params }) {
             //     }
 
             // }
+
+            //// old work ends here
 
             await query(
                 'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
