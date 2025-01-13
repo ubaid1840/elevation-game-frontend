@@ -12,23 +12,46 @@ import {
   Box,
   FormLabel,
 } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Link } from "@chakra-ui/next-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/config/firebase";
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
-  const [isEmailValid, setIsEmailValid] = useState(false); 
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));
   }, [email]);
 
   async function handleReset() {
-  
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        toast({
+          title: "Email sent",
+          description: "Please check your email for password reset link.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: "Failed to send link. Please try again",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   return (
@@ -71,6 +94,7 @@ export default function Page() {
 
             <Stack mt={5}>
               <Button
+                isLoading={loading}
                 borderRadius={"2px"}
                 colorScheme={"purple"}
                 isDisabled={!isEmailValid}
