@@ -30,27 +30,33 @@ export default function Page() {
     startTime: "",
   });
 
+  useEffect(() => {
+    console.log(UserState.value.data?.schedule);
+  }, [UserState.value.data]);
 
   const handleAddAvailability = () => {
     if (formData.day && formData.startTime) {
-      setNewAvailability((prev) => [
-        ...prev,
-        { [formData.day]: formData.startTime },
-      ]);
-      setFormData({ day: "", startTime: "" });
+      const newEntry = { [formData.day]: formData.startTime };
+      const isDuplicate = newAvailability.some(
+        (entry) => JSON.stringify(entry) === JSON.stringify(newEntry)
+      );
+
+      if (!isDuplicate) {
+        setNewAvailability((prev) => [...prev, newEntry]);
+        setFormData({ day: "", startTime: "" });
+      } else {
+        alert("This availability already exists!");
+      }
     }
   };
 
+ 
+
   const handleSaveAllAvailability = async () => {
-    const finalSchedule = {};
-    newAvailability.forEach((entry) => {
-      const [day, time] = Object.entries(entry)[0];
-      finalSchedule[day] = time;
-    });
 
     axios
       .put(`/api/users/${UserState.value.data.id}/schedule`, {
-        schedule: finalSchedule,
+        schedule: newAvailability,
       })
       .then((response) => {
         let temp = UserState.value.data;
@@ -64,6 +70,8 @@ export default function Page() {
       .finally(() => {
         setLoading(false);
       });
+
+    setLoading(false);
   };
 
   return (
@@ -92,13 +100,13 @@ export default function Page() {
               </Thead>
               <Tbody>
                 {UserState.value.data?.schedule &&
-                  Object.entries(UserState.value.data?.schedule).map(
-                    ([day, time]) => (
-                      <Tr key={day}>
-                        <Td>{day}</Td>
-                        <Td>{time}</Td>
+                  UserState.value.data.schedule.map((entry, index) =>
+                    Object.entries(entry).map(([key, value]) => (
+                      <Tr key={index}>
+                        <Td>{key}</Td>
+                        <Td>{value}</Td>
                       </Tr>
-                    )
+                    ))
                   )}
               </Tbody>
             </Table>
@@ -199,7 +207,7 @@ export default function Page() {
           {/* Final Save Button */}
           {newAvailability.length > 0 && (
             <Button
-            isDisabled={!UserState.value.data.id}
+              isDisabled={!UserState.value.data.id}
               isLoading={loading}
               colorScheme="purple"
               size="lg"

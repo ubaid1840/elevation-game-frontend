@@ -65,7 +65,7 @@ export default function Page() {
         name: name,
         role: "user",
         refered_by: referral,
-        schedule: {},
+        schedule: [],
       })
       .then(() => {
         createUserWithEmailAndPassword(auth, email.toLocaleLowerCase(), password).catch((e) => {

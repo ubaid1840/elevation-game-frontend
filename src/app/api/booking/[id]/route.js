@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
       JOIN 
         users ON bookings.booked_for = users.id
       WHERE 
-        bookings.booked_by = $1
+        $1 = ANY(bookings.users)
       `,
       [id]
     );

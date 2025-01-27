@@ -13,6 +13,7 @@ import {
   Link,
   Center,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -26,7 +27,9 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [myBookings, setMyBookings] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [selectedTime, setSelectedTime] = useState("");
   const { state: UserState } = useContext(UserContext);
+  const toast = useToast();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -60,22 +63,31 @@ export default function Page() {
   };
 
   const handleBookSession = () => {
-    if (!date || !selectedJudge) {
-      console.error("Please select both a date and a judge.");
+    if (!date || !selectedJudge || !selectedTime) {
+      console.error("Please select date, time and a judge.");
       return;
     }
 
     axios
       .post("/api/booking", {
-        booked_by: UserState.value.data.id,
-        booked_for: selectedJudge,
+        booked_by: Number(UserState.value.data.id),
+        booked_for: Number(selectedJudge),
         booking_date: moment(date).valueOf(),
+        booking_time: selectedTime,
       })
       .then((response) => {
         fetchData(UserState.value.data?.id);
       })
-      .catch((error) => {
-        console.error("Error booking session:", error);
+      .catch((e) => {
+        console.error("Error booking session:", e);
+
+        toast({
+          title: "Error",
+          description: e.response?.data?.message || "Error",
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -83,7 +95,8 @@ export default function Page() {
   };
 
   const formatScheduleString = (schedule, name) => {
-    if (Object.keys(schedule).length === 0) return "";
+    if (schedule && schedule.length === 0) return "";
+
     const dayOrder = [
       "Monday",
       "Tuesday",
@@ -93,7 +106,9 @@ export default function Page() {
       "Saturday",
       "Sunday",
     ];
-    const sortedEntries = Object.entries(schedule).sort(
+
+    const scheduleEntries = schedule.flatMap((entry) => Object.entries(entry));
+    const sortedEntries = scheduleEntries.sort(
       ([dayA], [dayB]) => dayOrder.indexOf(dayA) - dayOrder.indexOf(dayB)
     );
     const formattedEntries = sortedEntries.map(([day, time], index, arr) => {
@@ -123,6 +138,19 @@ export default function Page() {
               Select a date and judge below to book a critique session.
             </Text>
 
+            <Select
+              placeholder="Select a judge"
+              value={selectedJudge}
+              onChange={handleJudgeChange}
+              mb={4}
+            >
+              {allJudges.map((judge) => (
+                <option key={judge.id} value={judge.id}>
+                  {judge.name}
+                </option>
+              ))}
+            </Select>
+
             <Box
               bg={"white"}
               border={"1px solid"}
@@ -147,16 +175,33 @@ export default function Page() {
             </Box>
 
             <Select
-              placeholder="Select a judge"
-              value={selectedJudge}
-              onChange={handleJudgeChange}
+              isDisabled={!selectedJudge || !date} // Disable dropdown if no judge or date is selected
+              placeholder="Select Time"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              variant="outline"
+              bg="white"
+              borderColor="gray.300"
               mb={4}
             >
-              {allJudges.map((judge) => (
-                <option key={judge.id} value={judge.id}>
-                  {judge.name}
-                </option>
-              ))}
+              {allJudges
+                .filter((judge) => judge.id === Number(selectedJudge))
+                .flatMap((judge) => {
+                  const filteredSchedule = judge.schedule?.filter((entry) => {
+                    const day = Object.keys(entry)[0];
+                    return day === moment(new Date(date)).format("dddd");
+                  });
+                  return filteredSchedule.map(
+                    (entry) => Object.values(entry)[0]
+                  );
+                })
+                .map((time, index) => {
+                  return (
+                    <option key={index} value={time}>
+                      {time}
+                    </option>
+                  );
+                })}
             </Select>
 
             <VStack align="start" spacing={4} mt={6}>
@@ -165,7 +210,8 @@ export default function Page() {
               </Text>
               {allJudges.map(
                 (item, index) =>
-                  Object.keys(item.schedule).length !== 0 && (
+                  item.schedule &&
+                  item.schedule.length !== 0 && (
                     <Text key={index} fontSize="sm">
                       - {formatScheduleString(item.schedule, item.name)}
                       <br />
@@ -207,11 +253,17 @@ export default function Page() {
                   >
                     <Text fontSize="md">
                       <strong>Date:</strong>{" "}
-                      {moment(new Date(Number(booking.booking_date))).format("MM/DD/YYYY")}
+                      {moment(new Date(Number(booking.booking_date))).format(
+                        "MM/DD/YYYY"
+                      )}
+                    </Text>
+                    <Text fontSize="md">
+                      <strong>Time:</strong> {booking?.booking_time}
                     </Text>
                     <Text fontSize="md">
                       <strong>Status:</strong> {booking.status}
                     </Text>
+
                     {booking.meeting_link ? (
                       <Link
                         href={booking.meeting_link}

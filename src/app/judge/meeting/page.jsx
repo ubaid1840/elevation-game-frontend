@@ -19,6 +19,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Stack,
   Text,
   useDisclosure,
@@ -53,27 +54,16 @@ export default function Page() {
     axios
       .get(`/api/booking/judge/${id}`)
       .then((response) => {
-        if (response.data.length > 0) {
-          const bookings = response.data;
-          const groupedData = bookings.reduce((acc, booking) => {
-            const formattedDate = moment(
-              new Date(Number(booking.booking_date))
-            ).format("MM/DD/YYYY");
-            let dateGroup = acc.find((group) => group.date === formattedDate);
-            if (!dateGroup) {
-              dateGroup = { date: formattedDate, data: [] };
-              acc.push(dateGroup);
-            }
-            dateGroup.data.push(booking);
-            return acc;
-          }, []);
-          setMyBookings(groupedData);
-        }
+        setMyBookings(response.data);
       })
       .finally(() => {
         setLoading(false);
       });
   }
+
+  useEffect(() => {
+    console.log(myBookings);
+  }, [myBookings]);
 
   async function handleStartSession(item) {
     setSelectedGroup(item);
@@ -83,112 +73,115 @@ export default function Page() {
 
   async function handleShareLinkToAll() {
     onClose();
-    const promises = selectedGroup.data.map((eachItem) => {
-      return axios
-        .put(`/api/booking/${eachItem.id}`, {
-          meeting_link: meetingLink,
-          status: "Started",
-        })
-        .catch((error) => {
-          console.error(
-            `Error updating booking for item ${eachItem.id}:`,
-            error
-          );
-        });
-    });
+    axios
+      .put(`/api/booking/${selectedGroup.id}`, {
+        meeting_link: meetingLink,
+        status: "Started",
+      })
+      .catch((error) => {
+        console.error(`Error updating booking for item ${eachItem.id}:`, error);
+      });
 
-    await Promise.all(promises);
     fetchData(UserState.value.data.id);
   }
 
-  async function handleEndSession(group) {
-    const promises = group.data.map((eachItem) => {
-      return axios
-        .put(`/api/booking/${eachItem.id}`, {
-          meeting_link: "",
-          status: "Ended",
-        })
-        .catch((error) => {
-          console.error(
-            `Error updating booking for item ${eachItem.id}:`,
-            error
-          );
-        });
-    });
+  useEffect(() => {
+    console.log(selectedGroup);
+  }, [selectedGroup]);
 
-    await Promise.all(promises);
+  async function handleEndSession(group) {
+    axios
+      .put(`/api/booking/${group.id}`, {
+        meeting_link: "",
+        status: "Ended",
+      })
+      .catch((error) => {
+        console.error(`Error updating booking for item ${eachItem.id}:`, error);
+      });
     fetchData(UserState.value.data.id);
   }
 
   return (
     <Sidebar LinkItems={GetLinkItems("judge")}>
       <Box p={8} bg="white">
-        <VStack spacing={4} align="stretch">
-          <Heading mb={2} color="purple.700">
-            My Bookings
-          </Heading>
-          {myBookings
-            .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
-            .map((group, index) => (
-              <Box
-                key={group.date}
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                borderColor="gray.300"
-              >
-                <VStack align={"flex-start"} gap={2}>
-                  <Text fontSize="lg" fontWeight="bold" color="teal.400">
-                    {moment(new Date(group.date)).format("MMM DD, yyyy")}
-                  </Text>
-                  <Text fontSize="sm">Status: {group.data[0].status}</Text>
-                  {group.data[0].status == "Started" && (
-                    <Text
-                      _hover={{ cursor: "pointer", textDecorationLine: true }}
-                      color="teal.500"
-                      onClick={() => {
-                        window.open(group.data[0].meeting_link, "_blank");
-                      }}
-                    >
-                      Join Meeting
+        {!loading ? (
+          <VStack spacing={4} align="stretch">
+            <Heading mb={2} color="purple.700">
+              My Bookings
+            </Heading>
+            {myBookings
+              .sort(
+                (a, b) =>
+                  moment(Number(b.booking_date)).valueOf() -
+                  moment(Number(a.booking_date)).valueOf()
+              )
+              .map((group, index) => (
+                <Box
+                  key={index}
+                  p={4}
+                  borderWidth="1px"
+                  borderRadius="md"
+                  borderColor="gray.300"
+                >
+                  <VStack align={"flex-start"} gap={2}>
+                    <Text fontSize="lg" fontWeight="bold" color="teal.400">
+                      {moment(Number(group.booking_date)).format(
+                        "MMM DD, yyyy"
+                      )}
                     </Text>
-                  )}
-                  {group.data[0].status !== "Ended" &&
-                    group.data[0].status !== "Started" &&
-                    moment(group.date).isSameOrAfter(
-                      moment().startOf("day")
-                    ) && (
-                      <Button
-                        isLoading={loading}
-                        colorScheme="purple"
-                        onClick={() => {
-                          // setLoading(true)
-                          handleStartSession(group);
-                        }}
-                      >
-                        Start Session
-                      </Button>
-                    )}
 
-                  {group.data[0].status === "Started" &&
-                    moment(group.date).isSameOrAfter(
-                      moment().startOf("day")
-                    ) && (
-                      <Button
-                        isLoading={loading}
-                        colorScheme="red"
+                    <Text fontSize="sm">Time: {group?.booking_time}</Text>
+                    <Text fontSize="sm">Status: {group?.status}</Text>
+                    {group?.status == "Started" && (
+                      <Text
+                        _hover={{ cursor: "pointer", textDecorationLine: true }}
+                        color="teal.500"
                         onClick={() => {
-                          setLoading(true);
-                          handleEndSession(group);
+                          window.open(group?.meeting_link, "_blank");
                         }}
                       >
-                        End Session
-                      </Button>
+                        Join Meeting
+                      </Text>
                     )}
-                </VStack>
-              </Box>
-            ))}
-        </VStack>
+                    {group?.status !== "Ended" &&
+                      group?.status !== "Started" &&
+                      moment(Number(group.booking_date)).isSameOrAfter(
+                        moment().startOf("day")
+                      ) && (
+                        <Button
+                          colorScheme="purple"
+                          onClick={() => {
+                            // setLoading(true)
+                            handleStartSession(group);
+                          }}
+                        >
+                          Start Session
+                        </Button>
+                      )}
+
+                    {group?.status === "Started" &&
+                      moment(Number(group.booking_date)).isSameOrAfter(
+                        moment().startOf("day")
+                      ) && (
+                        <Button
+                          colorScheme="red"
+                          onClick={() => {
+                            setLoading(true);
+                            handleEndSession(group);
+                          }}
+                        >
+                          End Session
+                        </Button>
+                      )}
+                  </VStack>
+                </Box>
+              ))}
+          </VStack>
+        ) : (
+          <Center style={{ width: "100%", height: "100vh" }}>
+            <Spinner />
+          </Center>
+        )}
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose}>

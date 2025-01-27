@@ -276,7 +276,7 @@ export default function Page({ params }) {
         console.log(e);
         toast({
           title: "Error",
-          description: e?.response?.data?.message,
+          description: e?.response?.data?.message || e?.message,
           status: "error",
           duration: 3000,
           isClosable: true,
