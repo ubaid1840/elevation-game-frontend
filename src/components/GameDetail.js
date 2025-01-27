@@ -67,7 +67,7 @@ export default function GameDetail({ params }) {
                 const total = Number(response.data?.game?.totalrounds || 1)
                 setProgress((current / total) * 100)
             }
-
+            console.log(response.data)
             setGameDetailData(response.data);
             setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
@@ -208,6 +208,14 @@ export default function GameDetail({ params }) {
                                 <Text key={index}>{judge}</Text>
                             ))}
                         </Stack>
+                    </GridItem>
+                    <GridItem>
+                        <Text fontWeight="bold" color="purple.600">
+                            Round Instructions:
+                        </Text>
+                        <Box whiteSpace="pre-wrap" mt={2}>
+                            {gameDetailData?.game?.roundinstruction?.[currentRound]}
+                        </Box>
                     </GridItem>
                 </Grid>
 

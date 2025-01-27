@@ -69,30 +69,45 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   const { id } = params;
-  const { winnerid } = await req.json();
+  const { winnerid, roundinstruction } = await req.json();
 
-  if (!winnerid || !id) {
+  if (!id) {
     return NextResponse.json({ message: 'Required information missing' }, { status: 404 });
   }
 
   try {
 
-    await pool.query(
-      `UPDATE users 
-         SET winner_earnings = winner_earnings + (SELECT prize_amount FROM games WHERE games.id = $1) 
-         WHERE users.id = $2`,
-      [id, winnerid]
-    );
+    if (winnerid) {
+      await pool.query(
+        `UPDATE users 
+           SET winner_earnings = winner_earnings + (SELECT prize_amount FROM games WHERE games.id = $1) 
+           WHERE users.id = $2`,
+        [id, winnerid]
+      );
 
-    const updatedGame = await pool.query(
-      `UPDATE games 
-       SET winner = $1 
-       WHERE id = $2 
-       RETURNING *`,
-      [winnerid, id]
-    );
+      const updatedGame = await pool.query(
+        `UPDATE games 
+         SET winner = $1 
+         WHERE id = $2 
+         RETURNING *`,
+        [winnerid, id]
+      );
+      return NextResponse.json(updatedGame.rows[0], { status: 200 });
+    }
 
-    return NextResponse.json(updatedGame.rows[0], { status: 200 });
+    if (roundinstruction) {
+      const updatedGame = await pool.query(
+        `UPDATE games 
+         SET roundinstruction = $1 
+         WHERE id = $2 
+         RETURNING *`,
+        [roundinstruction, id]
+      );
+      return NextResponse.json(updatedGame.rows[0], { status: 200 });
+    }
+
+    return NextResponse.json({ message: "Data saved" }, { status: 200 })
+
   } catch (error) {
     console.error('Error updating game:', error);
     return NextResponse.json({ message: 'Error updating game', error: error.message }, { status: 500 });

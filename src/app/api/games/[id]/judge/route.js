@@ -17,6 +17,7 @@ export async function GET(req, { params }) {
         g.prize_amount, 
         g.winner, 
         g.created_by, 
+        g.roundinstruction,
         g.additional_judges
        FROM games g 
        WHERE g.id = $1`,

@@ -71,6 +71,13 @@ export default function Page({ params }) {
     onOpen: onOpenNextRound,
     onClose: onCloseNextRound,
   } = useDisclosure();
+
+  const {
+    isOpen: isOpenEditInstruction,
+    onOpen: onOpenEditInstruction,
+    onClose: onCloseEditInstruction,
+  } = useDisclosure();
+
   const [selectedPitch, setSelectedPitch] = useState();
   const [loading, setLoading] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -78,6 +85,9 @@ export default function Page({ params }) {
   const [roundLoading, setRoundLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [finalScore, setFinalScore] = useState([]);
+  const [editInstruction, setEditInstruction] = useState("");
+  const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
+
   const toast = useToast();
 
   useEffect(() => {
@@ -102,9 +112,10 @@ export default function Page({ params }) {
           isClosable: true,
         });
         console.error("Error fetching data:", e);
-      }).finally(()=>{
-        setLoading(false);
       })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -162,7 +173,6 @@ export default function Page({ params }) {
         });
         setNewComment("");
         fetchData();
-        
       })
       .catch((e) => {
         setLoading(false);
@@ -254,7 +264,7 @@ export default function Page({ params }) {
           isClosable: true,
         });
         const temp = winnersList.filter(
-          (eachWinner) => eachWinner.user_id === selectedUserId
+          (eachWinner) => eachWinner.user_id === Number(selectedUserId)
         );
         addDoc(collection(db, "notifications"), {
           to: selectedUserId,
@@ -276,7 +286,7 @@ export default function Page({ params }) {
         console.log(e);
         toast({
           title: "Error",
-          description: e?.response?.data?.message || e?.message,
+          description: e?.response?.data?.message || "Notification error",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -288,6 +298,48 @@ export default function Page({ params }) {
     setRoundLoading();
     onCloseStart();
     handleMoveToNextRound();
+  }
+
+  function handleEditInstruction() {
+    onOpenEditInstruction();
+    setEditInstruction("");
+  }
+
+  function handleSaveInstruction() {
+    let temp = {};
+
+    if (gameData?.roundinstruction) {
+      temp = { ...gameData.roundinstruction };
+    }
+    temp[currentRound] = editInstruction;
+
+    axios
+      .put(`/api/games/${gameData.id}`, {
+        roundinstruction: temp,
+      })
+      .then(async () => {
+        toast({
+          title: "Success",
+          description: "Description updated",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        fetchData();
+      })
+      .catch((e) => {
+        console.log(e);
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message || "Notification error",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setEditDescriptionLoading(false);
+      });
   }
 
   return (
@@ -337,6 +389,21 @@ export default function Page({ params }) {
                 ? moment(gameData?.deadline).format("MM/DD/YYYY")
                 : "NA"}
             </Text>
+
+            <Text>
+              <strong>Round Instructions:</strong>{" "}
+            </Text>
+            <Box whiteSpace="pre-wrap">
+              {gameData?.roundinstruction?.[currentRound]}
+            </Box>
+            <Text></Text>
+            <Button
+              isLoading={editDescriptionLoading}
+              colorScheme="blue"
+              onClick={handleEditInstruction}
+            >
+              Edit Instruction
+            </Button>
           </VStack>
         </Box>
         {gameData && (
@@ -851,6 +918,48 @@ export default function Page({ params }) {
               }}
             >
               Next Round
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpenEditInstruction} onClose={onCloseEditInstruction}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Instructions</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <FormControl mt={6}>
+              <FormLabel htmlFor="new-comment" fontWeight="bold">
+                Instruction:
+              </FormLabel>
+              <Textarea
+                maxH={"400px"}
+                isDisabled={loading}
+                id="edit-description"
+                value={editInstruction}
+                onChange={(e) => setEditInstruction(e.target.value)}
+                placeholder="Type instruction..."
+              />
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"outline"} onClick={onCloseEditInstruction}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={!editInstruction}
+              colorScheme="blue"
+              ml={3}
+              onClick={() => {
+                setEditDescriptionLoading(true);
+                onCloseEditInstruction();
+                handleSaveInstruction();
+              }}
+            >
+              Save
             </Button>
           </ModalFooter>
         </ModalContent>
