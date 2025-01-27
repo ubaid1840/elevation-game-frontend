@@ -4,7 +4,7 @@ import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch,
 import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false }) => {
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false }) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
@@ -31,8 +31,8 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
-    const RenderRow = ({ value, user }) => {
-        const [rowLoading, setRowLoading] = useState(false)
+    const RenderRow = ({ value, user, onClickRow, rowClickable = false, index }) => {
+        const [rowLoading, setRowLoading] = useState(false) 
 
         return (
             <Td width={'350px'}>
@@ -45,7 +45,9 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                                 setRowLoading(true)
                                 onSwitchClick({ id: user.id, status: e.target.checked })
                             }} /> :
-                        value
+                        <Text cursor={index === 1 && rowClickable && 'pointer'} onClick={onClickRow}>
+                            {value}
+                        </Text>
                 }
             </Td>
         )
@@ -88,7 +90,13 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                                 <Tr key={user.id}>
                                     {Object.entries(user).map(([key, value], i) => (
                                         key && key === "id" ? null :
-                                            <RenderRow key={i} value={value} user={user} />
+                                            <RenderRow key={i} index={i} value={value} user={user} onClickRow={() => {
+                                                if (rowClickable) {
+                                                    onClickRow(user.id)
+                                                }
+                                            }
+                                            }
+                                                rowClickable={rowClickable} />
                                     ))}
 
                                     {button && (

@@ -112,6 +112,8 @@ const GameManagement = () => {
   const RenderTable = useCallback(() => {
     return (
       <TableData
+      rowClickable={true}
+      onClickRow={(i)=> router.push(`/admin/gamemanagement/${i}`)}
         data={filteredGames.map((item) => {
           return {
             id: item.id,
