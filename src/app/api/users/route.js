@@ -54,44 +54,59 @@ export async function POST(req) {
       } else {
         return NextResponse.json({ message: 'Invalid referral code' }, { status: 400 });
       }
-    } else {
-
+    }
+    else {
       await query('BEGIN');
-      const lastAssignedResult = await query(
-        'SELECT last_assigned_judge_id FROM referral_tracker LIMIT 1'
-      );
 
-      let lastAssignedJudgeId = lastAssignedResult.rows[0]?.last_assigned_judge_id || null;
+      try {
 
-      if (lastAssignedJudgeId) {
-        const nextJudge = await query(
-          'SELECT id, referral_code FROM users WHERE role = $1 AND id > $2 ORDER BY id ASC LIMIT 1',
-          ['judge', lastAssignedJudgeId]
+        const lastAssignedResult = await query(
+          'SELECT last_assigned_judge_id FROM referral_tracker LIMIT 1'
         );
 
-        if (nextJudge.rows.length > 0) {
-          referrer_id = nextJudge.rows[0].id;
+        let lastAssignedJudgeId = lastAssignedResult.rows.length > 0 ? lastAssignedResult.rows[0].last_assigned_judge_id : null;
+
+        if (lastAssignedJudgeId) {
+          const nextJudge = await query(
+            'SELECT id, referral_code FROM users WHERE role = $1 AND id > $2 ORDER BY id ASC LIMIT 1',
+            ['judge', lastAssignedJudgeId]
+          );
+
+          if (nextJudge.rows.length > 0) {
+            referrer_id = nextJudge.rows[0].id;
+          } else {
+            const firstJudge = await query(
+              'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
+              ['judge']
+            );
+            referrer_id = firstJudge.rows[0].id;
+          }
+
+          await query(
+            'UPDATE referral_tracker SET last_assigned_judge_id = $1',
+            [referrer_id]
+          );
+
         } else {
           const firstJudge = await query(
             'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
             ['judge']
           );
           referrer_id = firstJudge.rows[0].id;
+
+          await query(
+            'INSERT INTO referral_tracker (last_assigned_judge_id) VALUES ($1)',
+            [referrer_id]
+          );
         }
-      } else {
-        const firstJudge = await query(
-          'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
-          ['judge']
-        );
-        referrer_id = firstJudge.rows[0].id;
+
+        await query('COMMIT');
+
+      } catch (error) {
+        await query('ROLLBACK');
+        throw error;
       }
 
-      await query(
-        'UPDATE referral_tracker SET last_assigned_judge_id = $1',
-        [referrer_id]
-      );
-
-      await query('COMMIT');
     }
 
     const newUser = await query(
