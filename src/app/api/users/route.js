@@ -11,7 +11,7 @@ export async function GET(req) {
 
   try {
     const users = await query('SELECT id, name, email, role, last_active, schedule, active FROM users WHERE role = $1', [role]);
-    return NextResponse.json(users.rows );
+    return NextResponse.json(users.rows);
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json({ message: 'Error fetching users', error: error.message }, { status: 500 });
@@ -39,7 +39,7 @@ export async function POST(req) {
         );
         return NextResponse.json(updatedUser.rows[0], { status: 200 });
       } else {
-        return NextResponse.json({ message: 'Error creating user'}, { status: 500 });
+        return NextResponse.json({ message: 'Error creating user' }, { status: 500 });
       }
     }
 
@@ -54,6 +54,44 @@ export async function POST(req) {
       } else {
         return NextResponse.json({ message: 'Invalid referral code' }, { status: 400 });
       }
+    } else {
+
+      await query('BEGIN');
+      const lastAssignedResult = await query(
+        'SELECT last_assigned_judge_id FROM referral_tracker LIMIT 1'
+      );
+
+      let lastAssignedJudgeId = lastAssignedResult.rows[0]?.last_assigned_judge_id || null;
+
+      if (lastAssignedJudgeId) {
+        const nextJudge = await query(
+          'SELECT id, referral_code FROM users WHERE role = $1 AND id > $2 ORDER BY id ASC LIMIT 1',
+          ['judge', lastAssignedJudgeId]
+        );
+
+        if (nextJudge.rows.length > 0) {
+          referrer_id = nextJudge.rows[0].id;
+        } else {
+          const firstJudge = await query(
+            'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
+            ['judge']
+          );
+          referrer_id = firstJudge.rows[0].id;
+        }
+      } else {
+        const firstJudge = await query(
+          'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
+          ['judge']
+        );
+        referrer_id = firstJudge.rows[0].id;
+      }
+
+      await query(
+        'UPDATE referral_tracker SET last_assigned_judge_id = $1',
+        [referrer_id]
+      );
+
+      await query('COMMIT');
     }
 
     const newUser = await query(
