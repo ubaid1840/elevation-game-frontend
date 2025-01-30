@@ -74,3 +74,7 @@ html {
 .p-datepicker {
   z-index: 9999 !important; 
 }
+
+.chakra-modal__content-container{
+  z-index: 9999 !important;
+}

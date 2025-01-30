@@ -56,18 +56,34 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
     const [haveNotifications, setHaveNotifications] = useState(0)
 
     useEffect(() => {
-        checkSession().then((val) => {
-            setUser(val.user)
-        })
+        let unsubscribe;
 
-    }, [])
+        checkSession()
+            .then((res) => {
+                if (res.error) {
+                    console.log(res.error);
+                }
+                if (typeof res === "function") {
+                    unsubscribe = res;
+                }
+                if (res.user) {
+                    setUser(res.user)
+                }
+            })
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (UserState.value.data?.email) {
             const searchEmail = UserState.value.data?.email
             const searchId = UserState.value.data?.id
             let q = null
-            if(UserState.value.data?.role === 'admin'){
+            if (UserState.value.data?.role === 'admin') {
                 q = query(
                     collection(db, "notifications"),
                     and(where("to", "==", searchEmail), where("status", "==", "pending"))
@@ -78,7 +94,7 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
                     and(where("to", "==", searchId), where("status", "==", "pending"))
                 );
             }
-            
+
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 let list = []
                 snapshot.forEach((doc) => {
@@ -117,9 +133,10 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
                 returnFocusOnClose={false}
                 onOverlayClick={onClose}
                 size="full"
+                zIndex={9999}
             >
                 <DrawerContent>
-                    <SidebarContent  id={id} haveNotifications={haveNotifications} settingsLink={settingsLink} LinkItems={LinkItems} display="flex" onClose={onClose} />
+                    <SidebarContent id={id} haveNotifications={haveNotifications} settingsLink={settingsLink} LinkItems={LinkItems} display="flex" onClose={onClose} />
                 </DrawerContent>
             </Drawer>
             <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
@@ -135,7 +152,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
 
     const pathname = usePathname()
-    const { state: UserState } = useContext(UserContext)
+    const { state: UserState, setUser } = useContext(UserContext)
 
     return (
         <Box
@@ -144,10 +161,10 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
             minHeight={"full"}
             flexDirection={"column"}
             justifyContent={"space-between"}
-            bg={theme.color.background}
-            {...rest}
+            bg={theme.color.background} 
             borderRightWidth={1}
             borderRightColor="#EAECF0"
+            {...rest}
         >
             <div>
                 <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
@@ -161,7 +178,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                 {LinkItems.map((link, index) =>
                 (
                     <NavItem
-                    onClose={onClose}
+                        onClose={onClose}
                         isActive={pathname.includes(link.path)}
                         key={link.name}
                         icon={link.icon}
@@ -189,7 +206,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                         {UserState.value.data?.role != 'admin' &&
                             <NavItem
-                            onClose={onClose}
+                                onClose={onClose}
                                 isActive={pathname.includes('profile')}
                                 icon={CgProfile}
                                 path={`/${UserState.value.data?.role}/profile`}
@@ -198,7 +215,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                             </NavItem>
                         }
                         <NavItem
-                         onClose={onClose}
+                            onClose={onClose}
                             haveNotifications={haveNotifications}
                             isActive={pathname.includes('notifications')}
                             icon={MdNotificationsActive}
@@ -209,7 +226,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                         {UserState.value.data?.role == 'admin'
                             ?
                             <NavItem
-                            onClose={onClose}
+                                onClose={onClose}
                                 isActive={pathname.includes('settings')}
                                 icon={MdSettings}
                                 path={`/admin/settings`}
@@ -219,7 +236,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                             :
                             <NavItem
-                            onClose={onClose}
+                                onClose={onClose}
                                 isActive={pathname.includes('subscription')}
                                 icon={MdAttachMoney}
                                 path={`/${UserState.value.data?.role}/subscription`}
@@ -229,7 +246,10 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                         }
 
                         <HStack width={'100%'} align={'center'} justify={'space-between'} p={5}>
-                            <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={() => signOut(auth)} />
+                            <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={() => {
+                                setUser(null)
+                                signOut(auth)
+                            }} />
                             <Text>{UserState.value.data?.name}</Text>
                         </HStack>
                     </>}
@@ -244,7 +264,7 @@ const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, .
 
     return (
         <Link
-        onClick={onClose}
+            onClick={onClose}
             href={`${path}`}
             style={{ textDecoration: "none", fontSize: "14px", fontWeight: "300", height: '40px' }}
             _focus={{ boxShadow: "none" }}

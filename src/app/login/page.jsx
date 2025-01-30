@@ -39,17 +39,26 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      checkSession().then((res) => {
+    let unsubscribe;
+
+    checkSession()
+      .then((res) => {
         if (res.error) {
           console.log(res.error);
         }
+        if (typeof res === "function") {
+          unsubscribe = res; 
+        }
+      })
+      .finally(() => {
         setLoading(false);
       });
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();  // Cleanup on unmount
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -58,18 +67,21 @@ export default function Page() {
   }, [email, password]);
 
   const handleLogin = async () => {
-    axios.get(`/api/userdetail/${email.toLocaleLowerCase()}`).then((response) => {
-      handleAuthLogin(response.data);
-    }).catch((e)=>{
-      toast({
-        title: "Error",
-        description: e?.response?.data?.message,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
+    axios
+      .get(`/api/userdetail/${email.toLocaleLowerCase()}`)
+      .then((response) => {
+        handleAuthLogin(response.data);
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        setLoading(false);
       });
-      setLoading(false);
-    })
   };
 
   async function handleAuthLogin(data) {

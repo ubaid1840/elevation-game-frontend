@@ -18,12 +18,37 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/config/firebase";
+import useCheckSession from "@/lib/checkSession";
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
   const toast = useToast();
+  const checkSession = useCheckSession();
+
+  useEffect(() => {
+    let unsubscribe;
+
+    checkSession()
+      .then((res) => {
+        if (res.error) {
+          console.log(res.error);
+        }
+        if (typeof res === "function") {
+          unsubscribe = res; 
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();  // Cleanup on unmount
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setIsEmailValid(email.includes("@") && email.includes("."));

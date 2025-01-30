@@ -164,6 +164,7 @@ export default function Page() {
               mb={4}
             >
               <Calendar
+                minDate={new Date()}
                 id="session-booking"
                 value={date}
                 onChange={(e) => setDate(e.value)}
@@ -175,7 +176,7 @@ export default function Page() {
             </Box>
 
             <Select
-              isDisabled={!selectedJudge || !date} // Disable dropdown if no judge or date is selected
+              isDisabled={!selectedJudge || !date}
               placeholder="Select Time"
               value={selectedTime}
               onChange={(e) => setSelectedTime(e.target.value)}
@@ -191,11 +192,11 @@ export default function Page() {
                     const day = Object.keys(entry)[0];
                     return day === moment(new Date(date)).format("dddd");
                   });
-                  return filteredSchedule.map(
+                  return filteredSchedule?.map(
                     (entry) => Object.values(entry)[0]
                   );
                 })
-                .map((time, index) => {
+                ?.map((time, index) => {
                   return (
                     <option key={index} value={time}>
                       {time}

@@ -40,17 +40,26 @@ export default function Page() {
   const toast = useToast()  
 
   useEffect(() => {
-    try {
-      checkSession().then((res) => {
+    let unsubscribe;
+
+    checkSession()
+      .then((res) => {
         if (res.error) {
           console.log(res.error);
         }
+        if (typeof res === "function") {
+          unsubscribe = res; 
+        }
+      })
+      .finally(() => {
         setLoading(false);
       });
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();  // Cleanup on unmount
+      }
+    };
   }, []);
 
   useEffect(() => {

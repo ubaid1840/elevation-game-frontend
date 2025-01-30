@@ -7,7 +7,7 @@ export const UserContext = createContext()
 
 const UserContextProvider = (props) => {
 
-    const [state, dispatch] = useReducer(myUserReducer, { value: { data: [] }})
+    const [state, dispatch] = useReducer(myUserReducer, { value: { data: null }})
 
     const setUser = (data) => {
         dispatch({ type: SET_User, payload: { data: data } })

@@ -28,11 +28,25 @@ export default function Page() {
   }, [UserState.value.data]);
 
   useEffect(() => {
-    checkSession().then((val) => {
-      if (val.user) {
-        setUser(val.user);
+    let unsubscribe;
+
+    checkSession().then((res) => {
+      if (res.error) {
+        console.log(res.error);
       }
-    });
+      if (typeof res === "function") {
+        unsubscribe = res;
+      }
+      if (res.user) {
+        setUser(res.user);
+      }
+    })
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const fetchPaymentVerification = useCallback(

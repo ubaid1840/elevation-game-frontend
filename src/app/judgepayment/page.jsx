@@ -13,18 +13,26 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 export default function Page() {
   const checkSession = useCheckSession();
   const { state: UserState, setUser } = useContext(UserContext);
-
   useEffect(() => {
-    try {
-      checkSession().then((res) => {
-        if (res.error) {
-          console.log(res.error);
-        }
-        if (res.user) {
-          setUser(res.user);
-        }
-      });
-    } catch (error) {}
+    let unsubscribe;
+
+    checkSession().then((res) => {
+      if (res.error) {
+        console.log(res.error);
+      }
+      if (typeof res === "function") {
+        unsubscribe = res;
+      }
+      if (res.user) {
+        setUser(res.user);
+      }
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const RenderCheckout = useCallback(() => {

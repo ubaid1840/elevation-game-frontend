@@ -830,6 +830,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
+               minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {
@@ -884,6 +885,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
+               minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {

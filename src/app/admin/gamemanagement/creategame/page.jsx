@@ -274,6 +274,7 @@ export default function Page() {
             px={4}
           >
             <Calendar
+             minDate={new Date()}
               id="deadline"
               value={deadline}
               onChange={(e) => setDeadline(e.value)}

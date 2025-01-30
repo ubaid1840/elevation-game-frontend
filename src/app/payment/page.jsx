@@ -34,21 +34,27 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      checkSession().then((res) => {
-        console.log(res)
-        if (res.error) {
-          console.log(res.error);
-        }
-        if (res.user) {
-          setUser(res.user);
-        }
-        setLoading(false);
-      });
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+    let unsubscribe;
+
+    checkSession().then((res) => {
+      if (res.error) {
+        console.log(res.error);
+      }
+      if (typeof res === "function") {
+        unsubscribe = res;
+      }
+      if (res.user) {
+        setUser(res.user);
+      }
+    }).finally(()=>{
+      setLoading(false)
+    })
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -72,7 +78,7 @@ export default function Page() {
   async function handlePackageSelect(pkg) {
     setSelectedPlan(pkg.label);
     setAmount(pkg.price);
-   }
+  }
 
   const RenderCheckout = useCallback(() => {
     return (
@@ -96,7 +102,7 @@ export default function Page() {
       </Box>
     );
   }, [amount]);
-  
+
   return (
     <Box p={8} maxWidth="1200px" mx="auto">
       {loading ? (
