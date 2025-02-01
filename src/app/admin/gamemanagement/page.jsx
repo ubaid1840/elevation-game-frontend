@@ -20,6 +20,8 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -37,6 +39,7 @@ const GameManagement = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [filter, setFilter] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
@@ -45,7 +48,9 @@ const GameManagement = () => {
   async function fetchData() {
     axios.get("/api/games/admin").then((response) => {
       setGames(response.data);
-    });
+    }).finally(()=>{
+      setLoading(false)
+    })
   }
 
   const handleAddOrEditGame = () => {
@@ -97,9 +102,15 @@ const GameManagement = () => {
   };
 
   async function handleRemoveGame(val) {
-    axios.delete(`/api/games/${val}`).then(() => {
-      fetchData();
-    });
+    // console.log(val)
+    axios
+      .delete(`/api/games/${val}`)
+      .then(() => {
+        fetchData();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   function handleShareGame(id) {
@@ -112,8 +123,8 @@ const GameManagement = () => {
   const RenderTable = useCallback(() => {
     return (
       <TableData
-      rowClickable={true}
-      onClickRow={(i)=> router.push(`/admin/gamemanagement/${i}`)}
+        rowClickable={true}
+        onClickRow={(i) => router.push(`/admin/gamemanagement/${i}`)}
         data={filteredGames.map((item) => {
           return {
             id: item.id,
@@ -132,7 +143,10 @@ const GameManagement = () => {
         ]}
         button={true}
         buttonText={"Remove"}
-        onButtonClick={(val) => handleRemoveGame(val)}
+        onButtonClick={(val) => {
+          setLoading(true);
+          handleRemoveGame(val);
+        }}
         button2={true}
         buttonText2={"Share"}
         onButtonClick2={(val) => handleShareGame(val)}
@@ -142,62 +156,65 @@ const GameManagement = () => {
 
   return (
     <Sidebar LinkItems={GetLinkItems("admin")}>
-      <Box p={8} bg="white">
-        <Heading mb={6} color="purple.700">
-          Game Management
-        </Heading>
+      {loading ? (
+        <Center h={"100vh"}>
+          <Spinner />
+        </Center>
+      ) : (
+        <Box p={8} bg="white">
+          <Heading mb={6} color="purple.700">
+            Game Management
+          </Heading>
 
-        <Input
-          placeholder="Search by name"
-          value={filter}
-          onChange={handleFilterChange}
-        />
+          <Input
+            placeholder="Search by name"
+            value={filter}
+            onChange={handleFilterChange}
+          />
 
-        <Button
-          colorScheme="purple"
-          my={4}
-          onClick={() => router.push(`${pathname}/creategame`)}
-        >
-          Add New Game
-        </Button>
+          <Button
+            colorScheme="purple"
+            my={4}
+            onClick={() => router.push(`${pathname}/creategame`)}
+          >
+            Add New Game
+          </Button>
 
-        {/* Game Table */}
-
-        <RenderTable />
-        {/* Modal for Add/Edit Game */}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>
-              {editingGame ? "Edit Game" : "Add New Game"}
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Stack spacing={4}>
-                <Input
-                  placeholder="Game Name"
-                  value={gameName}
-                  onChange={(e) => setGameName(e.target.value)}
-                />
-                <Input
-                  type="number"
-                  placeholder="Total Spots"
-                  value={spots}
-                  onChange={(e) => setSpots(e.target.value)}
-                />
-              </Stack>
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme="blue" onClick={handleAddOrEditGame}>
-                {editingGame ? "Update Game" : "Add Game"}
-              </Button>
-              <Button ml={3} onClick={onClose}>
-                Cancel
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </Box>
+          <RenderTable />
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>
+                {editingGame ? "Edit Game" : "Add New Game"}
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Stack spacing={4}>
+                  <Input
+                    placeholder="Game Name"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Total Spots"
+                    value={spots}
+                    onChange={(e) => setSpots(e.target.value)}
+                  />
+                </Stack>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="blue" onClick={handleAddOrEditGame}>
+                  {editingGame ? "Update Game" : "Add Game"}
+                </Button>
+                <Button ml={3} onClick={onClose}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </Box>
+      )}
     </Sidebar>
   );
 };

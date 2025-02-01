@@ -123,10 +123,7 @@ export async function DELETE(req, { params }) {
       DELETE FROM comments
       WHERE pitch_id IN (
         SELECT id FROM pitches
-        WHERE enrollment_id IN (
-          SELECT id FROM game_enrollments
           WHERE game_id = $1
-        )
       )
       `,
       [id]
@@ -135,10 +132,8 @@ export async function DELETE(req, { params }) {
     await pool.query(
       `
       DELETE FROM pitches
-      WHERE enrollment_id IN (
-        SELECT id FROM game_enrollments
-        WHERE game_id = $1
-      )
+      WHERE game_id = $1
+      
       `,
       [id]
     );
@@ -146,6 +141,14 @@ export async function DELETE(req, { params }) {
     await pool.query(
       `
       DELETE FROM game_enrollments
+      WHERE game_id = $1
+      `,
+      [id]
+    );
+
+    await pool.query(
+      `
+      DELETE FROM testimonials
       WHERE game_id = $1
       `,
       [id]
