@@ -44,7 +44,7 @@ export default function Page() {
 
   async function fetchData(id) {
     // axios
-    //   .get(`/api/users/${UserState.value.data.id}/games`)
+    //   .get(`/api/users/${UserState.value.data?.id}/games`)
     //   .then((response) => {
     //     console.log(response.data)
     //     setMyGames(response.data);

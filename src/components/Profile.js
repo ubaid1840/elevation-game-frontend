@@ -115,7 +115,7 @@ export default function ProfilePage({ page }) {
     const handleNamePhoneUpdate = async () => {
         handleEditModalClose();
         axios
-            .put(`/api/users/${UserState.value.data.id}`, {
+            .put(`/api/users/${UserState.value.data?.id}`, {
                 name: formData.name,
                 phone: formData.phone,
             })

@@ -46,7 +46,7 @@ export default function Page() {
 
   useEffect(() => {
     if (UserState.value.data?.id) {
-      fetchData(UserState.value.data.id);
+      fetchData(UserState.value.data?.id);
     }
   }, [UserState.value.data]);
 
@@ -82,7 +82,7 @@ export default function Page() {
         console.error(`Error updating booking for item ${eachItem.id}:`, error);
       });
 
-    fetchData(UserState.value.data.id);
+    fetchData(UserState.value.data?.id);
   }
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function Page() {
       .catch((error) => {
         console.error(`Error updating booking for item ${eachItem.id}:`, error);
       });
-    fetchData(UserState.value.data.id);
+    fetchData(UserState.value.data?.id);
   }
 
   return (

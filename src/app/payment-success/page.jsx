@@ -78,7 +78,7 @@ export default function Page() {
     }
 
     axios
-      .post(`/api/users/${UserState.value.data.id}/payment`, {
+      .post(`/api/users/${UserState.value.data?.id}/payment`, {
         subscription: plan,
         expiry: currentDate,
         paymentIntentId: paymentIntentId,
@@ -89,7 +89,7 @@ export default function Page() {
           to: "admin@gmail.com",
           title: "Payment",
           message: `${
-            UserState.value.data?.name || UserState.value.data.email
+            UserState.value.data?.name || UserState.value.data?.email
           } made payment against ${plan} subscription`,
           timestamp: moment().valueOf(),
           status : "pending"
@@ -100,7 +100,7 @@ export default function Page() {
         //   setMessage("Payment Verified Updating Record");
         //   axios
         //     .post("/api/updatetier", {
-        //       user_id: UserState.value.data.id,
+        //       user_id: UserState.value.data?.id,
         //       plan: plan,
         //       intent_id : UserState.value.data?.package_intent_id || null
         //     })

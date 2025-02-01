@@ -58,7 +58,7 @@ export default function GameDetail({ params }) {
     async function fetchData() {
         try {
             const response = await axios.get(
-                `/api/users/${UserState.value.data.id}/games/${params.id}`
+                `/api/users/${UserState.value.data?.id}/games/${params.id}`
             );
             if (response.data?.game?.completed) {
                 setProgress(100)
@@ -96,7 +96,7 @@ export default function GameDetail({ params }) {
             .post("/api/comments", {
                 pitch_id: pitchid,
                 comment_text: newComment,
-                user_id: UserState.value.data.id,
+                user_id: UserState.value.data?.id,
             })
             .then(async () => {
                 let notify = []
@@ -109,7 +109,7 @@ export default function GameDetail({ params }) {
                         return await addDoc(collection(db, "notifications"), {
                             to: eachJudge,
                             title: "Comment",
-                            message: `${UserState.value.data?.name || UserState.value.data.email} commented on pitch in ${gameDetailData.game.title}`,
+                            message: `${UserState.value.data?.name || UserState.value.data?.email} commented on pitch in ${gameDetailData.game.title}`,
                             timestamp: moment().valueOf(),
                             status: "pending"
                         });
@@ -130,6 +130,7 @@ export default function GameDetail({ params }) {
                 fetchData()
             })
             .catch((e) => {
+                console.log(e)
                 setLoading(false);
             })
             .finally(() => {
@@ -317,7 +318,7 @@ export default function GameDetail({ params }) {
                                             {pitch.comments?.map((comment, i) => (
                                                 <Box key={i} borderWidth="1px" borderRadius="md" p={3}>
                                                     <Text fontWeight="bold">
-                                                        {comment.user_id == UserState.value.data.id
+                                                        {comment.user_id == UserState.value.data?.id
                                                             ? UserState.value.data.name
                                                             : "Judge"}
                                                         :
@@ -343,7 +344,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) && (
+                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) && (
                             <Button
                                 w={"full"}
                                 as={Link}

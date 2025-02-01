@@ -66,7 +66,7 @@ export default function SubscriptionPage({ page }) {
 
     async function handlePromoteToJudge() {
         setSelectedPlan("")
-        axios.get(`/api/users/${UserState.value.data.id}/promote`).then((response) => {
+        axios.get(`/api/users/${UserState.value.data?.id}/promote`).then((response) => {
             if (response.data.error) {
                 toast({
                     duration: 3000,
@@ -139,7 +139,7 @@ export default function SubscriptionPage({ page }) {
                                 amount: convertToSubcurrency(annualFee),
                                 currency: "usd"
                             }}>
-                                <CheckoutPage amount={annualFee} userID={UserState.value.data.id} plan={"Promotion"} />
+                                <CheckoutPage amount={annualFee} userID={UserState.value.data?.id} plan={"Promotion"} />
                             </Elements>
                         )}
                     </Box>
@@ -151,7 +151,7 @@ export default function SubscriptionPage({ page }) {
                                 amount: convertToSubcurrency(amount),
                                 currency: "usd"
                             }}>
-                                <CheckoutPage amount={amount} userID={UserState.value.data.id} plan={selectedPlan} />
+                                <CheckoutPage amount={amount} userID={UserState.value.data?.id} plan={selectedPlan} />
                             </Elements>
                         )}
                     </Box>

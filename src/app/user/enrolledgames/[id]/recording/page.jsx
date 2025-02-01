@@ -56,7 +56,7 @@ export default function GameEnrollmentPage({ params }) {
   const handleSubmit = () => {
     axios
       .post("/api/pitches/create", {
-        user_id: UserState.value.data.id,
+        user_id: UserState.value.data?.id,
         game_id: params.id,
         round: game.currentround,
         video_link: videoLink,

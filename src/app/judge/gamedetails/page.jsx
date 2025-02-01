@@ -35,7 +35,7 @@ export default function Page() {
 
   useEffect(() => {
     if (UserState.value.data?.id) {
-      debouncedFetchData(UserState.value.data.id);
+      debouncedFetchData(UserState.value.data?.id);
     }
   }, [UserState.value.data]);
 

@@ -161,7 +161,7 @@ export default function Page({ params }) {
       .post("/api/comments", {
         pitch_id: pitchid,
         comment_text: newComment,
-        user_id: UserState.value.data.id,
+        user_id: UserState.value.data?.id,
       })
       .then(async () => {
         addDoc(collection(db, "notifications"), {
@@ -195,7 +195,7 @@ export default function Page({ params }) {
     axios
       .put(`/api/pitches/${pitch_id}`, {
         score: Number(newScore),
-        by: UserState.value.data.id,
+        by: UserState.value.data?.id,
       })
       .then(async (response) => {
         addDoc(collection(db, "notifications"), {
@@ -487,12 +487,12 @@ export default function Page({ params }) {
                                     <VStack>
                                       {pitch.scores &&
                                         pitch.scores[
-                                          UserState.value.data.id
+                                          UserState.value.data?.id
                                         ] !== undefined && (
                                           <Text>
                                             {
                                               pitch.scores[
-                                                UserState.value.data.id
+                                                UserState.value.data?.id
                                               ]
                                             }
                                           </Text>
@@ -516,7 +516,7 @@ export default function Page({ params }) {
                                 <Spacer />
                                 <VStack align={"flex-end"}>
                                   {!pitch.scores ||
-                                    (pitch.scores[UserState.value.data.id] ==
+                                    (pitch.scores[UserState.value.data?.id] ==
                                       undefined && (
                                       <Button
                                         size={"sm"}

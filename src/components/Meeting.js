@@ -69,8 +69,8 @@ export default function Meeting({ page, onEndMeeting, group }) {
         }
 
         const initMeeting = async (fullURL) => {
-            const userID = UserState.value.data.email;
-            const userName = UserState.value.data.email;
+            const userID = UserState.value.data?.email;
+            const userName = UserState.value.data?.email;
 
             const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
                 process.env.NEXT_PUBLIC_ZEGO_APPID,

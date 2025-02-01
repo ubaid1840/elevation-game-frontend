@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -87,6 +87,7 @@ export default function Page({ params }) {
   const [finalScore, setFinalScore] = useState([]);
   const [editInstruction, setEditInstruction] = useState("");
   const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
+  const [winnerLoading, setWinnerLoading] = useState(false);
 
   const toast = useToast();
 
@@ -118,6 +119,33 @@ export default function Page({ params }) {
       });
   }
 
+  // useEffect(() => {
+  //   if (gameData) {
+  //     const qualifiedPitchesWithAverageScore = gameData.enrollments
+  //       .flatMap((enrollment) =>
+  //         enrollment.pitches
+  //           .filter((pitch) => pitch.pitch_status === "Qualify")
+  //           .map((pitch) => {
+  //             const scores = Object.values(pitch.scores);
+  //             const totalScore = scores.reduce((acc, score) => acc + score, 0);
+  //             const averageScore =
+  //               scores.length > 0 ? totalScore / scores.length : 0;
+
+  //             return {
+  //               ...pitch,
+  //               user_id: enrollment.user_id,
+  //               averageScore,
+  //               totalScore,
+  //             };
+  //           })
+  //       )
+  //       .sort((a, b) => a.round - b.round);
+
+  //     setFinalScore(qualifiedPitchesWithAverageScore);
+  //   }
+
+  // }, [gameData]);
+
   useEffect(() => {
     if (gameData) {
       const qualifiedPitchesWithAverageScore = gameData.enrollments
@@ -144,6 +172,33 @@ export default function Page({ params }) {
     }
   }, [gameData]);
 
+  const playersWithCumulativeScores = useMemo(() => {
+    return winnersList.map((eachWinner) => {
+      const playerScores = finalScore.filter(
+        (eachScore) => eachWinner?.user_id === eachScore?.user_id
+      );
+
+      const cumulativeTotal = playerScores.reduce(
+        (acc, curr) => acc + curr.totalScore,
+        0
+      );
+      const cumulativeAverage =
+        playerScores.length > 0 ? cumulativeTotal / playerScores.length : 0;
+
+      return {
+        ...eachWinner,
+        cumulativeTotal,
+        cumulativeAverage,
+      };
+    });
+  }, [finalScore, winnersList]);
+
+  const sortedPlayers = useMemo(() => {
+    return playersWithCumulativeScores.sort(
+      (a, b) => b.cumulativeTotal - a.cumulativeTotal
+    );
+  }, [playersWithCumulativeScores]);
+
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
       setCurrentRound(currentRound + 1);
@@ -161,7 +216,7 @@ export default function Page({ params }) {
       .post("/api/comments", {
         pitch_id: pitchid,
         comment_text: newComment,
-        user_id: UserState.value.data.id,
+        user_id: UserState.value.data?.id,
       })
       .then(async () => {
         addDoc(collection(db, "notifications"), {
@@ -172,9 +227,10 @@ export default function Page({ params }) {
           status: "pending",
         });
         setNewComment("");
-        fetchData();
+        await fetchData();
       })
       .catch((e) => {
+        console.log(e);
         setLoading(false);
       })
       .finally(() => {
@@ -195,7 +251,7 @@ export default function Page({ params }) {
     axios
       .put(`/api/pitches/${pitch_id}`, {
         score: Number(newScore),
-        by: UserState.value.data.id,
+        by: UserState.value.data?.id,
       })
       .then(async (response) => {
         addDoc(collection(db, "notifications"), {
@@ -206,7 +262,7 @@ export default function Page({ params }) {
           status: "pending",
         });
         setNewScore("");
-        fetchData();
+        await fetchData();
       })
       .catch((e) => {
         setLoading(false);
@@ -250,7 +306,7 @@ export default function Page({ params }) {
   }
 
   async function handleWinner() {
-    onCloseWinner();
+    setWinnerLoading(true);
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
@@ -291,6 +347,10 @@ export default function Page({ params }) {
           duration: 3000,
           isClosable: true,
         });
+      })
+      .finally(() => {
+        setWinnerLoading(false);
+        onCloseWinner();
       });
   }
 
@@ -487,12 +547,12 @@ export default function Page({ params }) {
                                     <VStack>
                                       {pitch.scores &&
                                         pitch.scores[
-                                          UserState.value.data.id
+                                          UserState.value.data?.id
                                         ] !== undefined && (
                                           <Text>
                                             {
                                               pitch.scores[
-                                                UserState.value.data.id
+                                                UserState.value.data?.id
                                               ]
                                             }
                                           </Text>
@@ -516,7 +576,7 @@ export default function Page({ params }) {
                                 <Spacer />
                                 <VStack align={"flex-end"}>
                                   {!pitch.scores ||
-                                    (pitch.scores[UserState.value.data.id] ==
+                                    (pitch.scores[UserState.value.data?.id] ==
                                       undefined && (
                                       <Button
                                         size={"sm"}
@@ -533,34 +593,36 @@ export default function Page({ params }) {
                                         Add Score
                                       </Button>
                                     ))}
-                                  {!pitch.pitch_status && (
-                                    <>
-                                      <Button
-                                        size={"sm"}
-                                        colorScheme="teal"
-                                        onClick={() => {
-                                          handlePitchStatus(
-                                            "Qualify",
-                                            pitch.pitch_id
-                                          );
-                                        }}
-                                      >
-                                        Qualify
-                                      </Button>
-                                      <Button
-                                        size={"sm"}
-                                        colorScheme="red"
-                                        onClick={() => {
-                                          handlePitchStatus(
-                                            "Disqualify",
-                                            pitch.pitch_id
-                                          );
-                                        }}
-                                      >
-                                        Disqualify
-                                      </Button>
-                                    </>
-                                  )}
+                                  {!pitch.pitch_status &&
+                                    UserState.value.data?.id ===
+                                      Number(gameData?.created_by || 0) && (
+                                      <>
+                                        <Button
+                                          size={"sm"}
+                                          colorScheme="teal"
+                                          onClick={() => {
+                                            handlePitchStatus(
+                                              "Qualify",
+                                              pitch.pitch_id
+                                            );
+                                          }}
+                                        >
+                                          Qualify
+                                        </Button>
+                                        <Button
+                                          size={"sm"}
+                                          colorScheme="red"
+                                          onClick={() => {
+                                            handlePitchStatus(
+                                              "Disqualify",
+                                              pitch.pitch_id
+                                            );
+                                          }}
+                                        >
+                                          Disqualify
+                                        </Button>
+                                      </>
+                                    )}
                                 </VStack>
                               </HStack>
 
@@ -611,7 +673,10 @@ export default function Page({ params }) {
           </>
         )}
       </Box>
-      {gameData?.totalrounds &&
+      {gameData &&
+        gameData.currentround !== gameData.totalrounds &&
+        UserState.value.data?.id === Number(gameData?.created_by || 0) &&
+        gameData?.totalrounds &&
         gameData.currentround === currentRound &&
         !gameData.winner && (
           <Button
@@ -684,7 +749,7 @@ export default function Page({ params }) {
                 setLoading(true);
                 handleSubmitComment(
                   selectedPitch.pitch.pitch_id,
-                  selectedPitch.pitch_user_id
+                  selectedPitch.pitch.pitch_user_id
                 );
               }}
             >
@@ -771,9 +836,9 @@ export default function Page({ params }) {
                 w="100%"
               >
                 <Text mb={2} fontSize="xl" fontWeight="bold">
-                  Final Scores
+                  Final Scores per round
                 </Text>
-                {winnersList.map((eachWinner, ind) => (
+                {/* {winnersList.map((eachWinner, ind) => (
                   <Box key={ind} mb={4}>
                     <Text fontWeight="bold">{eachWinner.user_name}</Text>
                     {finalScore
@@ -790,7 +855,48 @@ export default function Page({ params }) {
                         </Text>
                       ))}
                   </Box>
-                ))}
+                ))} */}
+
+                <>
+                  {sortedPlayers.map((eachWinner, ind) => {
+                    const playerScores = finalScore.filter(
+                      (eachScore) => eachWinner?.user_id === eachScore?.user_id
+                    );
+
+                    return (
+                      <Box key={ind} mb={4}>
+                        <Text fontWeight="bold">{eachWinner.user_name}</Text>
+                        {playerScores.map((eachScore, i) => (
+                          <Text key={i}>
+                            Round {eachScore?.round} Total Score:{" "}
+                            {eachScore?.totalScore} <br />
+                            Round {eachScore?.round} Average Score:{" "}
+                            {eachScore?.averageScore}
+                          </Text>
+                        ))}
+                      </Box>
+                    );
+                  })}
+
+                  {/* Show cumulative total and average for each player at the bottom */}
+                  <Text mb={2} fontSize="xl" fontWeight="bold">
+                    Final Scores Cumulative
+                  </Text>
+                  <Box mt={4}>
+                    {sortedPlayers.map((eachWinner, i) => (
+                      <Box key={i} mb={2}>
+                        <Text fontWeight="bold">{eachWinner.user_name}</Text>
+                        <Text>
+                          Cumulative Total Score: {eachWinner.cumulativeTotal}
+                        </Text>
+                        <Text>
+                          Cumulative Average Score:{" "}
+                          {eachWinner.cumulativeAverage.toFixed(2)}
+                        </Text>
+                      </Box>
+                    ))}
+                  </Box>
+                </>
               </Box>
             </VStack>
           </ModalBody>
@@ -800,6 +906,7 @@ export default function Page({ params }) {
               Cancel
             </Button>
             <Button
+              isLoading={winnerLoading}
               isDisabled={!selectedUserId}
               colorScheme="blue"
               ml={3}
@@ -830,7 +937,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
-               minDate={new Date()}
+                minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {
@@ -885,7 +992,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
-               minDate={new Date()}
+                minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {

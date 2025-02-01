@@ -161,7 +161,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
             minHeight={"full"}
             flexDirection={"column"}
             justifyContent={"space-between"}
-            bg={theme.color.background} 
+            bg={theme.color.background}
             borderRightWidth={1}
             borderRightColor="#EAECF0"
             {...rest}
@@ -247,8 +247,8 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                         <HStack width={'100%'} align={'center'} justify={'space-between'} p={5}>
                             <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={() => {
-                                setUser(null)
                                 signOut(auth)
+                                setUser(null)
                             }} />
                             <Text>{UserState.value.data?.name}</Text>
                         </HStack>

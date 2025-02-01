@@ -87,7 +87,7 @@ export default function Page() {
       additional_judges: selectedJudges.map((judge) => judge.id),
       total_spots: Number(totalSpots),
       video_link: videoLink,
-      creator_id: UserState.value.data.id,
+      creator_id: UserState.value.data?.id,
       prize_amount: prize,
       deadline,
       currentround: 0,

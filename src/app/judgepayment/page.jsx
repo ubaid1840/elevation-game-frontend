@@ -49,7 +49,7 @@ export default function Page() {
           >
             <CheckoutPage
               amount={750}
-              userID={UserState.value.data.id}
+              userID={UserState.value.data?.id}
               plan={"Promotion"}
             />
           </Elements>

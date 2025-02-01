@@ -36,9 +36,9 @@ export default function Page() {
   const [videoLink, setVideoLink] = useState("");
   const [gameDescription, setGameDescription] = useState("");
   const [selectedJudges, setSelectedJudges] = useState([]);
-  const [rounds, setRounds] = useState(1);
+  const [rounds, setRounds] = useState("");
   const [category, setCategory] = useState("");
-  const [totalSpots, setTotalSpots] = useState(0);
+  const [totalSpots, setTotalSpots] = useState("");
   const [prize, setPrize] = useState(0);
   const [deadline, setDeadline] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ export default function Page() {
   async function fetchData() {
     axios.get("/api/users?role=judge").then((response) => {
       const temp = response.data?.filter(
-        (item) => item.id !== UserState.value.data.id
+        (item) => item.id !== UserState.value.data?.id
       );
       setAvailableJudges([...temp]);
     });
@@ -94,7 +94,7 @@ export default function Page() {
       additional_judges: selectedJudges.map((judge) => judge.id),
       total_spots: Number(totalSpots),
       video_link: videoLink,
-      creator_id: UserState.value.data.id,
+      creator_id: UserState.value.data?.id,
       prize_amount: prize,
       deadline,
       currentround: 0,
@@ -164,23 +164,23 @@ export default function Page() {
     if (url.includes("youtu.be")) {
       const videoId = url.split("youtu.be/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle standard YouTube watch URL (youtube.com/watch?v=VIDEO_ID)
+
+      // Handle standard YouTube watch URL (youtube.com/watch?v=VIDEO_ID)
     } else if (url.includes("youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle YouTube Shorts URL (youtube.com/shorts/VIDEO_ID)
+
+      // Handle YouTube Shorts URL (youtube.com/shorts/VIDEO_ID)
     } else if (url.includes("youtube.com/shorts/")) {
       const videoId = url.split("youtube.com/shorts/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle mobile YouTube URL (m.youtube.com/watch?v=VIDEO_ID)
+
+      // Handle mobile YouTube URL (m.youtube.com/watch?v=VIDEO_ID)
     } else if (url.includes("m.youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
     }
-  
+
     // Return the URL as is if it's not recognized
     return url;
   }
@@ -269,11 +269,18 @@ export default function Page() {
         <FormControl mb={6}>
           <FormLabel htmlFor="rounds">Number of Rounds</FormLabel>
           <Input
+          min={1}
             id="rounds"
             type="number"
-            min={1}
             value={rounds}
-            onChange={(e) => setRounds(parseInt(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!isNaN(value) && value.trim() !== "") {
+                setRounds(parseInt(value));
+              } else {
+                setRounds("")
+              }
+            }}
             placeholder="Enter number of rounds"
           />
         </FormControl>
@@ -281,11 +288,18 @@ export default function Page() {
         <FormControl mb={6}>
           <FormLabel htmlFor="totalSpots">Total Spots</FormLabel>
           <Input
+            min={1}
             id="totalSpots"
             type="number"
-            min={1}
             value={totalSpots}
-            onChange={(e) => setTotalSpots(parseInt(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!isNaN(value) && value.trim() !== "") {
+                setTotalSpots(parseInt(value));
+              }else{
+                setTotalSpots("")
+              }
+            }}
             placeholder="Enter total spots available"
           />
         </FormControl>
@@ -303,7 +317,7 @@ export default function Page() {
             px={4}
           >
             <Calendar
-             minDate={new Date()}
+              minDate={new Date()}
               id="deadline"
               value={deadline}
               onChange={(e) => setDeadline(e.value)}

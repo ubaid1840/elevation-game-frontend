@@ -70,7 +70,7 @@ export default function Page() {
 
     axios
       .post("/api/booking", {
-        booked_by: Number(UserState.value.data.id),
+        booked_by: Number(UserState.value.data?.id),
         booked_for: Number(selectedJudge),
         booking_date: moment(date).valueOf(),
         booking_time: selectedTime,

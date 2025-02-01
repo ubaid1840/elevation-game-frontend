@@ -37,7 +37,7 @@ export default function GameEnrollmentPage({ params }) {
   const handleSubmit = () => {
     axios
       .post("/api/games/enroll", {
-        userId: UserState.value.data.id,
+        userId: UserState.value.data?.id,
         gameId: params.id,
         entryLevel: "PENDING",
       })

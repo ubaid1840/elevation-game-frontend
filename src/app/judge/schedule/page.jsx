@@ -55,7 +55,7 @@ export default function Page() {
   const handleSaveAllAvailability = async () => {
 
     axios
-      .put(`/api/users/${UserState.value.data.id}/schedule`, {
+      .put(`/api/users/${UserState.value.data?.id}/schedule`, {
         schedule: newAvailability,
       })
       .then((response) => {
@@ -207,7 +207,7 @@ export default function Page() {
           {/* Final Save Button */}
           {newAvailability.length > 0 && (
             <Button
-              isDisabled={!UserState.value.data.id}
+              isDisabled={!UserState.value.data?.id}
               isLoading={loading}
               colorScheme="purple"
               size="lg"
