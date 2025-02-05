@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
     const game = gameResult.rows[0];
 
     if (!game) {
-      return NextResponse.json({ message: "Game not found" }, { status: 404 });
+      return NextResponse.json([], { status: 200 });
     }
 
     // Replace created_by (user_id) with the user's name
