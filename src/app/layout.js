@@ -4,7 +4,7 @@ import { Providers } from "./providers";
 import { Suspense } from "react";
 import Loading from "./loading";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
-import { query } from "@/lib/db";
+import NextTopLoader from 'nextjs-toploader';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +29,7 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Suspense fallback={<Loading />}>
           <Providers>
+          <NextTopLoader />
             {children}
           </Providers>
         </Suspense>

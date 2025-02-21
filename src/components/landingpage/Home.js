@@ -27,7 +27,7 @@ export default function HomePage() {
                 </Text>
                 <VStack gap={{ base: 5, md: 10 }}>
                     <Text fontSize={'2xl'} color={'white'}>
-                        Join the Virtual Three-Minute Elevator Pitch and complete for exciting prizes!
+                        Join the Virtual Three-Minute Elevator Pitch and compete for exciting prizes!
                     </Text>
 
                     <Img height={'300px'} src={"/logo.png"} />

@@ -20,6 +20,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  useToast,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -34,6 +35,8 @@ const JudgeManagement = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const toast = useToast();
 
   useEffect(() => {
     fetchData();
@@ -54,11 +57,25 @@ const JudgeManagement = () => {
         role: "judge",
       })
       .then(() => {
+        toast({
+          title: "Success",
+          description: "New judge added successfully.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
         resetForm();
         onClose();
         fetchData();
       })
       .catch((e) => {
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message || e?.message,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
         setLoading(false);
       });
   };
@@ -85,8 +102,23 @@ const JudgeManagement = () => {
         role: "user",
       })
       .then(() => {
-        const temp = judges.filter((item)=> item.id !== id)
-        setJudges([...temp])
+        const temp = judges.filter((item) => item.id !== id);
+        setJudges([...temp]);
+        toast({
+          title: "Success",
+          description: "Judge removed successfully",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }) .catch((e) => {
+        toast({
+          title: "Error",
+          description: e?.response?.data?.message || e?.message,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       });
   }
 
@@ -104,12 +136,14 @@ const JudgeManagement = () => {
         button={true}
         buttonText={"Remove"}
         onButtonClick={(val) => handleJudgeStatus(val)}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
     );
   }, [filteredJudges]);
 
   return (
-    <Sidebar LinkItems={GetLinkItems("admin")}>
+    <>
       <Box p={8} bg="white">
         <Heading mb={6} color="purple.700">
           Judge Management
@@ -169,7 +203,7 @@ const JudgeManagement = () => {
           </ModalContent>
         </Modal>
       </Box>
-    </Sidebar>
+    </>
   );
 };
 

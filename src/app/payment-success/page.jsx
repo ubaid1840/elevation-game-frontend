@@ -40,7 +40,7 @@ export default function Page() {
       if (res.user) {
         setUser(res.user);
       }
-    })
+    });
 
     return () => {
       if (unsubscribe) {
@@ -55,7 +55,19 @@ export default function Page() {
         .post("/api/verify-payment", { paymentIntentId })
         .then((response) => {
           if (response.data.plan) {
-            handleUpdatePackage(response.data.plan, paymentIntentId);
+            if (response.data.plan == "trivia") {
+              const gameId = new URLSearchParams(window.location.search).get(
+                "g"
+              );
+              if (gameId) {
+                handleUpdateTriviaPayment(paymentIntentId, Number(gameId));
+              } else {
+                setMessage("Game not found")
+                callTimeout()
+              }
+            } else {
+              handleUpdatePackage(response.data.plan, paymentIntentId);
+            }
           }
         })
         .catch((e) => {
@@ -66,6 +78,37 @@ export default function Page() {
     }, 1000),
     []
   );
+
+  async function handleUpdateTriviaPayment(paymentIntent, gid) {
+    axios
+      .put(
+        `/api/trivia/users/${UserState.value.data.id}/games/${gid}/payment`,
+        {
+          payment_intent_id: paymentIntent,
+        }
+      )
+      .then(async (response) => {
+        setMessage("Payment Verified");
+        await addDoc(collection(db, "notifications"), {
+          to: "admin@gmail.com",
+          title: "Trivia Game Payment",
+          message: `${
+            UserState.value.data?.name || UserState.value.data?.email
+          } made payment against trivia game`,
+          timestamp: moment().valueOf(),
+          status: "pending",
+        }).catch((e)=>{
+          console.log(e)
+        })
+        router.push(
+          `/${UserState.value.data.role}/trivia/enrolledgames/${gid}`
+        );
+      })
+      .catch((e) => {
+        console.log(e)
+        setMessage(e?.response?.data?.message || e?.message);
+      });
+  }
 
   async function handleUpdatePackage(plan, paymentIntentId) {
     let currentDate = new Date();
@@ -92,7 +135,7 @@ export default function Page() {
             UserState.value.data?.name || UserState.value.data?.email
           } made payment against ${plan} subscription`,
           timestamp: moment().valueOf(),
-          status : "pending"
+          status: "pending",
         });
 
         callTimeout();

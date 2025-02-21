@@ -139,14 +139,14 @@ export default function GameDetail({ params }) {
     }
 
     const handleShareGame = () => {
-        const gameLink = `${window.location.origin}/game/${params.id}`;
+        const gameLink = `${window.location.origin}/game/elevator/${params.id}`;
         navigator.clipboard.writeText(gameLink).then(() => {
             alert("Game link copied to clipboard!");
         });
     };
 
     return (
-        <Sidebar LinkItems={GetLinkItems("user")}>
+        <>
             <Box p={8} bg="white">
                 <Heading mb={4} color="purple.700">
                     {gameDetailData?.game?.title}
@@ -398,6 +398,6 @@ export default function GameDetail({ params }) {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-        </Sidebar>
+        </>
     );
 }

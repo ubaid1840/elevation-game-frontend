@@ -12,7 +12,7 @@ import { PiNetworkDuotone } from "react-icons/pi";
 import { VscGame } from "react-icons/vsc";
 import { SiGotomeeting } from "react-icons/si";
 
-const GetLinkItems = (role) => {
+const GetLinkItems = (role, type) => {
     switch (role) {
         case 'admin':
             return [
@@ -42,22 +42,22 @@ const GetLinkItems = (role) => {
                 {
                     name: "Dashboard",
                     icon: SlGameController ,
-                    path: `/judge/gamedetails`,
+                    path: `/judge/${type}/gamedetails`,
                 },
                 {
                     name: "Create Game",
                     icon: SiNintendogamecube,
-                    path: `/judge/creategame`,
+                    path: `/judge/${type}/creategame`,
                 },
                 {
                     name: "Availability",
                     icon: MdOutlineSchedule ,
-                    path: `/judge/schedule`,
+                    path: `/judge/${type}/schedule`,
                 },
                 {
                     name: "Meeting",
                     icon: SiGotomeeting ,
-                    path: `/judge/meeting`,
+                    path: `/judge/${type}/meeting`,
                 },
                 
             ];
@@ -66,12 +66,12 @@ const GetLinkItems = (role) => {
                     {
                         name: "Dashboard",
                         icon: RiDashboard3Line,
-                        path: `/user/dashboard`,
+                        path: `/user/${type}/dashboard`,
                     },
                     {
                         name: "Enrolled Games",
                         icon: VscGame,
-                        path: `/user/enrolledgames`,
+                        path: `/user/${type}/enrolledgames`,
                     },
                     // {
                     //     name: "Competition Progress",
@@ -88,28 +88,28 @@ const GetLinkItems = (role) => {
                     {
                         name: "Leaderboard",
                         icon: MdOutlineLeaderboard,
-                        path: `/user/leaderboard`,
+                        path: `/user/${type}/leaderboard`,
                     },
                     {
                         name: "My Earning",
                         icon: GiTakeMyMoney,
-                        path: `/user/myearning`,
+                        path: `/user/${type}/myearning`,
                     },
                    
                     {
                         name: "Judges Interaction",
                         icon: IoCalendarNumberOutline,
-                        path: `/user/judgesinteraction`,
+                        path: `/user/${type}/judgesinteraction`,
                     },
                     {
                         name: "Report",
                         icon: TbReport,
-                        path: `/user/report`,
+                        path: `/user/${type}/report`,
                     },
                     {
                         name: "Network",
                         icon: PiNetworkDuotone ,
-                        path: `/user/network`,
+                        path: `/user/${type}/network`,
                     },
                     
                 ];

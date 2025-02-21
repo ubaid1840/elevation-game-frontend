@@ -32,12 +32,17 @@ import {
     AlertDialogHeader,
     useToast,
     Center,
+    Tooltip,
+    Tag,
+    UnorderedList,
+    ListItem,
+    Button
 } from "@chakra-ui/react";
 import { FiLogOut, FiMenu } from "react-icons/fi";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { theme } from "@/data/data";
 import Link from "next/link";
-import Button from "./ui/Button";
+
 import { MdAttachMoney, MdNotificationsActive, MdOutlineEmergencyShare, MdSettings } from "react-icons/md";
 import Logo from "./logo";
 import useCheckSession from "@/lib/checkSession";
@@ -47,6 +52,7 @@ import { auth, db } from "@/config/firebase";
 import { CgProfile } from "react-icons/cg";
 import { and, collection, onSnapshot, query, where } from "firebase/firestore";
 import { debounce } from "@/utils/debounce";
+import { LuArrowRightLeft } from "react-icons/lu";
 
 export default function Sidebar({ children, LinkItems, settingsLink, currentPage, id }) {
 
@@ -153,6 +159,8 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
     const pathname = usePathname()
     const { state: UserState, setUser } = useContext(UserContext)
+    const currentAdditionalPath = pathname.includes("trivia") ? "/trivia" : pathname.includes("elevator") ? "/elevator" : ""
+    const otherAdditionalPath = pathname.includes("trivia") ? "/elevator" : pathname.includes("elevator") ? "/trivia" : ""
 
     return (
         <Box
@@ -177,15 +185,16 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 
                 {LinkItems.map((link, index) =>
                 (
-                    <NavItem
-                        onClose={onClose}
-                        isActive={pathname.includes(link.path)}
-                        key={link.name}
-                        icon={link.icon}
-                        path={`${link.path}`}
-                    >
-                        {link.name}
-                    </NavItem>
+                    link?.name === 'Report' && pathname.includes("trivia") ? null :
+                        <NavItem
+                            onClose={onClose}
+                            isActive={pathname.includes(link.path)}
+                            key={link.name}
+                            icon={link.icon}
+                            path={`${link.path}`}
+                        >
+                            {link.name}
+                        </NavItem>
                 )
                 )}
             </div>
@@ -205,21 +214,47 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                     <>
 
                         {UserState.value.data?.role != 'admin' &&
-                            <NavItem
-                                onClose={onClose}
-                                isActive={pathname.includes('profile')}
-                                icon={CgProfile}
-                                path={`/${UserState.value.data?.role}/profile`}
-                            >
-                                Profile
-                            </NavItem>
+                            <>
+                                <Tooltip fontSize={'md'} hasArrow label={
+                                    <Box p={2}>
+                                        <UnorderedList>
+                                            {pathname.includes("trivia") ?
+                                                <ListItem>Switch to Elevator dashboard</ListItem>
+                                                :
+                                                <ListItem>Switch to Trivia dashboard</ListItem>
+                                            }
+                                        </UnorderedList>
+                                    </Box>
+                                } >
+                                    <Button variant={"ghost"}>
+                                        <NavItem
+                                            onClose={onClose}
+                                            isActive={false}
+                                            icon={LuArrowRightLeft}
+                                            path={`/${UserState.value.data?.role}${otherAdditionalPath}`}
+                                        >
+                                            Switch Dashboard
+                                        </NavItem>
+                                    </Button>
+                                </Tooltip>
+
+                                <NavItem
+                                    onClose={onClose}
+                                    isActive={pathname.includes('profile')}
+                                    icon={CgProfile}
+                                    path={`/${UserState.value.data?.role}${currentAdditionalPath}/profile`}
+                                >
+                                    Profile
+                                </NavItem>
+                            </>
+
                         }
                         <NavItem
                             onClose={onClose}
                             haveNotifications={haveNotifications}
                             isActive={pathname.includes('notifications')}
                             icon={MdNotificationsActive}
-                            path={`/${UserState.value.data?.role}/notifications`}
+                            path={`/${UserState.value.data?.role}${currentAdditionalPath}/notifications`}
                         >
                             Notifications
                         </NavItem>
@@ -239,7 +274,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                                 onClose={onClose}
                                 isActive={pathname.includes('subscription')}
                                 icon={MdAttachMoney}
-                                path={`/${UserState.value.data?.role}/subscription`}
+                                path={`/${UserState.value.data?.role}${currentAdditionalPath}/subscription`}
                             >
                                 Subscription
                             </NavItem>

@@ -4,8 +4,8 @@ import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch,
 import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false }) => {
-    const [currentPage, setCurrentPage] = useState(1)
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false, currentPage, setCurrentPage }) => {
+   
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
     const rowsPerPage = 10;

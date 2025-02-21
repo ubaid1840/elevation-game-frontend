@@ -10,9 +10,9 @@ export default function Categories() {
 
             <Heading color={'white'}>CATEGORIES</Heading>
             <SimpleGrid columns={[1, 2, 3]} spacing={5}>
-                <CategoryCard title={"TECHNOLOGY"} spots={"10"} grandPrize={"20000 $"}/>
-                <CategoryCard title={"HEALTHCARE"} spots={"2"} grandPrize={"5000$"}/>
-                <CategoryCard title={"FINANCE"} spots={"5"} grandPrize={"50000$"}/>
+                <CategoryCard title={"TECHNOLOGY"} spots={"10"} grandPrize={"$20000"}/>
+                <CategoryCard title={"HEALTHCARE"} spots={"2"} grandPrize={"$5000"}/>
+                <CategoryCard title={"FINANCE"} spots={"5"} grandPrize={"$50000"}/>
 
             </SimpleGrid>
 

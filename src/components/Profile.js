@@ -143,7 +143,7 @@ export default function ProfilePage({ page }) {
     };
 
     return (
-        <Sidebar LinkItems={GetLinkItems(page)}>
+        <>
             <Flex justify="center" align="center" minHeight="100vh" bg="white">
                 <Box
                     maxWidth="400px"
@@ -288,6 +288,6 @@ export default function ProfilePage({ page }) {
                     </ModalContent>
                 </Modal>
             </Flex>
-        </Sidebar>
+        </>
     );
 }

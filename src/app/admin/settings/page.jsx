@@ -113,7 +113,7 @@ export default function Page() {
   };
 
   return (
-    <Sidebar LinkItems={GetLinkItems("admin")}>
+    <>
       {dataLoading ? (
         <Center w={"100%"} height={"100vh"}>
           <Spinner />
@@ -246,6 +246,6 @@ export default function Page() {
           </Modal>
         </Box>
       )}
-    </Sidebar>
+    </>
   );
 }

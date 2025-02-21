@@ -22,78 +22,63 @@ import {
   ModalFooter,
   Center,
   Spinner,
+  Flex,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
-import { Link } from "react-feather";
 import { usePathname, useRouter } from "next/navigation";
 import TableData from "@/components/ui/TableData";
+import Link from "next/link";
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
-  const [gameName, setGameName] = useState("");
-  const [spots, setSpots] = useState("");
-  const [editingGame, setEditingGame] = useState(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [triviaGames, setTriviaGames] = useState([])
   const pathname = usePathname();
   const router = useRouter();
   const [filter, setFilter] = useState("");
+  const [triviaFilter, setTriviaFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [triviaCurrentPage, setTriviaCurrentPage] = useState(1)
 
   useEffect(() => {
     fetchData();
+    fetchTriviaData()
   }, []);
 
   async function fetchData() {
-    axios.get("/api/games/admin").then((response) => {
-      setGames(response.data);
-    }).finally(()=>{
-      setLoading(false)
+    axios
+      .get("/api/games/admin")
+      .then((response) => {
+        setGames(response.data);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  async function fetchTriviaData(){
+    axios.get("/api/trivia/game/admin")
+    .then((response)=>{
+      console.log(response.data)
+      setTriviaGames(response.data)
     })
   }
 
-  const handleAddOrEditGame = () => {
-    if (editingGame) {
-      setGames((prev) =>
-        prev.map((game) =>
-          game.id === editingGame.id
-            ? { ...game, name: gameName, spots: Number(spots) }
-            : game
-        )
-      );
-    } else {
-      const newGame = {
-        id: games.length + 1,
-        name: gameName,
-        spots: Number(spots),
-        participants: 0,
-      };
-      setGames((prev) => [...prev, newGame]);
-    }
-    resetForm();
-    onClose();
-  };
-
-  // const handleEditGame = (game) => {
-  //   setGameName(game.name);
-  //   setSpots(game.spots);
-  //   setEditingGame(game);
-  //   onOpen();
-  // };
-
-  // const handleDeleteGame = (id) => {
-  //   setGames((prev) => prev.filter((game) => game.id !== id));
-  // };
-
-  const resetForm = () => {
-    setGameName("");
-    setSpots("");
-    setEditingGame(null);
-  };
-
+ 
   const filteredGames = games.filter((game) => {
     const matchesName = game.title.toLowerCase().includes(filter.toLowerCase());
+    return matchesName;
+  });
+
+  const filteredGamesTrivia = triviaGames.filter((game) => {
+    const matchesName = game.title.toLowerCase().includes(triviaFilter.toLowerCase());
     return matchesName;
   });
 
@@ -113,18 +98,32 @@ const GameManagement = () => {
       });
   }
 
+  async function handleRemoveGameTrivia(val) {
+    // console.log(val)
+    axios
+      .delete(`/api/trivia/game/${val}`)
+      .then(() => {
+        fetchTriviaData();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
   function handleShareGame(id) {
-    const gameLink = `${window.location.origin}/game/${id}`;
+    const gameLink = `${window.location.origin}/game/elevator/${id}`;
     navigator.clipboard.writeText(gameLink).then(() => {
       alert("Game link copied to clipboard!");
     });
   }
 
+ 
+
   const RenderTable = useCallback(() => {
     return (
       <TableData
         rowClickable={true}
-        onClickRow={(i) => router.push(`/admin/gamemanagement/${i}`)}
+        onClickRow={(i) => router.push(`/admin/gamemanagement/elevator/${i}`)}
         data={filteredGames.map((item) => {
           return {
             id: item.id,
@@ -150,72 +149,100 @@ const GameManagement = () => {
         button2={true}
         buttonText2={"Share"}
         onButtonClick2={(val) => handleShareGame(val)}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
     );
   }, [filteredGames]);
 
-  return (
-    <Sidebar LinkItems={GetLinkItems("admin")}>
-      {loading ? (
-        <Center h={"100vh"}>
-          <Spinner />
-        </Center>
-      ) : (
-        <Box p={8} bg="white">
-          <Heading mb={6} color="purple.700">
-            Game Management
-          </Heading>
+  const RenderTableTrivia = useCallback(() => {
+    return (
+      <TableData
+        rowClickable={true}
+        onClickRow={(i) => router.push(`/admin/gamemanagement/trivia/${i}`)}
+        data={filteredGamesTrivia.map((item) => {
+          return {
+            id: item.id,
+            title: item.title,
+            fee: item.fee,
+            prize: item.prize,
+            total_participants: item.total_enrollments,
+          };
+        })}
+        columns={[
+          { key: "title", value: "Name" },
+          { key: "fee", value: "Entry Fee" },
+          { key: "prize", value: "Grand Prize" },
+          { key: "total_participants", value: "Total Participants" },
+          { value: "Action" },
+        ]}
+        button={true}
+        buttonText={"Remove"}
+        onButtonClick={(val) => {
+          setLoading(true);
+          handleRemoveGameTrivia(val);
+        }}
+        currentPage={triviaCurrentPage}
+        setCurrentPage={setTriviaCurrentPage}
+      />
+    );
+  }, [filteredGamesTrivia]);
 
-          <Input
-            placeholder="Search by name"
-            value={filter}
-            onChange={handleFilterChange}
-          />
+  return loading ? (
+    <Center h={"100vh"}>
+      <Spinner />
+    </Center>
+  ) : (
+    <Box p={8} bg="white">
+      <Heading mb={6} color="purple.700">
+        Game Management
+      </Heading>
 
-          <Button
-            colorScheme="purple"
-            my={4}
-            onClick={() => router.push(`${pathname}/creategame`)}
-          >
-            Add New Game
-          </Button>
+      <Tabs>
+        <TabList>
+          <Tab>Elevator Pitch</Tab>
+          <Tab>Trivia</Tab>
+        </TabList>
 
-          <RenderTable />
-          <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>
-                {editingGame ? "Edit Game" : "Add New Game"}
-              </ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Stack spacing={4}>
-                  <Input
-                    placeholder="Game Name"
-                    value={gameName}
-                    onChange={(e) => setGameName(e.target.value)}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Total Spots"
-                    value={spots}
-                    onChange={(e) => setSpots(e.target.value)}
-                  />
-                </Stack>
-              </ModalBody>
-              <ModalFooter>
-                <Button colorScheme="blue" onClick={handleAddOrEditGame}>
-                  {editingGame ? "Update Game" : "Add Game"}
-                </Button>
-                <Button ml={3} onClick={onClose}>
-                  Cancel
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-        </Box>
-      )}
-    </Sidebar>
+        <TabPanels>
+          <TabPanel>
+            <Input
+              placeholder="Search by name"
+              value={filter}
+              onChange={handleFilterChange}
+            />
+
+            <Button
+              as={Link}
+              href={`${pathname}/creategame/elevator`}
+              colorScheme="purple"
+              my={4}
+            >
+              Add New Game
+            </Button>
+
+            <RenderTable />
+          </TabPanel>
+          <TabPanel>
+            <Input
+              placeholder="Search by name"
+              value={triviaFilter}
+              onChange={(e) => setTriviaFilter(e.target.value)}
+            />
+
+            <Button
+              as={Link}
+              href={`${pathname}/creategame/trivia`}
+              colorScheme="purple"
+              my={4}
+            >
+              Add New Game
+            </Button>
+            <RenderTableTrivia />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Box>
   );
 };
 

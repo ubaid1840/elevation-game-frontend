@@ -5,7 +5,7 @@ import { Button, Spinner } from "@chakra-ui/react"
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import axios from "axios"
 import { useEffect, useState } from "react"
-const CheckoutPage = ({ amount, userID, plan }) => {
+const CheckoutPage = ({ amount, plan, gameId }) => {
     const stripe = useStripe()
     const elements = useElements()
     const [clientSecret, setClientSecret] = useState(null)
@@ -26,6 +26,7 @@ const CheckoutPage = ({ amount, userID, plan }) => {
 
 
     async function handleSubmit() {
+        const gid = gameId ? `&g=${gameId}` : ""
 
 
         if (!stripe || !elements) {
@@ -43,7 +44,7 @@ const CheckoutPage = ({ amount, userID, plan }) => {
         const { error } = await stripe.confirmPayment({
             elements,
             clientSecret,
-            confirmParams: { return_url: `${window.location.origin}/payment-success?amount=${amount}&plan=${plan}` }
+            confirmParams: { return_url: `${window.location.origin}/payment-success?amount=${amount}&plan=${plan}${gid}` }
         })
 
         if (error) {

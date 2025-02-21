@@ -28,6 +28,7 @@ const FinancialOverview = () => {
   const toast = useToast();
   const [notificationType, setNotificationType] = useState("email");
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -36,6 +37,7 @@ const FinancialOverview = () => {
   async function fetchData() {
     axios.get("/api/finance").then((response) => {
       if (response.data.length > 0) {
+        console.log(response.data)
         const temp = response.data.filter((item) => item.role !== "admin");
 
         setPayments([...temp]);
@@ -80,22 +82,27 @@ const FinancialOverview = () => {
             name: item.name,
             amount:
               Number(item.tier1) + Number(item.tier2) + Number(item.tier3),
+              trivia_total : Number(item.trivia_total)
           };
         })}
         columns={[
           { key: "name", value: "Name" },
-          { key: "amount", value: "Amount ($)" },
+          { key: "amount", value: "Elevator Earnings ($)" },
+          { key: "trivia_total", value: "Trivia Earnings ($)" },
         ]}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
     );
   }, [filteredUsers]);
 
   return (
-    <Sidebar LinkItems={GetLinkItems("admin")}>
+   
       <Box p={8} bg="white">
         <Heading mb={6} color="purple.700">
           Financial Overview
         </Heading>
+        
 
         <Input
             placeholder="Search by name"
@@ -110,9 +117,10 @@ const FinancialOverview = () => {
         {payments.length > 0 && (
           <CSVLink
             href="#"
-            data={payments.map(({ name, tier1, tier2, tier3 }) => ({
+            data={payments.map(({ name, tier1, tier2, tier3, trivia_total }) => ({
               Participant: name,
-              Amount: Number(tier1) + Number(tier2) + Number(tier3),
+              Elevator: Number(tier1) + Number(tier2) + Number(tier3),
+              Trivia : Number(trivia_total)
             }))}
             filename={"financial-overview.csv"}
             className="btn btn-primary"
@@ -162,7 +170,7 @@ const FinancialOverview = () => {
           Send Notifications
         </Button>
       </Box>
-    </Sidebar>
+   
   );
 };
 

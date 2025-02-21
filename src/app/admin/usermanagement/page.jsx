@@ -34,7 +34,8 @@ const UserManagement = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -69,6 +70,7 @@ const UserManagement = () => {
 
   async function handleLogs(id) {
     axios.get(`/api/users/${id}/logs`).then((response) => {
+      console.log(response.data);
       setLogs(response.data);
     });
   }
@@ -88,9 +90,10 @@ const UserManagement = () => {
           }
         });
         setUsers([...temp]);
-      }).finally(()=>{
-        setLoading(false)
       })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   async function handlePromote(id) {
@@ -104,12 +107,14 @@ const UserManagement = () => {
         );
 
         setUsers([...updatedUsers]);
-      }).finally(()=>{
-        setLoading(false)
       })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   const RenderTable = useCallback(() => {
+    console.log("called");
     return (
       <TableData
         special={true}
@@ -139,82 +144,93 @@ const UserManagement = () => {
           handleLogs(val);
         }}
         onSwitchClick={(val) => {
-          setLoading(true)
+          setLoading(true);
           handleChangeStatus(val);
         }}
         button2={true}
         buttonText2={"Promote to judge"}
         onButtonClick2={(val) => {
-          setLoading(true)
-          handlePromote(val)}}
+          setLoading(true);
+          handlePromote(val);
+        }}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
     );
   }, [filteredUsers]);
 
   const LoadingIndicator = () => {
     return (
-      <Center height={'100vh'}>
-        <Spinner color="black"/>
+      <Center height={"100vh"}>
+        <Spinner color="black" />
       </Center>
-    )
-  }
+    );
+  };
 
   return (
-    <Sidebar LinkItems={GetLinkItems("admin")}>
-      {loading ? <LoadingIndicator /> :
-      <Box p={8} bg="white">
-        <Heading mb={6} color="purple.700">
-          User Management
-        </Heading>
+    <>
+      {loading ? (
+        <LoadingIndicator />
+      ) : (
+        <Box p={8} bg="white">
+          <Heading mb={6} color="purple.700">
+            User Management
+          </Heading>
 
-        {/* Filter Options */}
-        <Stack spacing={4} mb={6}>
-          <Input
-            placeholder="Search by name"
-            value={filter}
-            onChange={handleFilterChange}
-          />
-          <Select
-            placeholder="All"
-            value={selectedRole}
-            onChange={handleRoleChange}
-          >
-            <option value="Judge">Judge</option>
-            <option value="User">User</option>
-          </Select>
-          <Button
-            colorScheme="purple"
-            onClick={() => {
-              setFilter("");
-              setSelectedRole("");
-              setLogs([]);
-            }}
-          >
-            Clear Filters
-          </Button>
-        </Stack>
+          {/* Filter Options */}
+          <Stack spacing={4} mb={6}>
+            <Input
+              placeholder="Search by name"
+              value={filter}
+              onChange={handleFilterChange}
+            />
+            <Select
+              placeholder="All"
+              value={selectedRole}
+              onChange={handleRoleChange}
+            >
+              <option value="Judge">Judge</option>
+              <option value="User">User</option>
+            </Select>
+            <Button
+              colorScheme="purple"
+              onClick={() => {
+                setFilter("");
+                setSelectedRole("");
+                setLogs([]);
+              }}
+            >
+              Clear Filters
+            </Button>
+          </Stack>
 
-        {/* User Table */}
-        <RenderTable />
+          {/* User Table */}
+          <RenderTable />
 
-        {/* Activity Logs Section (optional) */}
-        <VStack spacing={4} mt={8} align="start">
-          <Heading size="md">User Activity Logs</Heading>
-          <Text>
-            {`Click on "View Logs" to see the detailed activity for each user.`}
-          </Text>
-          <UnorderedList>
-            {logs.length > 0 &&
-              logs.map((item, index) => (
-                <ListItem key={index}>{item.action}</ListItem>
-              ))}
-          </UnorderedList>
-        </VStack>
-      </Box>
-}
-     
-    </Sidebar>
+          {/* Activity Logs Section (optional) */}
+          <LogsSection logs={logs} />
+        </Box>
+      )}
+    </>
   );
 };
+
+const LogsSection = ({ logs }) => {
+  return (
+    <VStack spacing={4} mt={8} align="start">
+      <Heading size="md">User Activity Logs</Heading>
+      <Text>{`Click on "View Logs" to see the detailed activity for each user.`}</Text>
+      <UnorderedList>
+        {logs.length > 0 &&
+          logs.map((item, index) => (
+            <ListItem key={index}>
+              {new Date(item.created_at).toLocaleDateString("en-US")}{" "}
+              {item.action}
+            </ListItem>
+          ))}
+      </UnorderedList>
+    </VStack>
+  );
+}
 
 export default UserManagement;

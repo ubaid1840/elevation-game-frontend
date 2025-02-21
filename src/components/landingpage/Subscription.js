@@ -82,7 +82,7 @@ export default function SubscriptionPage({ page }) {
     }
 
     return (
-        <Sidebar LinkItems={GetLinkItems(page)}>
+        <>
             <Box p={8} bg="white">
                 <Heading mb={2} color="purple.700">
                     Current Plan: <Text as="span" color="green.500">{currentPlan}</Text>
@@ -92,7 +92,7 @@ export default function SubscriptionPage({ page }) {
 
                 {currentPlan &&
                     <Text fontSize={'lg'} color="purple.700">
-                        Expiry: <Text as="span" color="green.500">{moment(UserState.value.data.package_expiry).format("MMM DD, yyyy")}</Text>
+                        Expiry: <Text as="span" color="green.500">{UserState.value.data && UserState.value.data?.package_expiry ? moment(UserState.value.data.package_expiry).format("MMM DD, yyyy") : "Expired"}</Text>
                     </Text>
                 }
 
@@ -157,6 +157,6 @@ export default function SubscriptionPage({ page }) {
                     </Box>
                 }
             </Box>
-        </Sidebar>
+        </>
     );
 }

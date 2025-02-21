@@ -92,7 +92,7 @@ const NotificationManagement = ({ page }) => {
     }
 
     return (
-        <Sidebar LinkItems={GetLinkItems(page)}>
+        <>
             <Box p={8} bg="white" minH="100vh">
                 <Heading mb={6} color="purple.700">
                     Notifications
@@ -154,7 +154,7 @@ const NotificationManagement = ({ page }) => {
                     )}
                 </VStack>
             </Box>
-        </Sidebar>
+        </>
     );
 };
 

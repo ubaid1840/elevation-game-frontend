@@ -20,25 +20,30 @@ export default function useCheckSession() {
 
     async function checkData(user) {
         try {
+         
             const response = await axios.get(`/api/userdetail/${user.email}`);
             const userData = response.data;
 
             if (userData?.role) {
                 if (userData.role !== 'admin') {
-                    if (!userData.package_expiry || moment().isAfter(moment(userData.package_expiry))) {
+                    if (!userData.package_expiry || moment().isAfter(moment(userData.package_expiry, "YYYY-MM-DD"), "day")) {
                         if (
                             !pathname.includes("/payment") &&
                             !pathname.includes("/judgepayment") &&
                             !pathname.includes("/payment-success")
                         ) {
-                            router.push("/payment");
+                            if(pathname.includes("/elevator")){
+                                router.replace("/payment");
+                            }
+                            // router.push("/payment");
+                           
                         }
                     }
 
                     if (userData.role === 'judge') {
-                        if (!userData.annual_package_expiry || moment().isAfter(moment(userData.annual_package_expiry))) {
+                        if (!userData.annual_package_expiry || moment().isAfter(moment(userData.annual_package_expiry, "YYYY-MM-DD"), "day")) {
                             if (!pathname.includes("/judgepayment") && !pathname.includes("/payment-success")) {
-                                router.push("/judgepayment");
+                                router.replace("/judgepayment");
                             }
                         }
                     }
@@ -48,9 +53,10 @@ export default function useCheckSession() {
                     !pathname.includes(userData.role) &&
                     !pathname.includes("/payment") &&
                     !pathname.includes("/judgepayment") &&
+                    !pathname.includes("/triviapayment") &&
                     !pathname.includes("/payment-success")
                 ) {
-                    router.push(`/${userData.role}`);
+                    router.replace(`/${userData.role}`);
                 }
                 return { user: { ...userData, ...user } };
             } else {
