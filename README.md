@@ -9,7 +9,6 @@ npm i --force
 ``` bash 
 npm run dev
 ```
-
 ### Create Build
 ``` bash
 npm run build
@@ -20,4 +19,5 @@ npm run start
 ```
 
 ### Site Url
-https://elevation-game-frontend-three.vercel.app
+https://elevation-game-frontend-three.vercel.app 
+Sire url is temporary
