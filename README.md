@@ -5,7 +5,7 @@
 npm i --force
 ```
 
-### Run development server
+### Run local development server
 ``` bash 
 npm run dev
 ```
