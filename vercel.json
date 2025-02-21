@@ -1,8 +1,8 @@
 {
-    "crons": [
-      {
-        "path": "/api/process-trivia",
-        "schedule": "*/5 * * * *"
-      }
-    ]
-  }
+  "crons": [
+    {
+      "path": "/api/process-trivia",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
