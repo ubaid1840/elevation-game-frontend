@@ -143,6 +143,8 @@ export default function Page({ params }) {
       isCorrect: correct,
     };
 
+    setProgress([...progress, questionData]);
+
     axios
       .put(
         `/api/trivia/users/${UserState.value.data.id}/games/${params.id}/progress`,
@@ -152,9 +154,7 @@ export default function Page({ params }) {
       )
       .then(() => {
         if (currentIndex + 1 < questions.length) {
-          setCurrentIndex(currentIndex + 1);
-          setTimeLeft(questions[currentIndex + 1].time || 10);
-          setProgress([...progress, questionData]);
+         
           setSelectedAnswer(null);
           setIsLoading(false);
         } else {
@@ -186,7 +186,6 @@ export default function Page({ params }) {
       </RadioGroup>
     );
   }, [questions, currentIndex, selectedAnswer]);
-
 
   return (
     <Box p={8} minH="100vh">
@@ -234,7 +233,14 @@ export default function Page({ params }) {
       )}
       <AnswerModal
         visible={isModalOpen}
-        onClose={setIsModalOpen}
+        onClose={(val) => {
+          setIsModalOpen(val);
+          if(currentIndex + 1 < questions.length){
+            setCurrentIndex(currentIndex + 1);
+            setTimeLeft(questions[currentIndex + 1].time || 10);
+          }
+       
+        }}
         isCorrect={isCorrect}
         correctAnswer={correctAnswer}
       />
@@ -412,5 +418,3 @@ const GameResult = ({ progress, questions }) => {
     </Box>
   );
 };
-
-

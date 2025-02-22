@@ -230,7 +230,7 @@ export default function JudgesInteraction() {
                 setLoading(true);
                 handleBookSession();
               }}
-              isDisabled={!date || !selectedJudge}
+              isDisabled={!date || !selectedJudge || !selectedTime}
             >
               Book Critique Session
             </Button>

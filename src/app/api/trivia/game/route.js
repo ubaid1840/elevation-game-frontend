@@ -45,6 +45,8 @@ export async function POST(req) {
         return NextResponse.json({ message: "All fields are required" }, { status: 400 });
       }
 
+      const localQuestions = questions.map((item, index)=> ({...item, id : index}))
+
     const newGame = await pool.query(
       `INSERT INTO trivia_game (deadline, fee, prize, title, questions, created_by) 
        VALUES ($1, $2, $3, $4, $5, $6) 
@@ -54,7 +56,7 @@ export async function POST(req) {
         fee ,
         prize ,
         title ,
-        questions ,
+        localQuestions ,
         created_by 
       ]
     );

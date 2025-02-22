@@ -16,6 +16,13 @@ import {
   Center,
   Spinner,
   useToast,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
 } from "@chakra-ui/react";
 import { Calendar } from "primereact/calendar";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
@@ -35,6 +42,9 @@ export default function Page() {
   const [fee, setFee] = useState("");
   const { state: UserState } = useContext(UserContext);
   const toast = useToast();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+    const [missingFields, setMissingFields] = useState([]);
 
   useEffect(() => {
     if (UserState?.value?.data?.id) setLoading(false);
@@ -58,7 +68,7 @@ export default function Page() {
   const addQuestion = () => {
     setQuestions([
       ...questions,
-      { text: "", options: [""], correct: "", time: "" },
+      { text: "", options: [""], correct: "", time: ""},
     ]);
   };
 
@@ -96,14 +106,41 @@ export default function Page() {
     setQuestions(updatedQuestions);
   };
 
-  const initiateGame = () => {
-    const gameData = {
-      gameName,
-      deadline,
-      questions,
-      prize,
-      fee,
-    };
+  const validateForm = () => {
+    let missing = [];
+
+    if (!gameName.trim()) missing.push("Game Name");
+    if (!deadline) missing.push("Deadline");
+    if (!fee) missing.push("Entry Fee");
+    if (!prize) missing.push("Prize");
+
+    if (questions.length === 0) {
+      missing.push("At least one question is required");
+    } else {
+      questions.forEach((q, index) => {
+        if (!q.text.trim()) missing.push(`Question ${index + 1} text`);
+        if (!q.correct) missing.push(`Question ${index + 1} correct answer`);
+        if (!q.time) missing.push(`Question ${index + 1} time`);
+        if (q.options.length === 0 || q.options.some((opt) => !opt.trim())) {
+          missing.push(`Options for Question ${index + 1}`);
+        }
+      });
+    }
+
+    return missing;
+  };
+
+  const handleInitiateGame = () => {
+
+    const missing = validateForm();
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      onOpen(); 
+      return;
+    }
+
+    setLoading(true);
+   
     axios
       .post("/api/trivia/game", {
         deadline: deadline,
@@ -158,6 +195,8 @@ export default function Page() {
 
     return false; // Return false if everything is valid
   };
+
+  
 
   return loading ? (
     <Center h={"100vh"}>
@@ -302,6 +341,7 @@ export default function Page() {
 
           {/* Remove Question Button */}
           <Button
+          isDisabled={questions.length === 1}
             size="sm"
             colorScheme="red"
             onClick={() => removeQuestion(qIndex)}
@@ -317,7 +357,7 @@ export default function Page() {
       </Button>
 
       {/* Submit Button */}
-      <Button
+      {/* <Button
         ml={2}
         isDisabled={isFormInvalid()}
         colorScheme="purple"
@@ -327,7 +367,36 @@ export default function Page() {
         }}
       >
         Initiate Game
-      </Button>
+      </Button> */}
+
+       <Button onClick={handleInitiateGame} colorScheme="purple"  ml={2}>
+              Initiate Game
+            </Button>
+      
+            <AlertDialog isOpen={isOpen} onClose={onClose}>
+              <AlertDialogOverlay>
+                <AlertDialogContent>
+                  <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                    Missing Fields
+                  </AlertDialogHeader>
+      
+                  <AlertDialogBody>
+                    <Text>Please fill in the following fields:</Text>
+                    <VStack align="start" mt={3}  maxH={'60vh'} overflowY={'auto'}>
+                      {missingFields.map((field, index) => (
+                        <Text key={index} color="red.500">
+                          - {field}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </AlertDialogBody>
+      
+                  <AlertDialogFooter>
+                    <Button onClick={onClose}>OK</Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialogOverlay>
+            </AlertDialog>
     </Box>
   );
 }

@@ -126,6 +126,10 @@ const GameCard = ({ gameDetailData }) => {
           )}
         </Text>
         <Text fontWeight="bold">
+          Entry fee:{" "}
+         ${gameDetailData?.game?.fee}
+        </Text>
+        <Text fontWeight="bold">
           Created By:{" "}
           <Badge colorScheme="blue">
             {gameDetailData?.game?.created_by_name || "Admin"}
