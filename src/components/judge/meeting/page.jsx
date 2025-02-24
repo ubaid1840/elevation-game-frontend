@@ -65,17 +65,25 @@ export default function JudgeMeeting() {
   }
 
   async function handleShareLinkToAll() {
-    onClose();
-    axios
-      .put(`/api/booking/${selectedGroup.id}`, {
-        meeting_link: meetingLink,
-        status: "Started",
-      })
-      .catch((error) => {
-        console.error(`Error updating booking for item ${eachItem.id}:`, error);
-      });
-
-    fetchData(UserState.value.data?.id);
+    try {
+      onClose();
+      axios
+        .put(`/api/booking/${selectedGroup.id}`, {
+          meeting_link: meetingLink,
+          status: "Started",
+        })
+        .catch((error) => {
+          console.error(
+            `Error updating booking for item ${eachItem.id}:`,
+            error
+          );
+        })
+        .finally(() => {
+          fetchData(UserState.value.data?.id);
+        });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function handleEndSession(group) {
@@ -86,8 +94,10 @@ export default function JudgeMeeting() {
       })
       .catch((error) => {
         console.error(`Error updating booking for item ${eachItem.id}:`, error);
+      })
+      .finally(() => {
+        fetchData(UserState.value.data?.id);
       });
-    fetchData(UserState.value.data?.id);
   }
 
   return (

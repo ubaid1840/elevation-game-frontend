@@ -91,7 +91,7 @@ export default function GameEnrollmentPage({ params }) {
         } catch (error) {
           console.error("Error sending notifications:", error);
         }
-        router.push(`/user/enrolledgames/${params.id}`);
+        router.push(`/user/elevator/enrolledgames/${params.id}`);
       });
   };
 

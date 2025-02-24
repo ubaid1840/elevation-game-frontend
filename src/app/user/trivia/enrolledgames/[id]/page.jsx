@@ -140,8 +140,10 @@ export default function Page({ params }) {
     setIsLoading(true);
 
     const endTime = performance.now();
-    const timeTaken = Math.min(questions[currentIndex].time * 1000, endTime - startTime); // Calculate time spent in ms
-  
+    const timeTaken = Math.min(
+      questions[currentIndex].time * 1000,
+      endTime - startTime
+    ); // Calculate time spent in ms
 
     const correct = questions[currentIndex].correct === selectedAnswer;
     setIsCorrect(correct);
@@ -333,7 +335,10 @@ const GameCard = ({ gameDetailData }) => {
 };
 
 const GameResult = ({ progress, questions }) => {
-  const totalTimeTaken = progress.reduce((acc, curr) => acc + curr.timeTaken, 0);
+  const totalTimeTaken = progress.reduce(
+    (acc, curr) => acc + curr.timeTaken,
+    0
+  );
   const totalTime = (totalTimeTaken / 1000).toFixed(2);
   const correctAnswers = progress.filter((p) => p.isCorrect).length;
   const totalQuestions = questions.length;
@@ -388,7 +393,8 @@ const GameResult = ({ progress, questions }) => {
               </Text>
 
               <Text fontSize="sm" color="gray.500" mt={1}>
-                ⏱️ Time Taken: {timeTaken} seconds
+                ⏱️ Time Taken:{" "}
+                {timeTaken ? (Number(timeTaken) / 1000).toFixed(2) : ""} seconds
               </Text>
 
               <Stack mt={2} spacing={2}>

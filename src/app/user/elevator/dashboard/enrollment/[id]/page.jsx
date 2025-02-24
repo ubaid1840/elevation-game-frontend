@@ -42,7 +42,7 @@ export default function GameEnrollmentPage({ params }) {
         entryLevel: "PENDING",
       })
       .then(() => {
-        router.push("/user/dashboard");
+        router.push("/user/elevator/dashboard");
       });
   };
 

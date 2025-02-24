@@ -37,9 +37,7 @@ const FinancialOverview = () => {
   async function fetchData() {
     axios.get("/api/finance").then((response) => {
       if (response.data.length > 0) {
-        console.log(response.data)
         const temp = response.data.filter((item) => item.role !== "admin");
-
         setPayments([...temp]);
       }
     });

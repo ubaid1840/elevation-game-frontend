@@ -30,10 +30,6 @@ export default function JudgeSchedule() {
     startTime: "",
   });
 
-  useEffect(() => {
-    console.log(UserState.value.data?.schedule);
-  }, [UserState.value.data]);
-
   const handleAddAvailability = () => {
     if (formData.day && formData.startTime) {
       const newEntry = { [formData.day]: formData.startTime };

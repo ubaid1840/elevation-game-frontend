@@ -16,6 +16,7 @@ import {
   HStack,
   Input,
   useToast,
+  Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -76,7 +77,7 @@ export default function Page() {
       status = false;
     }
     if (status == true) {
-      return `dashboard/enrollment/${game.id}`;
+      return `/user/elevator/dashboard/enrollment/${game.id}`;
     } else {
       return `#`;
     }
@@ -103,13 +104,14 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             My Games
           </Heading>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+          <Flex wrap={"wrap"} gap={6}>
             {myGames.map(
               (game, index) =>
                 !game.completed && (
-                  <GridItem
+                  <Box
+                  maxW={'300px'}
                     as={Link}
-                    href={`/user/enrolledgames/${game.id}`}
+                    href={`/user/elevator/enrolledgames/${game.id}`}
                     key={index}
                     p={6}
                     bg="gray.100"
@@ -139,10 +141,13 @@ export default function Page() {
                         {game.completed ? "COMPLETED" : "PENDING"}
                       </Badge>
                     </div>
-                  </GridItem>
+                  </Box>
                 )
             )}
-          </Grid>
+          </Flex>
+          {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+          
+          </Grid> */}
         </VStack>
 
         <Divider borderColor="gray.300" />
@@ -151,11 +156,14 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             Enroll in a Game
           </Heading>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+          <Flex wrap={"wrap"} gap={6}>
             {availableGames
               .filter((game) => {
                 if (game.spots_remaining === 0) return false;
-                if (game.deadline && moment(game.deadline).isBefore(moment(), "day"))
+                if (
+                  game.deadline &&
+                  moment(game.deadline).isBefore(moment(), "day")
+                )
                   return false;
                 // const userPackage = UserState.value.data?.package;
                 // if (
@@ -170,7 +178,8 @@ export default function Page() {
                 return true;
               })
               .map((game) => (
-                <GridItem
+                <Box
+                maxW={'300px'}
                   key={game.id}
                   p={6}
                   bg="gray.100"
@@ -223,9 +232,12 @@ export default function Page() {
                   >
                     Enroll
                   </Button>
-                </GridItem>
+                </Box>
               ))}
-          </Grid>
+          </Flex>
+          {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+           
+          </Grid> */}
         </VStack>
 
         <Divider borderColor="gray.300" />

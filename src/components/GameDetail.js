@@ -348,7 +348,7 @@ export default function GameDetail({ params }) {
                             <Button
                                 w={"full"}
                                 as={Link}
-                                href={`/user/enrolledgames/${params.id}/recording`}
+                                href={`/user/elevator/enrolledgames/${params.id}/recording`}
                                 colorScheme="teal"
                                 mt={4}
                                 _hover={{ textDecoration: "none" }}

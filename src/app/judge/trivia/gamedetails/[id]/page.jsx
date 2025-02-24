@@ -121,15 +121,15 @@ const GameCard = ({ gameDetailData, instructions }) => {
           </Text>
           <Text fontWeight="bold">
             Winner:{" "}
-            {gameDetailData?.game?.winner ? (
-              <Badge colorScheme="purple">{gameDetailData?.game?.winner}</Badge>
+            {gameDetailData?.game?.winner_id ? (
+              <Badge colorScheme="purple">{gameDetailData?.game?.winner_name}</Badge>
             ) : (
               "TBA"
             )}
           </Text>
           <Text fontWeight="bold">
             Created By:{" "}
-            <Badge colorScheme="blue">{gameDetailData?.game?.createdby}</Badge>
+            <Badge colorScheme="blue">{gameDetailData?.game?.created_by_name}</Badge>
           </Text>
           <Text fontWeight="bold">
             Category: {gameDetailData?.game?.category}

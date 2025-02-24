@@ -35,7 +35,6 @@ export default function Page() {
 
   async function fetchData() {
     axios.get(`/api/trivia/leaderboard`).then((response) => {
-      console.log(response.data);
       setParticipants(response.data);
     });
   }

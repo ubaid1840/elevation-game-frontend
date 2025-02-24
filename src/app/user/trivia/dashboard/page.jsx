@@ -16,6 +16,7 @@ import {
   HStack,
   Input,
   useToast,
+  Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -55,7 +56,8 @@ export default function Page() {
     const [loading, setLoading] = useState(false);
 
     return (
-      <GridItem
+      <Box
+        maxW={"300px"}
         key={game.id}
         p={6}
         bg="gray.100"
@@ -88,7 +90,7 @@ export default function Page() {
         >
           Enroll
         </Button>
-      </GridItem>
+      </Box>
     );
   };
 
@@ -113,11 +115,12 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             My Games
           </Heading>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+          <Flex wrap={"wrap"} gap={6}>
             {myGames.map(
               (game, index) =>
                 !game.completed && (
-                  <GridItem
+                  <Box
+                    maxW={"300px"}
                     as={Link}
                     href={`/user/trivia/enrolledgames/${game.id}`}
                     key={index}
@@ -149,10 +152,13 @@ export default function Page() {
                         {game.completed ? "COMPLETED" : "PENDING"}
                       </Badge>
                     </div>
-                  </GridItem>
+                  </Box>
                 )
             )}
-          </Grid>
+          </Flex>
+          {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+           
+          </Grid> */}
         </VStack>
 
         <Divider borderColor="gray.300" />
@@ -161,7 +167,7 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             Enroll in a Game
           </Heading>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+          <Flex wrap={"wrap"} gap={6}>
             {availableGames
               .filter((game) => {
                 if (
@@ -175,7 +181,10 @@ export default function Page() {
               .map((game, index) => (
                 <RenderEachGame key={index} game={game} />
               ))}
-          </Grid>
+          </Flex>
+          {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+           
+          </Grid> */}
         </VStack>
 
         <Divider borderColor="gray.300" />

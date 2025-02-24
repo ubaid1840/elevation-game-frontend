@@ -124,7 +124,7 @@ export default function Page({ params }) {
               Winner:{" "}
               {gameDetailData?.game?.winner ? (
                 <Badge colorScheme="purple">
-                  {gameDetailData?.game?.winner}
+                  {gameDetailData?.game?.winner_name}
                 </Badge>
               ) : (
                 "TBA"
@@ -135,7 +135,7 @@ export default function Page({ params }) {
             <Text fontWeight="bold">
               Created By:{" "}
               <Badge colorScheme="blue">
-                {gameDetailData?.game?.createdby}
+                {gameDetailData?.game?.created_by_name}
               </Badge>
             </Text>
           </GridItem>
