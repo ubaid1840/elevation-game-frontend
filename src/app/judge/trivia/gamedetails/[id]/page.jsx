@@ -52,6 +52,7 @@ export default function Page({ params }) {
   const [gameData, setGameData] = useState(null);
   const { state: UserState } = useContext(UserContext);
   const [loading, setLoading] = useState(false);
+  const [instructions, setInstructions] = useState([]);
   const toast = useToast();
 
   useEffect(() => {
@@ -62,8 +63,9 @@ export default function Page({ params }) {
 
   async function fetchData() {
     axios
-      .get(`/api/trivia/game/${params.id}/judge/${UserState.value.data.id}`)
+      .get(`/api/trivia/game/${params.id}`)
       .then((response) => {
+        // console.log(response.data);
         setGameData(response.data);
       })
       .catch((e) => {
@@ -88,7 +90,7 @@ export default function Page({ params }) {
   ) : (
     <Box p={8} minH="100vh">
       <Flex flexWrap={"wrap"} justify={"space-between"}>
-        <GameCard gameDetailData={gameData} />
+        <GameCard gameDetailData={gameData} instructions={instructions} />
         <Leaderboard
           enrollments={gameData?.enrollments || []}
           totalQuestions={
@@ -105,7 +107,7 @@ export default function Page({ params }) {
   );
 }
 
-const GameCard = ({ gameDetailData }) => {
+const GameCard = ({ gameDetailData, instructions }) => {
   return (
     <Box p={6} borderRadius="md" mb={2}>
       <Heading mb={4} color="purple.400">
@@ -113,38 +115,59 @@ const GameCard = ({ gameDetailData }) => {
       </Heading>
 
       <Box gap={2} display={"flex"} flexDir={"column"}>
-        <Text fontWeight="bold">
-          Prize:{" "}
-          <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
-        </Text>
-        <Text fontWeight="bold">
-          Winner:{" "}
-          {gameDetailData?.game?.winner ? (
-            <Badge colorScheme="purple">{gameDetailData?.game?.winner}</Badge>
-          ) : (
-            "TBA"
-          )}
-        </Text>
-        <Text fontWeight="bold">
-          Entry fee:{" "}
-         ${gameDetailData?.game?.fee}
-        </Text>
-        <Text fontWeight="bold">
-          Created By:{" "}
-          <Badge colorScheme="blue">
-            {gameDetailData?.game?.created_by_name || "Admin"}
-          </Badge>
-        </Text>
-        <Text fontWeight="bold">
-          Deadline:{" "}
-          {gameDetailData?.game?.deadline
-            ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
-            : ""}
-        </Text>
-        <Text fontWeight="bold">
-          Total Participants:{" "}
-          {gameDetailData?.enrollments ? gameDetailData.enrollments.length : 0}
-        </Text>
+          <Text fontWeight="bold">
+            Prize:{" "}
+            <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
+          </Text>
+          <Text fontWeight="bold">
+            Winner:{" "}
+            {gameDetailData?.game?.winner ? (
+              <Badge colorScheme="purple">{gameDetailData?.game?.winner}</Badge>
+            ) : (
+              "TBA"
+            )}
+          </Text>
+          <Text fontWeight="bold">
+            Created By:{" "}
+            <Badge colorScheme="blue">{gameDetailData?.game?.createdby}</Badge>
+          </Text>
+          <Text fontWeight="bold">
+            Category: {gameDetailData?.game?.category}
+          </Text>
+          <Text fontWeight="bold">
+            Start Date:{" "}
+            {gameDetailData?.game?.start_date
+              ? moment(gameDetailData.game.start_date).format("MM/DD/YYYY")
+              : ""}
+          </Text>
+          <Text fontWeight="bold">
+            Deadline:{" "}
+            {gameDetailData?.game?.deadline
+              ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+              : ""}
+          </Text>
+          <Text fontWeight="bold">
+            Spots Available: {gameDetailData?.game?.spots_remaining}
+          </Text>
+          <Text fontWeight="bold">
+            Total Participants: {gameDetailData?.game?.total_participants}
+          </Text>
+  
+        {instructions.length > 0 && (
+          <>
+            <Text fontSize="md">
+              <strong>Game Instructions:</strong>
+            </Text>
+            <VStack align={"flex-start"} gap={0}>
+              {instructions.map((eachInstruction, index) => (
+                <Text key={index} fontSize="sm">
+                  {`- ${eachInstruction}`}
+                </Text>
+              ))}
+            </VStack>
+          </>
+        )}
+
       </Box>
     </Box>
   );
@@ -173,7 +196,7 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
               <AccordionPanel>
                 <VStack spacing={4} align="stretch">
                   {questions.map((question, index) => {
-                    const userProgress = progress.find(
+                    const userProgress = progress?.find(
                       (p) => p.questionId === question.id
                     );
                     const isCorrect = userProgress?.isCorrect;
@@ -244,13 +267,14 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
 const Leaderboard = ({ enrollments, totalQuestions }) => {
   const sortedUsers = enrollments
     .map((enrollment) => {
-      const correctAnswers = enrollment.progress.filter(
+      const correctAnswers = enrollment?.progress?.filter(
         (p) => p.isCorrect
       ).length;
-      const totalTime = enrollment.progress.reduce(
-        (acc, p) => acc + (p.timeTaken || 0),
+      const totalTimeTaken = enrollment?.progress?.reduce(
+        (acc, p) => acc + (Number(p.timeTaken) || 0),
         0
       );
+      const totalTime = (totalTimeTaken / 1000).toFixed(2);
 
       return {
         user_name: enrollment.user_name || "Unknown User",

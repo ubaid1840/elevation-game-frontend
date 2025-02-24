@@ -36,7 +36,8 @@ export async function GET() {
         const userScores = enrollmentsResult.rows.map((enrollment) => {
           const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
           const correctAnswers = progress.filter((p) => p.isCorrect).length;
-          const totalTime = progress.reduce((acc, p) => acc + (Number(p.timeTaken) || 0), 0);
+          const totalTimeTaken = progress.reduce((acc, p) => acc + (Number(p.timeTaken) || 0), 0);
+          const totalTime = (totalTimeTaken / 1000).toFixed(2);
 
           return { user_id: enrollment.user_id, correctAnswers, totalTime };
         });

@@ -42,26 +42,38 @@ export async function PUT(req, { params }) {
     }
 
     const game = await pool.query(`
-      SELECT title from trivia_game WHERE id = $1`, [id])
+      SELECT title, spots_remaining from trivia_game WHERE id = $1`, [id])
 
-    const insertNewEntry = `
+    if (game.rows[0].spots_remaining > 0) {
+      const insertNewEntry = `
             INSERT INTO trivia_game_enrollment (user_id, game_id)
             VALUES ($1, $2)
             RETURNING *;
           `;
-    await query(insertNewEntry, [
-      Number(user_id),
-      id
-    ]);
+      await query(insertNewEntry, [
+        Number(user_id),
+        id
+      ]);
 
-    const tempStr = `Enrolled in trivia game - ${game.rows.length > 0 ? game.rows[0].title : ""}`
-    await query(
-      'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
-      [Number(user_id), tempStr]
-    );
+      await pool.query('UPDATE trivia_game SET spots_remaining = spots_remaining - 1, total_participants = total_participants + 1 WHERE id = $1', [id]);
+
+      await pool.query('UPDATE users SET last_active = $1 WHERE id = $2', [new Date(), Number(user_id)]);
+
+      const tempStr = `Enrolled in trivia game - ${game.rows.length > 0 ? game.rows[0].title : ""}`
+      await query(
+        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+        [Number(user_id), tempStr]
+      );
 
 
-    return NextResponse.json({ message: "Enrollment successful" }, { status: 200 });
+      return NextResponse.json({ message: "Enrollment successful" }, { status: 200 });
+
+    } else {
+      // No spots remaining, send an error response
+      return NextResponse.json({ message: 'No spots remaining' }, { status: 400 });
+    }
+
+
   } catch (error) {
     console.error('Error', error);
     return NextResponse.json({ message: 'Error Enrollment', error: error.message }, { status: 500 });

@@ -17,14 +17,20 @@ import {
     ModalBody,
     ModalFooter,
     Text,
+    Skeleton,
+    Avatar,
+    SkeletonCircle,
 } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Sidebar from "./sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import { UserContext } from "@/store/context/UserContext";
-import { auth } from "@/config/firebase";
+import { app, auth, storage } from "@/config/firebase";
 import { updatePassword, getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { initializeApp } from "firebase/app";
 
 export default function ProfilePage({ page }) {
     const { state: UserState, setUser } = useContext(UserContext);
@@ -38,6 +44,9 @@ export default function ProfilePage({ page }) {
     const [isPasswordResetVisible, setIsPasswordResetVisible] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const toast = useToast();
+    const [image, setImage] = useState(null)
+    const inputRef = useRef()
+    const [imageLoading, setImageLoading] = useState(true)
 
     useEffect(() => {
         if (UserState.value.data?.id) {
@@ -46,8 +55,9 @@ export default function ProfilePage({ page }) {
                 phone: UserState.value.data?.phone || "",
                 password: "",
                 confirmPassword: "",
-                currentPassword: "", 
+                currentPassword: "",
             });
+            getDisplayPicture()
         }
     }, [UserState.value.data]);
 
@@ -142,6 +152,104 @@ export default function ProfilePage({ page }) {
             });
     };
 
+
+    const handleImage = (event) => {
+        const fileList = Array.from(event.target.files);
+        uploadImage(fileList[0]);
+    };
+
+    const uploadImage = async (imageToUpload) => {
+        setImageLoading(true)
+
+        const metadata = {
+            contentType: "image/png",
+        };
+        const storageRef = ref(storage, `${UserState.value.data.email}/images/dp.png`);
+        const uploadTask = uploadBytesResumable(
+            storageRef,
+            imageToUpload,
+            metadata
+        );
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const progress =
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log("Upload is " + progress + "% done");
+                switch (snapshot.state) {
+                    case "paused":
+                        console.log("Upload is paused");
+                        break;
+                    case "running":
+                        console.log("Upload is running");
+                        break;
+                }
+            },
+            (error) => {
+                setImageLoading(false)
+                toast({
+                    title: "Error",
+                    description: "Error saving image",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            },
+            () => {
+                setImageLoading(false)
+                toast({
+                    title: "Picture Saved",
+                    description: "Profile picture updated successfully",
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    setImage(downloadURL);
+                });
+            },
+
+        );
+    };
+
+
+    async function getDisplayPicture() {
+
+        const imageRef = ref(storage, `${UserState.value.data.email}/images/dp.png`);
+        getDownloadURL(imageRef)
+            .then((url) => {
+                if (url) {
+                    setImage(url);
+                }
+            })
+            .catch((error) => {
+                console.log(error?.message)
+            }).finally(() => {
+                setImageLoading(false)
+            })
+    }
+
+
+    const RenderImage = useCallback(() => {
+        return (
+            <>
+                <Avatar _hover={{ cursor: 'pointer' }} size="4xl" src={image} name={UserState.value.data?.name} onClick={() => {
+                    if (inputRef.current) inputRef.current.click();
+                }} />
+                <input
+                    style={{ display: "none" }}
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple={false}
+                    onChange={(e) => handleImage(e)}
+                ></input>
+            </>
+
+        )
+    }, [image, imageLoading]);
+
     return (
         <>
             <Flex justify="center" align="center" minHeight="100vh" bg="white">
@@ -157,6 +265,11 @@ export default function ProfilePage({ page }) {
                         Profile Settings
                     </Heading>
                     <VStack spacing={4}>
+                        {imageLoading ?
+                            <SkeletonCircle size='40' />
+                            :
+                            <RenderImage />
+                        }
                         <VStack
                             align="flex-start"
                             bg="gray.50"

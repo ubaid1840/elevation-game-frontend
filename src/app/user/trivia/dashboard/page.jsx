@@ -29,7 +29,7 @@ export default function Page() {
   const [availableGames, setAvailableGames] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const toast = useToast();
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -51,27 +51,8 @@ export default function Page() {
     });
   }
 
- 
-
   const RenderEachGame = ({ game }) => {
     const [loading, setLoading] = useState(false);
-
-    async function handleEnroll() {
-      setLoading(true);
-      axios
-        .put(`/api/trivia/game/${game.id}`, {
-          user_id: UserState.value.data.id,
-        })
-        .then(() => {
-          router.push(`/user/trivia/enrolledgames/${game.id}`);
-        })
-        .catch((e) => {
-          console.log(e);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
 
     return (
       <GridItem
@@ -86,14 +67,19 @@ export default function Page() {
         <Heading size="md" mb={2}>
           {game.title}
         </Heading>
+        <Text fontSize="lg">Spots Available: {game.spots_remaining}</Text>
         <Text fontSize="lg">Entry fee: {game.fee}</Text>
+        {/* <Text fontSize="lg">
+          Start Date: {moment(new Date(game.start_date)).format("MM/DD/YYYY")}
+        </Text> */}
         <Text fontSize="lg">
           Deadline: {moment(new Date(game.deadline)).format("MM/DD/YYYY")}
         </Text>
 
         <Button
+          as={Link}
+          href={`/user/trivia/dashboard/enrollment/${game.id}`}
           isLoading={loading}
-          onClick={handleEnroll}
           mt={4}
           colorScheme="purple"
           variant="solid"
@@ -178,7 +164,11 @@ export default function Page() {
           <Grid templateColumns="repeat(3, 1fr)" gap={6}>
             {availableGames
               .filter((game) => {
-                if (game.deadline && moment(game.deadline).isBefore(moment(), "day"))
+                if (
+                  game.spots_remaining === 0 ||
+                  (game.deadline &&
+                    moment(game.deadline).isBefore(moment(), "day"))
+                )
                   return false;
                 return true;
               })

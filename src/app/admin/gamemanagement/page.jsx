@@ -166,13 +166,15 @@ const GameManagement = () => {
             title: item.title,
             fee: item.fee,
             prize: item.prize,
-            total_participants: item.total_enrollments,
+            spots_remaining : item.spots_remaining,
+            total_participants: item.total_participants,
           };
         })}
         columns={[
           { key: "title", value: "Name" },
           { key: "fee", value: "Entry Fee" },
           { key: "prize", value: "Grand Prize" },
+          { key: "spots_reamining", value: "Spots Remaining" },
           { key: "total_participants", value: "Total Participants" },
           { value: "Action" },
         ]}

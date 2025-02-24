@@ -38,18 +38,22 @@ export async function POST(req) {
         prize ,
         title ,
         questions ,
-        created_by 
+        created_by,
+        start_date,
+        category,
+        description,
+        spots_remaining,
     } = await req.json();
 
-    if (!deadline || !fee || !prize || !title || !questions || !created_by) {
+    if (!deadline || !fee || !prize || !title || !questions || !created_by || !start_date || !category  || !description || !spots_remaining) {
         return NextResponse.json({ message: "All fields are required" }, { status: 400 });
       }
 
       const localQuestions = questions.map((item, index)=> ({...item, id : index}))
 
     const newGame = await pool.query(
-      `INSERT INTO trivia_game (deadline, fee, prize, title, questions, created_by) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO trivia_game (deadline, fee, prize, title, questions, created_by, start_date, description, category, spots_remaining) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        RETURNING *`,
       [
         deadline,
@@ -57,7 +61,11 @@ export async function POST(req) {
         prize ,
         title ,
         localQuestions ,
-        created_by 
+        created_by,
+        start_date,
+        description,
+        category,
+        Number(spots_remaining)
       ]
     );
 

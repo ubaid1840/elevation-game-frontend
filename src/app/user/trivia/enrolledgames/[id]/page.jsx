@@ -49,6 +49,7 @@ export default function Page({ params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [correctAnswer, setCorrectAnswer] = useState("");
+  const [startTime, setStartTime] = useState(null);
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -116,13 +117,20 @@ export default function Page({ params }) {
   }
 
   useEffect(() => {
+    if (questions.length > 0 && currentIndex < questions.length) {
+      setStartTime(performance.now()); // Start tracking time in ms
+      setTimeLeft(questions[currentIndex].time * 1000); // Convert seconds to ms
+    }
+  }, [currentIndex, questions]);
+
+  useEffect(() => {
     if (timeLeft > 0) {
       if (!isModalOpen && !isLoading) {
-        const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        const timer = setTimeout(() => setTimeLeft((prev) => prev - 100), 100); // Decrease in 100ms intervals
         return () => clearTimeout(timer);
       }
     } else {
-      handleAnswer();
+      handleAnswer(); // If time runs out, auto-submit
     }
   }, [timeLeft, isModalOpen, isLoading]);
 
@@ -130,6 +138,10 @@ export default function Page({ params }) {
     if (questions.length === 0) return;
 
     setIsLoading(true);
+
+    const endTime = performance.now();
+    const timeTaken = Math.min(questions[currentIndex].time * 1000, endTime - startTime); // Calculate time spent in ms
+  
 
     const correct = questions[currentIndex].correct === selectedAnswer;
     setIsCorrect(correct);
@@ -139,7 +151,7 @@ export default function Page({ params }) {
     const questionData = {
       questionId: questions[currentIndex].id,
       answer: selectedAnswer,
-      timeTaken: questions[currentIndex].time - timeLeft,
+      timeTaken: Math.round(timeTaken), // Store in ms
       isCorrect: correct,
     };
 
@@ -154,7 +166,6 @@ export default function Page({ params }) {
       )
       .then(() => {
         if (currentIndex + 1 < questions.length) {
-         
           setSelectedAnswer(null);
           setIsLoading(false);
         } else {
@@ -210,7 +221,9 @@ export default function Page({ params }) {
                   Question: {questions[currentIndex].text}
                 </Text>
                 <Progress
-                  value={(timeLeft / questions[currentIndex].time) * 100}
+                  value={
+                    (timeLeft / (questions[currentIndex].time * 1000)) * 100
+                  }
                   size="sm"
                   colorScheme="purple"
                 />
@@ -235,11 +248,10 @@ export default function Page({ params }) {
         visible={isModalOpen}
         onClose={(val) => {
           setIsModalOpen(val);
-          if(currentIndex + 1 < questions.length){
+          if (currentIndex + 1 < questions.length) {
             setCurrentIndex(currentIndex + 1);
             setTimeLeft(questions[currentIndex + 1].time || 10);
           }
-       
         }}
         isCorrect={isCorrect}
         correctAnswer={correctAnswer}
@@ -321,7 +333,8 @@ const GameCard = ({ gameDetailData }) => {
 };
 
 const GameResult = ({ progress, questions }) => {
-  const totalTime = progress.reduce((acc, curr) => acc + curr.timeTaken, 0);
+  const totalTimeTaken = progress.reduce((acc, curr) => acc + curr.timeTaken, 0);
+  const totalTime = (totalTimeTaken / 1000).toFixed(2);
   const correctAnswers = progress.filter((p) => p.isCorrect).length;
   const totalQuestions = questions.length;
 
