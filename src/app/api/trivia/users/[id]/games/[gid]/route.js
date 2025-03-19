@@ -39,12 +39,18 @@ export async function GET(req, { params }) {
     const createdByName = createdByResult.rows[0]?.name || null;
     game.createdby = createdByName;
 
+    const questionResult = await query(
+      'SELECT id FROM trivia_questions WHERE game_id = $1',
+      [game.id]
+    );
+
     // Fetch additional judges if available
 
 
     const response = {
       enrollment,
       game,
+      total_questions : questionResult.rows.length
     };
 
     return NextResponse.json(response);

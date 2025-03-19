@@ -40,6 +40,7 @@ import { Calendar } from "primereact/calendar";
 import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -515,10 +516,15 @@ export default function Page({ params }) {
                     boxShadow="md"
                   >
                     <Stack spacing={4}>
-                      <Heading size="md" color="gray.700">
-                        {enrollment.user_name}
-                      </Heading>
-
+                      <HStack>
+                        <RenderProfilePicture
+                          name={enrollment.user_name}
+                          email={enrollment.user_email}
+                        />
+                        <Heading size="md" color="gray.700">
+                          {enrollment.user_name}
+                        </Heading>
+                      </HStack>
                       {enrollment.pitches.map(
                         (pitch, index) =>
                           pitch.round === currentRound && (

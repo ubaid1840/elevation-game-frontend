@@ -47,6 +47,7 @@ import { Calendar } from "primereact/calendar";
 import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
 
 export default function Page({ params }) {
   const [gameData, setGameData] = useState(null);
@@ -187,9 +188,10 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
             <AccordionItem key={enrollment.id}>
               <h2>
                 <AccordionButton m={2}>
-                  <Box as="span" flex="1" textAlign="left">
-                    {user_name || "Unknown User"}
-                  </Box>
+                <Flex flex="1" textAlign="left" alignItems={"center"}>
+                    <RenderProfilePicture email={user_email} name={user_name}/>
+                    <Text ml={2}>{user_name || "Unknown User"}</Text>
+                  </Flex>
                   <AccordionIcon />
                 </AccordionButton>
               </h2>

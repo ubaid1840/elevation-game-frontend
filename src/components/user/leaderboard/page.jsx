@@ -1,4 +1,5 @@
 "use client";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
 import Sidebar from "@/components/sidebar";
 import { UserContext } from "@/store/context/UserContext";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -76,9 +77,15 @@ export default function LeaderboardPage() {
               <Tr key={index} _hover={{ bg: "purple.50" }}>
                 <Td>{index + 1}</Td>
                 <Td>
-                  <Text fontWeight="bold" color="purple.600">
-                    {participant.name}
-                  </Text>
+                  <HStack>
+                    <RenderProfilePicture
+                      name={participant.name}
+                      email={participant.email}
+                    />
+                    <Text fontWeight="bold" color="purple.600">
+                      {participant.name}
+                    </Text>
+                  </HStack>
                 </Td>
                 <Td>{participant.game_title}</Td>
                 <Td>

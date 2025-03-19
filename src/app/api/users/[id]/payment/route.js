@@ -20,6 +20,14 @@ export async function POST(req, { params }) {
                 ["judge", subscription, expiry, paymentIntentId, new Date(), id]
             );
 
+            const promotionAmount = 750
+
+            await query(
+                `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+             VALUES ($1, $2, 'Completed', 'Promoted to judge', 'elevator')`,
+                [id, promotionAmount]
+            );
+
             await query(
                 'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
                 [id, `User promoted to judge`]
@@ -51,6 +59,12 @@ export async function POST(req, { params }) {
             )
 
             const amountToSave = Number(userPlan.rows[0].price)
+
+            await query(
+                `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+             VALUES ($1, $2, 'Completed', 'Subscription payment', 'elevator')`,
+                [id, amountToSave]
+            );
 
 
             const firstReferrerResult = await query(
@@ -93,11 +107,49 @@ export async function POST(req, { params }) {
                         'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
                         [amountToSave, referrer_id]
                     );
-                } else {
                     await query(
-                        'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
-                        [amountToSave, referrer_id]
+                        `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                     VALUES ($1, ($2 * 0.03), 'Completed', 'Silver subscription referral earning', 'elevator')`,
+                        [referrer_id, amountToSave]
                     );
+                } else {
+                    if(checkPlan === 'Platinum'){
+                        await query(
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
+                            [amountToSave, referrer_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.2), 'Completed', 'Tier1 20% subscription referral earning', 'elevator')`,
+                            [referrer_id, amountToSave]
+                        );
+                    } else if(checkPlan === 'Gold'){
+
+                        await query(
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
+                            [amountToSave, referrer_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier2 10% subscription referral earning', 'elevator')`,
+                            [referrer_id, amountToSave]
+                        );
+
+                    } else if(checkPlan === 'Iridium'){
+                        await query(
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
+                            [amountToSave, referrer_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier3 5% subscription referral earning', 'elevator')`,
+                            [referrer_id, amountToSave]
+                        );
+                    }
+                   
                 }
 
             }
@@ -107,10 +159,43 @@ export async function POST(req, { params }) {
                     [referrer2_id]
                 );
                 if (checkPlan !== 'Silver') {
-                    await query(
-                        'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
-                        [amountToSave, referrer2_id]
-                    );
+
+                    if(checkPlan === 'Platinum'){
+                        await query(
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.1) WHERE id = $2',
+                            [amountToSave, referrer2_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier1 10% subscription referral earning', 'elevator')`,
+                            [referrer2_id, amountToSave]
+                        );
+                    } else if(checkPlan === 'Gold'){
+
+                        await query(
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.05) WHERE id = $2',
+                            [amountToSave, referrer2_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier2 5% subscription referral earning', 'elevator')`,
+                            [referrer2_id, amountToSave]
+                        );
+
+                    } else if(checkPlan === 'Iridium'){
+                        await query(
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.025) WHERE id = $2',
+                            [amountToSave, referrer2_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier3 2.5% subscription referral earning', 'elevator')`,
+                            [referrer2_id, amountToSave]
+                        );
+                    }
                 }
             }
 
@@ -120,10 +205,42 @@ export async function POST(req, { params }) {
                     [referrer3_id]
                 );
                 if (checkPlan !== 'Silver') {
-                    await query(
-                        'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
-                        [amountToSave, referrer3_id]
-                    );
+                    if(checkPlan === 'Platinum'){
+                        await query(
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.05) WHERE id = $2',
+                            [amountToSave, referrer3_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier1 5% subscription referral earning', 'elevator')`,
+                            [referrer3_id, amountToSave]
+                        );
+                    } else if(checkPlan === 'Gold'){
+
+                        await query(
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.025) WHERE id = $2',
+                            [amountToSave, referrer3_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier2 2.5% subscription referral earning', 'elevator')`,
+                            [referrer3_id, amountToSave]
+                        );
+
+                    } else if(checkPlan === 'Iridium'){
+                        await query(
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.0125) WHERE id = $2',
+                            [amountToSave, referrer3_id]
+                        );
+    
+                        await query(
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
+                         VALUES ($1, ($2 * 0.0125), 'Completed', 'Tier3 1.25% subscription referral earning', 'elevator')`,
+                            [referrer3_id, amountToSave]
+                        );
+                    }
                 }
             }
 

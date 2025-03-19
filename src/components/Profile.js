@@ -31,6 +31,7 @@ import { updatePassword, getAuth, reauthenticateWithCredential, EmailAuthProvide
 import { getFirestore } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { initializeApp } from "firebase/app";
+import getDisplayPicture from "@/lib/getDisplayPicture";
 
 export default function ProfilePage({ page }) {
     const { state: UserState, setUser } = useContext(UserContext);
@@ -57,7 +58,11 @@ export default function ProfilePage({ page }) {
                 confirmPassword: "",
                 currentPassword: "",
             });
-            getDisplayPicture()
+            getDisplayPicture(UserState?.value?.data?.email).then((url)=>{
+                setImage(url)
+            }).finally(()=>{
+                setImageLoading(false)
+            })
         }
     }, [UserState.value.data]);
 
@@ -214,27 +219,12 @@ export default function ProfilePage({ page }) {
     };
 
 
-    async function getDisplayPicture() {
-
-        const imageRef = ref(storage, `${UserState.value.data.email}/images/dp.png`);
-        getDownloadURL(imageRef)
-            .then((url) => {
-                if (url) {
-                    setImage(url);
-                }
-            })
-            .catch((error) => {
-                console.log(error?.message)
-            }).finally(() => {
-                setImageLoading(false)
-            })
-    }
-
+   
 
     const RenderImage = useCallback(() => {
         return (
             <>
-                <Avatar _hover={{ cursor: 'pointer' }} size="4xl" src={image} name={UserState.value.data?.name} onClick={() => {
+                <Avatar _hover={{ cursor: 'pointer' }} height={200} width={200} src={image}  name={UserState.value.data?.name} onClick={() => {
                     if (inputRef.current) inputRef.current.click();
                 }} />
                 <input

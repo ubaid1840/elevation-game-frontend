@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Heading,
@@ -24,10 +24,14 @@ import {
   Select,
   Center,
   Spinner,
+  FormLabel,
+  Flex,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
+import TableData from "@/components/ui/TableData";
 
 export default function Page() {
   const [settings, setSettings] = useState([]);
@@ -40,16 +44,41 @@ export default function Page() {
     onOpen: onAddModalOpen,
     onClose: onAddModalClose,
   } = useDisclosure();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newPackage, setNewPackage] = useState("");
   const [newPackagePrice, setNewPackagePrice] = useState("");
-  const [dataLoading, setDataLoading] = useState(true);
 
   const packageOptions = ["Silver", "Iridium", "Gold", "Platinum"];
+  const [percentage, setPercentage] = useState("");
+  const [percentageID, setPercentageID] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  const toast = useToast();
+  const {
+    isOpen: isOpenCategory,
+    onOpen: onOpenCategory,
+    onClose: onCloseCategory,
+  } = useDisclosure();
+  const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
+    fetchCategories();
+    fetchTriviaSettings();
     fetchSettings();
   }, []);
+
+  async function fetchTriviaSettings() {
+    axios.get("/api/trivia/settings").then((response) => {
+      setPercentage(response.data.referral_incentive_percentage);
+      setPercentageID(response.data.id);
+    });
+  }
+
+  async function fetchCategories() {
+    axios.get("/api/categories").then((response) => {
+      setCategories(response.data);
+    });
+  }
 
   async function fetchSettings() {
     axios
@@ -58,7 +87,7 @@ export default function Page() {
         setSettings(response.data);
       })
       .finally(() => {
-        setDataLoading(false);
+        setLoading(false);
       });
   }
 
@@ -82,8 +111,10 @@ export default function Page() {
           fetchSettings();
           onClose();
         });
+      callSuccessToast();
     } catch (error) {
       console.error("Error updating setting:", error);
+      callFailedToast();
     } finally {
       setLoading(false);
     }
@@ -112,16 +143,100 @@ export default function Page() {
     }
   };
 
+  async function handleUpdateTriviaSettings() {
+    setLoading(true);
+    try {
+      await axios
+        .put(`/api/trivia/settings`, {
+          percentage: percentage,
+          id: percentageID,
+        })
+        .then(() => {
+          fetchTriviaSettings();
+          callSuccessToast();
+        });
+    } catch (error) {
+      console.error("Error updating trivia settings:", error);
+      callFailedToast();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function callSuccessToast() {
+    toast({
+      title: "Setting Updated",
+      description: "Setting has been updated successfully",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+  }
+  function callFailedToast() {
+    toast({
+      title: "Setting Update Failed",
+      description: "Setting update failed. Please try again.",
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  }
+
+  const handleAddNewCategory = () => {
+    setLoading(true);
+    axios
+      .post("/api/categories", { value: newCategory })
+      .then(() => {
+        onCloseCategory();
+        fetchCategories();
+        callSuccessToast();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleDeleteCategory = (val) => {
+    axios
+      .delete(`/api/categories/${val}`)
+      .then(() => {
+        onCloseCategory();
+        fetchCategories();
+        callSuccessToast();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const RenderCategoriesTable = useCallback(() => {
+    const [currentPage, setCurrentPage] = useState(1);
+    return (
+      <TableData
+        data={categories}
+        columns={[{ key: "value", value: "Name" }]}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        button={true}
+        buttonText={"Remove"}
+        onButtonClick={(val) => {
+          setLoading(true);
+          handleDeleteCategory(val);
+        }}
+      />
+    );
+  }, [categories]);
+
   return (
     <>
-      {dataLoading ? (
+      {loading ? (
         <Center w={"100%"} height={"100vh"}>
           <Spinner />
         </Center>
       ) : (
         <Box p={8} bg="white">
           <Heading mb={6} color="purple.700">
-            Settings
+            Package Settings
           </Heading>
           {availablePackages?.length > 0 && (
             <Button colorScheme="green" mb={4} onClick={onAddModalOpen}>
@@ -164,6 +279,42 @@ export default function Page() {
               )}
             </Tbody>
           </Table>
+
+          <Heading my={6} color="purple.700">
+            Trivia Settings
+          </Heading>
+
+          <Stack spacing={4}>
+            <FormLabel>Referral incentive percentage</FormLabel>
+            <Flex>
+              <Input
+                type="number"
+                placeholder="Enter referral incentive percentage"
+                value={percentage ? percentage : ""}
+                onChange={(e) => {
+                  setPercentage(Number(e.target.value));
+                }}
+              />
+              <Button
+                isDisabled={!percentage}
+                colorScheme="blue"
+                ml={3}
+                onClick={handleUpdateTriviaSettings}
+              >
+                Update
+              </Button>
+            </Flex>
+          </Stack>
+
+          <Heading my={6} color="purple.700">
+            Categories
+          </Heading>
+
+          <Button colorScheme="blue" onClick={onOpenCategory}>
+            Add New Category
+          </Button>
+
+          <RenderCategoriesTable />
 
           <Modal isOpen={isAddModalOpen} onClose={onAddModalClose}>
             <ModalOverlay />
@@ -237,6 +388,31 @@ export default function Page() {
                   onClick={handleSaveSetting}
                 >
                   Update Setting
+                </Button>
+                <Button ml={3} onClick={onClose}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal isOpen={isOpenCategory} onClose={onCloseCategory}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Add New Category</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Stack spacing={4}>
+                  <Input
+                    placeholder="Category name"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                  />
+                </Stack>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="blue" onClick={handleAddNewCategory}>
+                  Save
                 </Button>
                 <Button ml={3} onClick={onClose}>
                   Cancel

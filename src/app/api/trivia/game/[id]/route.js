@@ -104,18 +104,25 @@ export async function GET(req, { params }) {
       `
       SELECT 
           tge.*, 
-          COALESCE(u2.name, NULL) AS user_name
+          COALESCE(u2.name, NULL) AS user_name,
+          COALESCE(u2.email, NULL) AS user_email
       FROM trivia_game_enrollment tge
       LEFT JOIN users u2 ON tge.user_id = u2.id
       WHERE tge.game_id = $1;
       `,
       [id]
     );
+    
+
+    const questions = await query (
+      `SELECT * from trivia_questions WHERE game_id = $1`, [id]
+    )
   
     return NextResponse.json(
       {
         game: gameData.rows[0] || {},
         enrollments: enrollments.rows || [],
+        questions : questions.rows || []
       },
       { status: 200 }
     );

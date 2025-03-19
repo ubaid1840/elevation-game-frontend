@@ -105,7 +105,7 @@ export default function Page() {
           boxShadow="md"
           mb={8}
         >
-          <Heading>Welcome, {UserState.value.data?.name}</Heading>
+          <Heading>Welcome To Trivia Dashboard, {UserState.value.data?.name}</Heading>
           <Text mt={4} fontSize="lg">
             {`Here's a quick look at your game progress and referral stats.`}
           </Text>

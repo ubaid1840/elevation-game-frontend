@@ -11,6 +11,7 @@ import { TbReport } from "react-icons/tb";
 import { PiNetworkDuotone } from "react-icons/pi";
 import { VscGame } from "react-icons/vsc";
 import { SiGotomeeting } from "react-icons/si";
+import { MdMultilineChart } from "react-icons/md";
 
 const GetLinkItems = (role, type) => {
     switch (role) {
@@ -36,6 +37,16 @@ const GetLinkItems = (role, type) => {
                     icon: BsCashStack,
                     path: `/admin/finance`,
                 },
+                {
+                    name: "Analytics",
+                    icon: TbReport,
+                    path: `/admin/analytics`,
+                },
+                {
+                    name: "Traffic",
+                    icon: MdMultilineChart,
+                    path: `/admin/traffic`,
+                },
             ];
             case 'judge':
             return [
@@ -58,6 +69,16 @@ const GetLinkItems = (role, type) => {
                     name: "Meeting",
                     icon: SiGotomeeting ,
                     path: `/judge/${type}/meeting`,
+                },
+                {
+                    name: "My Earning",
+                    icon: GiTakeMyMoney,
+                    path: `/judge/${type}/myearning`,
+                },
+                {
+                    name: "Network",
+                    icon: PiNetworkDuotone ,
+                    path: `/judge/${type}/network`,
                 },
                 
             ];

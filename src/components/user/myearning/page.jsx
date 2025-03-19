@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "@/components/sidebar";
+import TableData from "@/components/ui/TableData";
 import { UserContext } from "@/store/context/UserContext";
 import GetLinkItems from "@/utils/SideBarItems";
 import {
@@ -17,132 +18,125 @@ import {
   useToast,
   Checkbox,
 } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import moment from "moment";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 
-export default function MyEarningPage() {
+export default function Page() {
   const { state: UserState } = useContext(UserContext);
-  const [earnings, setEarnings] = useState(null);
   const [csvData, setCsvData] = useState([]);
+  const [winnings, setWinnings] = useState(0);
+  const [earnings, setEarnings] = useState(0);
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     if (UserState.value.data?.id) {
-      const tier1 = Number(UserState.value.data.tier1 || 0);
-      const tier2 = Number(UserState.value.data.tier2 || 0);
-      const tier3 = Number(UserState.value.data.tier3 || 0);
-      const winner = Number(UserState.value.data.winner_earnings || 0);
-      setEarnings({
-        totalEarnings: tier1 + tier2 + tier3 + winner,
-        tieredIncome: [
-          { tier: "Tier 1", percentage: 20, amount: tier1 },
-          { tier: "Tier 2", percentage: 10, amount: tier2 },
-          { tier: "Tier 3", percentage: 5, amount: tier3 },
-        ],
-      });
+      fetchData(UserState.value.data.id);
     }
   }, [UserState.value.data]);
 
-  useEffect(() => {
-    if (earnings) {
-      setCsvData([
-        ["Tier", "Percentage", "Amount"],
-        ...earnings.tieredIncome.map((income) => [
-          income.tier,
-          income.percentage + "%",
-          `$${income.amount}`,
+  async function fetchData(id) {
+    axios.get(`/api/users/${id}/earning`).then((response) => {
+      const tempData = response.data.map((item) => {
+        let transactionType = item.transaction_type;
+
+        return {
+          id: item.id,
+          amount:
+            transactionType.includes("entry") ||
+            transactionType.includes("payment")
+              ? -Math.abs(item.amount)
+              : Math.abs(item.amount),
+          transaction_type: transactionType,
+          created_at: moment(new Date(item.created_at)).format("DD/MM/YYYY"),
+        };
+      });
+
+      setTableData(tempData);
+
+      const transactions = response.data;
+      const winnings = [];
+      const earnings = [];
+      let totalWinnings = 0;
+      let totalEarnings = 0;
+
+      transactions.forEach((transaction) => {
+        if (transaction.transaction_type.includes("winning")) {
+          winnings.push(transaction);
+          totalWinnings += Number(transaction.amount);
+        } else if (transaction.transaction_type.includes("referral")) {
+          earnings.push(transaction);
+          totalEarnings += Number(transaction.amount);
+        }
+      });
+
+      setWinnings(totalWinnings.toFixed(2));
+      setEarnings(totalEarnings.toFixed(2));
+      const csvFormattedData = [
+        ["Amount", "Reason", "Date"],
+        ...tempData.map((tx) => [
+          tx.amount,
+          tx.transaction_type,
+          tx.created_at,
         ]),
-      ]);
-    }
-  }, [earnings]);
+      ];
 
-  // const [emailNotifications, setEmailNotifications] = useState(false);
-  // const toast = useToast();
+      setCsvData(csvFormattedData);
+    });
+  }
 
-  // const handleToggleEmailNotifications = () => {
-  //   setEmailNotifications(!emailNotifications);
-  //   toast({
-  //     title: "Notification Preference Updated",
-  //     description: emailNotifications
-  //       ? "You will no longer receive email notifications."
-  //       : "You will receive email notifications.",
-  //     status: "info",
-  //     duration: 3000,
-  //     isClosable: true,
-  //   });
-  // };
+  const RenderTableData = useCallback(() => {
+    const [currentPage, setCurrentPage] = useState(1);
+    return (
+      <Box w={"100%"}>
+        <TableData
+          data={tableData}
+          columns={[
+            { key: "amount", value: "Amount ($)" },
+            { key: "transaction_type", value: "Reason" },
+            { key: "created_at", value: "Date" },
+          ]}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      </Box>
+    );
+  }, [tableData]);
 
   return (
-    <>
-      <Box p={8}>
-        <VStack spacing={6} align="start">
-          {/* Earnings Header */}
-          <Heading size="lg" color="purple.700">
-            My Earnings
-          </Heading>
-          <Divider borderColor="purple.400" />
+    <Box p={8}>
+      <VStack spacing={6} align="start">
+        {/* Earnings Header */}
+        <Heading size="lg" color="purple.700">
+          My Earnings
+        </Heading>
+        <Divider borderColor="purple.400" />
 
-          {/* Overview Section */}
-          <Text fontSize="md">
-            Participants can earn up to <strong>35%</strong> of any upgrades
-            based on their unique referral numbers.
-          </Text>
+      
 
-          {/* Total Earnings */}
-          <Stat>
-            <StatLabel fontSize="lg">Total Earnings</StatLabel>
-            <StatNumber fontSize="2xl" color="green.500">
-              ${earnings?.totalEarnings}
-            </StatNumber>
-          </Stat>
+        {/* Total Earnings */}
+        <Stat>
+          <StatLabel fontSize="lg">Total game winnings</StatLabel>
+          <StatNumber fontSize="2xl" color="green.500">
+            ${winnings}
+          </StatNumber>
+        </Stat>
 
-          {/* Tiered Income Breakdown */}
-          <Heading size="md" color="purple.600">
-            Tiered Income Breakdown
-          </Heading>
-          <SimpleGrid columns={2} spacing={4} width="100%">
-            {earnings?.tieredIncome &&
-              earnings.tieredIncome.map((income, index) => (
-                <Box
-                  key={index}
-                  p={4}
-                  bg="gray.100"
-                  borderRadius="lg"
-                  boxShadow="md"
-                >
-                  <Text fontSize="lg">{income.tier}</Text>
-                  <Text fontSize="md" color="gray.600">
-                    Earn {income.percentage}%: ${income.amount}
-                  </Text>
-                </Box>
-              ))}
-          </SimpleGrid>
+        <Stat>
+          <StatLabel fontSize="lg">Total users referral earnings</StatLabel>
+          <StatNumber fontSize="2xl" color="green.500">
+            ${earnings}
+          </StatNumber>
+        </Stat>
 
-          {/* Earnings Dashboard */}
-          <Heading size="md" color="purple.600" mt={6}>
-            Earnings Dashboard
-          </Heading>
-          <Text fontSize="md">
-            Visual representation of your participant network will be here.
-          </Text>
-
-          {/* Report Export Feature */}
-          {csvData.length > 0 && (
-            <CSVLink data={csvData} filename="earnings_report.csv">
-              <Button colorScheme="purple">Export Earnings Report (CSV)</Button>
-            </CSVLink>
-          )}
-
-          {/* Email Notifications */}
-          {/* <HStack spacing={4} mt={4}>
-            <Checkbox
-              isChecked={emailNotifications}
-              onChange={handleToggleEmailNotifications}
-            >
-              Receive email notifications for earnings updates and new referrals
-            </Checkbox>
-          </HStack> */}
-        </VStack>
-      </Box>
-    </>
+        {csvData.length > 0 && (
+          <CSVLink data={csvData} filename="earnings_report.csv">
+            <Button colorScheme="purple">Export Earnings Report (CSV)</Button>
+          </CSVLink>
+        )}
+        <RenderTableData />
+      </VStack>
+    </Box>
   );
 }

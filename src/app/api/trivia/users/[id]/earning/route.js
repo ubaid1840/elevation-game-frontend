@@ -12,8 +12,10 @@ export async function GET(req, { params }) {
                    COALESCE(tg.title, NULL) AS game_title
             FROM transactions t
             LEFT JOIN trivia_game tg ON t.game_id = tg.id
+            WHERE t.user_id = $1 
+              AND t.game_type <> 'elevator'
             ORDER BY t.created_at DESC
-        `);
+        `, [id]);
 
         return NextResponse.json(transactions.rows, { status: 200 });
     } catch (error) {

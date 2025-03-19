@@ -20,10 +20,21 @@ export async function PUT(req, { params }) {
         }
 
         await query(
-            "UPDATE trivia_game_enrollment SET payment_intent_id = $1 WHERE user_id = $2 AND game_id = $3",
-            [payment_intent_id, id, gid]
+            "UPDATE trivia_game_enrollment SET payment_intent_id = $1, payment_date = $2 WHERE user_id = $3 AND game_id = $4",
+            [payment_intent_id, new Date(), id, gid]
         );
 
+
+
+        await query(
+            `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
+             SELECT $1, fee, 'Trivia game entry fee', id, 'Completed', 'trivia'
+             FROM trivia_game WHERE id = $2`,
+            [id, gid]
+        );
+
+        const result = await query(`SELECT percentage FROM trivia_settings`);
+        const percentage = result.rows[0].percentage;
         const referrerResult = await query(
             "SELECT referrer_id FROM referrals WHERE referred_id = $1",
             [id]
@@ -41,19 +52,19 @@ export async function PUT(req, { params }) {
             if (gameResult.rows.length > 0) {
                 const fee = gameResult.rows[0].fee;
                 const title = gameResult.rows[0].title
-                const commission = (3 / 100) * Number(fee);
+                const commission = (Number(percentage) / 100) * Number(fee);
 
 
                 await query(
                     `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
-                 VALUES ($1, $2, $3, 'Completed', 'trivia', '3% earning')`,
+                 VALUES ($1, $2, $3, 'Completed', 'trivia', 'Trivia game referral earning')`,
                     [referrer_id, commission, gid]
                 );
                 const tempStr = `Made payment of $${fee || ""} for trivia game - ${title || ""}`
                 await query(
                     'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
                     [id, tempStr]
-                  );
+                );
             }
 
 

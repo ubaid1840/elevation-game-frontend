@@ -143,11 +143,11 @@ export default function CreateTriviaGame({ page }) {
 
     if (!gameName.trim()) missing.push("Game Name");
     if (!deadline) missing.push("Deadline");
-    if (!fee) missing.push("Entry Fee");
+    if (!fee || Number(fee) == 0) missing.push("Entry Fee cannot be zero or empty");
     if (!prize) missing.push("Prize");
     if (!category) missing.push("Category")
     if (!startDate) missing.push("Start Date")
-    if (!spots) missing.push("Total Spots")
+    if (!spots || Number(spots) == 0) missing.push("Total Spots cannot be zero or empty")
 
 
     if (questions.length === 0) {

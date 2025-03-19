@@ -70,11 +70,12 @@ export async function GET(req, { params }) {
     // Replace user_id in enrollments with user names
     for (const enrollment of enrollments) {
       const userResult = await pool.query(
-        `SELECT name FROM users WHERE id = $1`,
+        `SELECT name, email FROM users WHERE id = $1`,
         [enrollment.user_id]
       );
       const user = userResult.rows[0];
       enrollment.user_name = user?.name || 'Unknown';
+      enrollment.user_email = user?.email || "Unknown"
 
       // Fetch pitches associated with this user
       const pitchResult = await pool.query(

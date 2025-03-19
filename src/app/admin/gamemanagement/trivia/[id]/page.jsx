@@ -37,6 +37,7 @@ import {
   AccordionPanel,
   AccordionItem,
   AccordionIcon,
+  Avatar,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
@@ -47,6 +48,8 @@ import { Calendar } from "primereact/calendar";
 import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import getDisplayPicture from "@/lib/getDisplayPicture";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
 
 export default function Page({ params }) {
   const [gameData, setGameData] = useState(null);
@@ -63,9 +66,8 @@ export default function Page({ params }) {
 
   async function fetchData() {
     axios
-      .get(`/api/trivia/game/${params.id}`)
+      .get(`/api/trivia/game/${params.id}`) 
       .then((response) => {
-        // console.log(response.data);
         setGameData(response.data);
       })
       .catch((e) => {
@@ -94,14 +96,14 @@ export default function Page({ params }) {
         <Leaderboard
           enrollments={gameData?.enrollments || []}
           totalQuestions={
-            gameData?.game?.questions ? gameData?.game?.questions.length : 0
+            gameData?.questions ? gameData?.questions.length : 0
           }
         />
       </Flex>
       <Divider my={4} />
       <UserResultsAccordion
         enrollments={gameData?.enrollments || []}
-        questions={gameData?.game?.questions || []}
+        questions={gameData?.questions || []}
       />
     </Box>
   );
@@ -173,6 +175,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
 };
 
 const UserResultsAccordion = ({ enrollments, questions }) => {
+
   return (
     <>
       <Text fontWeight={"bold"} fontSize={"2xl"} color="purple.500" my={2}>
@@ -180,15 +183,16 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
       </Text>
       <Accordion allowMultiple>
         {enrollments.map((enrollment) => {
-          const { user_name, progress } = enrollment;
-
+          const { user_name, progress, user_email } = enrollment;
+        
           return (
             <AccordionItem key={enrollment.id}>
               <h2>
                 <AccordionButton m={2}>
-                  <Box as="span" flex="1" textAlign="left">
-                    {user_name || "Unknown User"}
-                  </Box>
+                  <Flex flex="1" textAlign="left" alignItems={"center"}>
+                    <RenderProfilePicture email={user_email} name={user_name}/>
+                    <Text ml={2}>{user_name || "Unknown User"}</Text>
+                  </Flex>
                   <AccordionIcon />
                 </AccordionButton>
               </h2>
@@ -196,10 +200,10 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
                 <VStack spacing={4} align="stretch">
                   {questions.map((question, index) => {
                     const userProgress = progress?.find(
-                      (p) => p.questionId === question.id
+                      (p) => p.question_id === question.id
                     );
                     const isCorrect = userProgress?.isCorrect;
-                    const selectedAnswer = userProgress?.answer;
+                    const selectedAnswer = userProgress?.selected_option;
 
                     return (
                       <Box
@@ -237,8 +241,8 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
                                     colorScheme={isCorrect ? "green" : "red"}
                                   >
                                     {isCorrect
-                                      ? "Your Answer ✔️"
-                                      : "Your Answer ❌"}
+                                      ? "Selected Answer ✔️"
+                                      : "Selected Answer ❌"}
                                   </Badge>
                                 )}
                                 {option === question.correct && !isCorrect && (
@@ -269,11 +273,11 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
       const correctAnswers = enrollment?.progress?.filter(
         (p) => p.isCorrect
       ).length;
-      const totalTimeTaken = enrollment?.progress?.reduce(
-        (acc, curr) => acc + Number(curr.timeTaken || 0),
+      const totalTime = enrollment?.progress?.reduce(
+        (acc, curr) => acc + Number(curr.time_taken || 0),
         0
       );
-      const totalTime = (totalTimeTaken / 1000).toFixed(2);
+    
 
       return {
         user_name: enrollment.user_name || "Unknown User",

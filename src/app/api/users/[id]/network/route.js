@@ -1,4 +1,4 @@
-import {query} from '@/lib/db';
+import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
@@ -15,6 +15,7 @@ export async function GET(req, { params }) {
         SELECT 
           u.id,
           u.name,
+          u.email,
           u.referral_count AS referrals,
           r.referrer_id,
           r.referred_id,
@@ -28,6 +29,7 @@ export async function GET(req, { params }) {
         SELECT 
           u.id,
           u.name,
+          u.email,
           u.referral_count AS referrals,
           r.referrer_id,
           r.referred_id,
@@ -36,7 +38,7 @@ export async function GET(req, { params }) {
         JOIN referrals r ON u.id = r.referred_id
         JOIN referral_tree ON r.referrer_id = referral_tree.id
       )
-      SELECT id, name, referrals, level FROM referral_tree ORDER BY level, id;
+      SELECT id, name, email, referrals, level FROM referral_tree ORDER BY level, id;
     `;
 
     // Run query
@@ -44,13 +46,19 @@ export async function GET(req, { params }) {
 
     // Helper function to build the tree structure
     const buildTree = (data) => {
-      const root = { name: data[0].name, children: [] };
+      const root = {
+        name: data[0].name, 
+        attributes: {
+          email: data[0].email,
+        }, 
+        children: []
+      };
       const refMap = { 1: root };
 
       data.slice(1).forEach((item) => {
         const node = {
           name: item.name,
-          attributes: { referrals: item.referrals },
+          attributes: { referrals: item.referrals, email: item.email },
           children: [],
         };
         refMap[item.level - 1].children.push(node);

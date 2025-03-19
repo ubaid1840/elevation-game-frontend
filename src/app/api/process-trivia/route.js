@@ -36,9 +36,8 @@ export async function GET() {
         const userScores = enrollmentsResult.rows.map((enrollment) => {
           const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
           const correctAnswers = progress.filter((p) => p.isCorrect).length;
-          const totalTimeTaken = progress.reduce((acc, p) => acc + (Number(p.timeTaken) || 0), 0);
-          const totalTime = (totalTimeTaken / 1000).toFixed(2);
-
+          const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
+         
           return { user_id: enrollment.user_id, correctAnswers, totalTime };
         });
 
@@ -58,7 +57,7 @@ export async function GET() {
 
         await query(
           `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
-           VALUES ($1, $2, 'winning', $3, 'Completed', 'trivia')`,
+           VALUES ($1, $2, 'Trivia game winning', $3, 'Completed', 'trivia')`,
           [winner.user_id, prize, gameId]
         );
 

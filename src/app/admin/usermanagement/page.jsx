@@ -70,7 +70,6 @@ const UserManagement = () => {
 
   async function handleLogs(id) {
     axios.get(`/api/users/${id}/logs`).then((response) => {
-      console.log(response.data);
       setLogs(response.data);
     });
   }
@@ -114,7 +113,6 @@ const UserManagement = () => {
   }
 
   const RenderTable = useCallback(() => {
-    console.log("called");
     return (
       <TableData
         special={true}

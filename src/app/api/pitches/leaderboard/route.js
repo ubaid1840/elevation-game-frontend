@@ -5,13 +5,13 @@ export async function GET() {
   try {
     // Retrieve top 10 pitches with user names and game titles
     const result = await query(
-      `SELECT pitches.*, users.name, games.title AS game_title 
+      `SELECT pitches.*, users.name, users.email, games.title AS game_title 
        FROM pitches 
        JOIN users ON pitches.user_id = users.id 
        JOIN games ON pitches.game_id = games.id
        ORDER BY pitches.score DESC 
        LIMIT 10`
-    );
+    );    
 
     // Return the pitches data, including user name and game title
     return NextResponse.json(result.rows, { status: 200 });

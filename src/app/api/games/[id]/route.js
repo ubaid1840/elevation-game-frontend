@@ -85,6 +85,13 @@ export async function PUT(req, { params }) {
         [id, winnerid]
       );
 
+      await query(
+        `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
+         SELECT $1, prize_amount, id, 'Completed', 'elevator', 'Elevator game winning'
+         FROM games WHERE id = $2`,
+        [winnerid, id]
+    );
+
       const updatedGame = await pool.query(
         `UPDATE games 
          SET winner = $1 

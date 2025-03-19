@@ -40,6 +40,7 @@ import { Calendar } from "primereact/calendar";
 import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -100,6 +101,7 @@ export default function Page({ params }) {
     axios
       .get(`/api/games/${params.id}/judge`)
       .then((response) => {
+        console.log(response.data);
         setGameData(response.data);
         setCurrentRound(Number(response.data.currentround || 1));
       })
@@ -455,9 +457,15 @@ export default function Page({ params }) {
                     boxShadow="md"
                   >
                     <Stack spacing={4}>
-                      <Heading size="md" color="gray.700">
-                        {enrollment.user_name}
-                      </Heading>
+                      <HStack>
+                        <RenderProfilePicture
+                          email={enrollment?.user_email}
+                          name={enrollment?.user_name}
+                        />
+                        <Heading size="md" color="gray.700">
+                          {enrollment.user_name}
+                        </Heading>
+                      </HStack>
 
                       {enrollment.pitches.map(
                         (pitch, index) =>
@@ -830,7 +838,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
-               minDate={new Date()}
+                minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {
@@ -885,7 +893,7 @@ export default function Page({ params }) {
               px={4}
             >
               <Calendar
-               minDate={new Date()}
+                minDate={new Date()}
                 id="deadline"
                 value={deadline}
                 onChange={(e) => {

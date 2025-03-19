@@ -28,6 +28,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  FormLabel,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -38,19 +39,22 @@ import Link from "next/link";
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
-  const [triviaGames, setTriviaGames] = useState([])
+  const [triviaGames, setTriviaGames] = useState([]);
   const pathname = usePathname();
   const router = useRouter();
   const [filter, setFilter] = useState("");
   const [triviaFilter, setTriviaFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [triviaCurrentPage, setTriviaCurrentPage] = useState(1)
+  const [triviaCurrentPage, setTriviaCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchData();
-    fetchTriviaData()
+    fetchTriviaData();
+
   }, []);
+
+ 
 
   async function fetchData() {
     axios
@@ -63,22 +67,22 @@ const GameManagement = () => {
       });
   }
 
-  async function fetchTriviaData(){
-    axios.get("/api/trivia/game/admin")
-    .then((response)=>{
-      console.log(response.data)
-      setTriviaGames(response.data)
-    })
+  async function fetchTriviaData() {
+    axios.get("/api/trivia/game/admin").then((response) => {
+    
+      setTriviaGames(response.data);
+    });
   }
 
- 
   const filteredGames = games.filter((game) => {
     const matchesName = game.title.toLowerCase().includes(filter.toLowerCase());
     return matchesName;
   });
 
   const filteredGamesTrivia = triviaGames.filter((game) => {
-    const matchesName = game.title.toLowerCase().includes(triviaFilter.toLowerCase());
+    const matchesName = game.title
+      .toLowerCase()
+      .includes(triviaFilter.toLowerCase());
     return matchesName;
   });
 
@@ -116,8 +120,6 @@ const GameManagement = () => {
       alert("Game link copied to clipboard!");
     });
   }
-
- 
 
   const RenderTable = useCallback(() => {
     return (
@@ -166,7 +168,7 @@ const GameManagement = () => {
             title: item.title,
             fee: item.fee,
             prize: item.prize,
-            spots_remaining : item.spots_remaining,
+            spots_remaining: item.spots_remaining,
             total_participants: item.total_participants,
           };
         })}
@@ -231,19 +233,22 @@ const GameManagement = () => {
               value={triviaFilter}
               onChange={(e) => setTriviaFilter(e.target.value)}
             />
-
-            <Button
-              as={Link}
-              href={`${pathname}/creategame/trivia`}
-              colorScheme="purple"
+           
+              <Button
               my={4}
-            >
-              Add New Game
-            </Button>
+                as={Link}
+                href={`${pathname}/creategame/trivia`}
+                colorScheme="purple"
+              >
+                Add New Game
+              </Button>
+           
             <RenderTableTrivia />
           </TabPanel>
         </TabPanels>
       </Tabs>
+
+     
     </Box>
   );
 };

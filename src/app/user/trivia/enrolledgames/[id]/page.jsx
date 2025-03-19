@@ -25,6 +25,9 @@ import {
   ModalBody,
   ModalFooter,
   Spinner,
+  HStack,
+  Flex,
+  Spacer,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
@@ -38,10 +41,10 @@ export default function Page({ params }) {
   const toast = useToast();
 
   const [gameDetailData, setGameDetailData] = useState(null);
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [progress, setProgress] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,12 @@ export default function Page({ params }) {
   const [isCorrect, setIsCorrect] = useState(null);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [startTime, setStartTime] = useState(null);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [questionLoading, setQuestionLoading] = useState(true);
+  const [myGameResult, setMyGameResult] = useState();
+  const [instructions, setInstructions] = useState([])
+  const [hasAnswered, setHasAnswered] = useState(false);
+
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -64,43 +73,42 @@ export default function Page({ params }) {
     []
   );
 
-  const shuffleArray = (array) => {
-    return array
-      .map((item) => ({
-        ...item,
-        options: item.options.sort(() => Math.random() - 0.5),
-      }))
-      .sort(() => Math.random() - 0.5);
-  };
+  async function fetchQuestion(id) {
+    try {
+      const response = await axios.get(
+        `/api/trivia/users/${id}/games/${params.id}/question`
+      );
+      if (!response.data?.message) {
+        setQuestions(response.data);
+        setTimeLeft(response.data.time * 1000);
+      } else {
+        setQuestions({});
+        fetchMyGameResult(id);
+      }
+    } catch (e) {
+      console.log("Error fetching questions:", e.message);
+      toast({
+        title: e?.response?.data?.message || e?.message,
+        status: "error",
+      });
+      // router.push("/user/trivia/enrolledgames");
+    } finally {
+      setLoading(false);
+      setHasAnswered(false)
+    }
+  }
 
   async function fetchData(id) {
     try {
       const response = await axios.get(
         `/api/trivia/users/${id}/games/${params.id}`
       );
-
       if (response.data?.enrollment?.payment_intent_id) {
+        setInstructions(response.data?.game?.description.split("\n"))
         setGameDetailData(response.data);
-
-        let shuffledQuestions = shuffleArray(response.data.game.questions);
-
         const userProgress = response.data.enrollment.progress || [];
-        setProgress(userProgress);
-
-        const remainingQuestions = shuffledQuestions.filter(
-          (q) =>
-            !userProgress.some((p) => Number(p.questionId) === Number(q.id))
-        );
-
-        if (remainingQuestions.length > 0) {
-          setLoading(false);
-          setQuestions(remainingQuestions);
-          setCurrentIndex(0);
-          setTimeLeft(remainingQuestions[0].time || 10);
-        } else {
-          setLoading(false);
-          toast({ title: "You have completed this game!", status: "info" });
-        }
+        setTotalQuestions(response.data.total_questions - userProgress.length);
+        fetchQuestion(id);
       } else {
         router.push(
           `/triviapayment?g=${params.id}&fee=${response.data.game.fee}`
@@ -116,81 +124,78 @@ export default function Page({ params }) {
     }
   }
 
-  useEffect(() => {
-    if (questions.length > 0 && currentIndex < questions.length) {
-      setStartTime(performance.now()); // Start tracking time in ms
-      setTimeLeft(questions[currentIndex].time * 1000); // Convert seconds to ms
-    }
-  }, [currentIndex, questions]);
+  async function fetchMyGameResult(id) {
+    axios
+      .get(`/api/trivia/users/${id}/games/${params.id}/result`)
+      .then((response) => {
+        console.log(response.data);
+        setMyGameResult(response.data);
+      });
+  }
+
+  // useEffect(() => {
+  //   if (questions) {
+  //     setStartTime(performance.now());
+  //     setTimeLeft(questions[currentIndex].time * 1000); // Convert seconds to ms
+  //   }
+  // }, [currentIndex, questions]);
 
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (timeLeft && timeLeft > 0) {
       if (!isModalOpen && !isLoading) {
         const timer = setTimeout(() => setTimeLeft((prev) => prev - 100), 100); // Decrease in 100ms intervals
         return () => clearTimeout(timer);
       }
-    } else {
-      handleAnswer(); // If time runs out, auto-submit
+    }else if (!hasAnswered) {
+      setHasAnswered(true);
+      handleAnswer();
     }
-  }, [timeLeft, isModalOpen, isLoading]);
+  }, [timeLeft, isModalOpen, isLoading, hasAnswered]);
 
   const handleAnswer = async () => {
-    if (questions.length === 0) return;
+    if (!questions.question_id) return;
 
     setIsLoading(true);
 
-    const endTime = performance.now();
-    const timeTaken = Math.min(
-      questions[currentIndex].time * 1000,
-      endTime - startTime
-    ); // Calculate time spent in ms
-
-    const correct = questions[currentIndex].correct === selectedAnswer;
-    setIsCorrect(correct);
-    setCorrectAnswer(questions[currentIndex].correct);
-    setIsModalOpen(true);
-
-    const questionData = {
-      questionId: questions[currentIndex].id,
-      answer: selectedAnswer,
-      timeTaken: Math.round(timeTaken), // Store in ms
-      isCorrect: correct,
-    };
-
-    setProgress([...progress, questionData]);
-
     axios
-      .put(
-        `/api/trivia/users/${UserState.value.data.id}/games/${params.id}/progress`,
+      .post(
+        `/api/trivia/users/${UserState.value.data.id}/games/${params.id}/question`,
         {
-          progress: [...progress, questionData],
+          question_id: questions.question_id,
+          selected_option: selectedAnswer,
         }
       )
-      .then(() => {
-        if (currentIndex + 1 < questions.length) {
-          setSelectedAnswer(null);
-          setIsLoading(false);
-        } else {
-          setQuestions([]);
-          toast({
-            title: "Game Finished! Results Submitted.",
-            status: "success",
-          });
-        }
-      })
-      .catch((e) => {
-        toast({
-          title: e?.response?.data?.message || e?.message,
-          status: "error",
-        });
+      .then((response) => {
+        setIsLoading(false);
+        setSelectedAnswer(null);
+        setIsCorrect(response.data.isCorrect);
+        setCorrectAnswer(response.data.correct_answer);
+        setIsModalOpen(true);
       });
+  };
+
+  const handleShareGame = () => {
+    const totalTime = myGameResult?.gameDetails?.progress.reduce(
+      (acc, curr) => acc + curr.time_taken,
+      0
+    );
+    const correctAnswers = myGameResult?.gameDetails?.progress.filter(
+      (p) => p.isCorrect
+    ).length;
+    const totalQuestions = myGameResult?.questions.length || 0;
+    const referral_code = UserState.value.data?.referral_code
+
+    const gameLink = `${window.location.origin}/game/trivia/${params.id}?time=${totalTime}&correct=${correctAnswers}&question=${totalQuestions}&referral=${referral_code}`;
+    navigator.clipboard.writeText(gameLink).then(() => {
+      alert("Game link copied to clipboard!");
+    });
   };
 
   const RenderQuestions = useCallback(() => {
     return (
       <RadioGroup onChange={setSelectedAnswer} value={selectedAnswer}>
         <Stack>
-          {questions[currentIndex].options.map((option, idx) => (
+          {questions?.options.map((option, idx) => (
             <Radio key={idx} value={option}>
               {String.fromCharCode(idx + 65)}: {option}
             </Radio>
@@ -198,62 +203,54 @@ export default function Page({ params }) {
         </Stack>
       </RadioGroup>
     );
-  }, [questions, currentIndex, selectedAnswer]);
+  }, [questions, selectedAnswer]);
 
   return (
     <Box p={8} minH="100vh">
-      <GameCard gameDetailData={gameDetailData} />
-      {progress.length > 0 &&
-      gameDetailData &&
-      gameDetailData?.game?.questions.length === progress.length ? (
-        <GameResult
-          progress={progress}
-          questions={gameDetailData?.game?.questions || []}
-        />
-      ) : loading ? (
+      <GameCard gameDetailData={gameDetailData} instructions={instructions}/>
+      {myGameResult ? (
+        <GameResult data={myGameResult} handleShareGame={handleShareGame} />
+      ) : // gameDetailData?.game?.questions.length === progress.length ?
+      //  (
+
+      // )
+      //  :
+      loading ? (
         <Center mt={10}>
           <Spinner />
         </Center>
       ) : (
-        gameDetailData && (
-          <Box p={5} maxW="600px" mx="auto">
-            {questions.length > 0 && currentIndex < questions.length ? (
-              <VStack spacing={4} align="stretch">
-                <Text fontSize="lg">
-                  Question: {questions[currentIndex].text}
-                </Text>
-                <Progress
-                  value={
-                    (timeLeft / (questions[currentIndex].time * 1000)) * 100
-                  }
-                  size="sm"
-                  colorScheme="purple"
-                />
-                <RenderQuestions />
-                <Button
-                  colorScheme="purple"
-                  onClick={handleAnswer}
-                  isDisabled={!selectedAnswer || isLoading}
-                >
-                  {isLoading ? "Saving..." : "Continue"}
-                </Button>
-              </VStack>
-            ) : (
-              <Text fontSize="xl" textAlign="center">
-                {isLoading ? "Game finished" : " Preparing next question..."}
-              </Text>
-            )}
-          </Box>
-        )
+        <Box p={5} maxW="600px" mx="auto">
+          {questions?.question ? (
+            <VStack spacing={4} align="stretch">
+              <Text fontSize="lg">Question: {questions?.question}</Text>
+              <Progress
+                value={(timeLeft / (questions?.time * 1000)) * 100}
+                size="sm"
+                colorScheme="purple"
+              />
+              <RenderQuestions />
+              <Button
+                colorScheme="purple"
+                onClick={handleAnswer}
+                isDisabled={!selectedAnswer || isLoading}
+              >
+                {isLoading ? "Saving..." : "Continue"}
+              </Button>
+            </VStack>
+          ) : (
+            <Text fontSize="xl" textAlign="center">
+              {" Preparing..."}
+            </Text>
+          )}
+        </Box>
       )}
       <AnswerModal
         visible={isModalOpen}
         onClose={(val) => {
           setIsModalOpen(val);
-          if (currentIndex + 1 < questions.length) {
-            setCurrentIndex(currentIndex + 1);
-            setTimeLeft(questions[currentIndex + 1].time || 10);
-          }
+          setQuestions({});
+          fetchQuestion(UserState.value.data.id);
         }}
         isCorrect={isCorrect}
         correctAnswer={correctAnswer}
@@ -289,7 +286,7 @@ const AnswerModal = ({ visible, onClose, isCorrect, correctAnswer }) => {
   );
 };
 
-const GameCard = ({ gameDetailData }) => {
+const GameCard = ({ gameDetailData, instructions }) => {
   return (
     <Box textAlign="center" p={6} borderRadius="md" mb={6}>
       <Heading mb={4} color="purple.400">
@@ -327,25 +324,52 @@ const GameCard = ({ gameDetailData }) => {
               : ""}
           </Text>
         </GridItem>
+        <GridItem>
+        {instructions.length > 0 && (
+          <HStack justify={'center'}>
+            <Text fontWeight="bold">
+            Game Instructions:{" "}
+
+          </Text>
+            <VStack  gap={0}>
+              {instructions.map((eachInstruction, index) => (
+                <Text key={index} fontSize="sm">
+                  {`- ${eachInstruction}`}
+                </Text>
+              ))}
+            </VStack>
+          </HStack>
+        )}
+        </GridItem>
       </Grid>
+
+      
 
       <Divider my={4} />
     </Box>
   );
 };
 
-const GameResult = ({ progress, questions }) => {
-  const totalTimeTaken = progress.reduce(
-    (acc, curr) => acc + curr.timeTaken,
+const GameResult = ({ data, handleShareGame }) => {
+  const totalTime = data?.gameDetails?.progress.reduce(
+    (acc, curr) => acc + curr.time_taken,
     0
   );
-  const totalTime = (totalTimeTaken / 1000).toFixed(2);
-  const correctAnswers = progress.filter((p) => p.isCorrect).length;
-  const totalQuestions = questions.length;
+  const correctAnswers = data?.gameDetails?.progress.filter(
+    (p) => p.isCorrect
+  ).length;
+  const totalQuestions = data?.questions.length || 0;
 
   return (
     <Box px={5} mx="auto">
       {/* Summary Box */}
+    <Flex>
+      <Spacer />
+      <Button colorScheme="teal" onClick={handleShareGame} mb={4}>
+        Share Game Result
+      </Button>
+      </Flex>
+
       <Box
         textAlign="center"
         p={5}
@@ -372,13 +396,13 @@ const GameResult = ({ progress, questions }) => {
       </Box>
 
       <VStack spacing={6} align="stretch">
-        {questions.map((question, index) => {
-          const userProgress = progress.find(
-            (p) => p.questionId === question.id
+        {data?.questions.map((question, index) => {
+          const userProgress = data?.gameDetails?.progress.find(
+            (p) => p.question_id === question.id
           );
           const isCorrect = userProgress?.isCorrect;
-          const selectedAnswer = userProgress?.answer;
-          const timeTaken = userProgress?.timeTaken || 0;
+          const selectedAnswer = userProgress?.selected_option;
+          const timeTaken = userProgress?.time_taken || 0;
 
           return (
             <Box
@@ -393,8 +417,7 @@ const GameResult = ({ progress, questions }) => {
               </Text>
 
               <Text fontSize="sm" color="gray.500" mt={1}>
-                ⏱️ Time Taken:{" "}
-                {timeTaken ? (Number(timeTaken) / 1000).toFixed(2) : ""} seconds
+                ⏱️ Time Taken: {timeTaken} seconds
               </Text>
 
               <Stack mt={2} spacing={2}>
