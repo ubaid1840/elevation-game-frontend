@@ -22,6 +22,9 @@ import {
   Tooltip,
   Button,
   Input,
+  Spinner,
+  Switch,
+  Icon,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -40,7 +43,6 @@ export default function Page() {
 
   async function fetchData() {
     axios.get(`/api/trivia/leaderboard`).then((response) => {
-      console.log(response.data);
       if (response.data.length > 0) {
         const temp = response.data.map((item, index) => {
           return {
@@ -65,7 +67,7 @@ export default function Page() {
   });
 
   const RenderTableData = useCallback(() => {
-    const [currentPage, setCurrentPage] = useState(1);
+    
     return (
       <TableData
         data={filteredUsers}
@@ -77,8 +79,6 @@ export default function Page() {
           { key: "game_prize", value: "Prize money" },
           { key: "winner_status", value: "Winning status" },
         ]}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
       />
     );
   }, [filteredUsers]);
@@ -127,10 +127,10 @@ const TableData = ({
   special = false,
   onClickRow,
   rowClickable = false,
-  currentPage,
-  setCurrentPage,
+
 }) => {
   const [localData, setLocalData] = useState(data || []);
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("asc");
   const rowsPerPage = 10;
   const indexOfLastRow = currentPage * rowsPerPage;

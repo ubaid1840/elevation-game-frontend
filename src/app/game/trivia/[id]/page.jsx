@@ -3,7 +3,6 @@ import axios from "axios";
 import moment from "moment";
 import Head from "next/head";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   const headerList = headers();
@@ -16,9 +15,17 @@ export async function generateMetadata({ params, searchParams }, parent) {
   const response = await axios.get(`${pathname}/api/trivia/game/${params.id}`);
   const game = response.data;
 
+  let description
+
+  if(referral){
+    description = `Gave correct answers ${correct} out of ${question} in ${time} sec. Join now using my referral code - ${referral} and win exciting prizes.`
+  } else {
+    description = `Join and win exciting prizes`
+  }
+
   return {
     title: `${game?.game?.title || "Game Details"}`,
-    description: `Gave correct answers ${correct} out of ${question} in ${time} sec. Join now using my referral code - ${referral} and win exciting prizes.`,
+    description:  description,
     openGraph: {
       images: [
         {

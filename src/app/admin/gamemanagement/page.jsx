@@ -121,6 +121,13 @@ const GameManagement = () => {
     });
   }
 
+  function handleShareGameTrivia(id) {
+    const gameLink = `${window.location.origin}/game/trivia/${id}?`;
+    navigator.clipboard.writeText(gameLink).then(() => {
+      alert("Game link copied to clipboard!");
+    });
+  }
+
   const RenderTable = useCallback(() => {
     return (
       <TableData
@@ -186,6 +193,9 @@ const GameManagement = () => {
           setLoading(true);
           handleRemoveGameTrivia(val);
         }}
+        button2={true}
+        buttonText2={"Share"}
+        onButtonClick2={(val) => handleShareGameTrivia(val)}
         currentPage={triviaCurrentPage}
         setCurrentPage={setTriviaCurrentPage}
       />

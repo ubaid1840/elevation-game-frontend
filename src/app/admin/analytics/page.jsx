@@ -67,6 +67,7 @@ const TriviaSection = () => {
   const [participants, setParticipants] = useState([]);
   const [search, setSearch] = useState("");
   const [csvData, setCsvData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -118,7 +119,7 @@ const TriviaSection = () => {
   });
 
   const RenderTableData = useCallback(() => {
-    const [currentPage, setCurrentPage] = useState(1);
+   
     return (
       <TriviaTableData
         data={filteredUsers}
@@ -130,8 +131,7 @@ const TriviaSection = () => {
           { key: "game_prize", value: "Prize money" },
           { key: "winner_status", value: "Winning status" },
         ]}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
+      
       />
     );
   }, [filteredUsers]);
@@ -229,7 +229,7 @@ const TriviaGameSection = () => {
     });
   
     const RenderTableData = useCallback(() => {
-      const [currentPage, setCurrentPage] = useState(1);
+     
       return (
         <TriviaTableData
           data={filteredUsers}
@@ -241,8 +241,7 @@ const TriviaGameSection = () => {
             { key: "revenue_genarated", value: "Revenue Generated" },
             { key: "winner_status", value: "Winning status" },
           ]}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
+        
         />
       );
     }, [filteredUsers]);
@@ -342,7 +341,7 @@ const TriviaGameSection = () => {
     });
   
     const RenderTableData = useCallback(() => {
-      const [currentPage, setCurrentPage] = useState(1);
+     
       return (
         <TriviaTableData
           data={filteredUsers}
@@ -354,8 +353,7 @@ const TriviaGameSection = () => {
             { key: "game_prize", value: "Prize money" },
             { key: "winner_status", value: "Winning status" },
           ]}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
+     
         />
       );
     }, [filteredUsers]);
@@ -450,14 +448,14 @@ const TriviaGameSection = () => {
       }
   
     const filteredUsers = participants.filter((user) => {
-      const matchesName = user?.user_name
+      const matchesName = user?.game_title
         .toLowerCase()
         .includes(search.toLowerCase());
       return matchesName;
     });
   
     const RenderTableData = useCallback(() => {
-      const [currentPage, setCurrentPage] = useState(1);
+    
       return (
         <TriviaTableData
           data={filteredUsers}
@@ -469,8 +467,7 @@ const TriviaGameSection = () => {
             { key: "enrollments", value: "Total Participants" },
             { key: "revenue_generated", value: "Revenue Generated" },
           ]}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
+        
         />
       );
     }, [filteredUsers]);
@@ -518,11 +515,11 @@ const TriviaTableData = ({
   columns,
   onClickRow,
   rowClickable = false,
-  currentPage,
-  setCurrentPage,
+
 }) => {
   const [localData, setLocalData] = useState(data || []);
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1)
   const rowsPerPage = 10;
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;

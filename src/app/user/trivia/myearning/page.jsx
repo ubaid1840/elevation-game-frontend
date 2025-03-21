@@ -29,6 +29,7 @@ export default function Page() {
   const [winnings, setWinnings] = useState(0);
   const [earnings, setEarnings] = useState(0);
   const [tableData, setTableData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -55,7 +56,7 @@ export default function Page() {
         };
       });
 
-      setTableData(tempData);
+      setTableData([...tempData]);
 
       const transactions = response.data;
       const winnings = [];
@@ -89,7 +90,7 @@ export default function Page() {
   }
 
   const RenderTableData = useCallback(() => {
-    const [currentPage, setCurrentPage] = useState(1);
+   
     return (
       <Box w={"100%"}>
         <TableData
@@ -104,7 +105,7 @@ export default function Page() {
         />
       </Box>
     );
-  }, [tableData]);
+  }, [tableData, currentPage]);
 
   return (
     <Box p={8}>

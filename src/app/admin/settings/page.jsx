@@ -52,6 +52,7 @@ export default function Page() {
   const [percentage, setPercentage] = useState("");
   const [percentageID, setPercentageID] = useState("");
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toast = useToast();
   const {
@@ -210,7 +211,7 @@ export default function Page() {
   };
 
   const RenderCategoriesTable = useCallback(() => {
-    const [currentPage, setCurrentPage] = useState(1);
+   
     return (
       <TableData
         data={categories}
@@ -225,7 +226,7 @@ export default function Page() {
         }}
       />
     );
-  }, [categories]);
+  }, [categories, currentPage]);
 
   return (
     <>
