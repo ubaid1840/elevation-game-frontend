@@ -110,12 +110,6 @@ export default function Page() {
         </Heading>
         <Divider borderColor="purple.400" />
 
-        {/* Overview Section */}
-        <Text fontSize="md">
-          Participants can earn up to <strong>3%</strong> of Trivia game fee
-          based on their unique referral numbers.
-        </Text>
-
 
         <Stat>
           <StatLabel fontSize="lg">Total game referral earnings</StatLabel>
