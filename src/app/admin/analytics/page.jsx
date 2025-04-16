@@ -1,35 +1,31 @@
 "use client";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import Pagination from "@/components/ui/Pagination";
-import TableData from "@/components/ui/TableData";
 import { UserContext } from "@/store/context/UserContext";
 import {
-  Center,
-  Spinner,
   Box,
-  Heading,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Input,
   Button,
-  Text,
-  VStack,
+  Flex,
+  Heading,
   HStack,
+  Icon,
+  Input,
+  Spacer,
+  Tab,
   Table,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Tbody,
+  Td,
+  Text,
+  Th,
   Thead,
   Tr,
-  Th,
-  Icon,
-  Td,
-  Tbody,
-  Flex,
-  Spacer,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { IoIosArrowRoundDown, IoIosArrowRoundUp } from "react-icons/io";
