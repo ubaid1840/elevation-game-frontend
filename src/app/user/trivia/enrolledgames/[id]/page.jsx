@@ -56,9 +56,8 @@ export default function Page({ params }) {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [questionLoading, setQuestionLoading] = useState(true);
   const [myGameResult, setMyGameResult] = useState();
-  const [instructions, setInstructions] = useState([])
+  const [instructions, setInstructions] = useState([]);
   const [hasAnswered, setHasAnswered] = useState(false);
-
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -94,7 +93,7 @@ export default function Page({ params }) {
       // router.push("/user/trivia/enrolledgames");
     } finally {
       setLoading(false);
-      setHasAnswered(false)
+      setHasAnswered(false);
     }
   }
 
@@ -104,7 +103,7 @@ export default function Page({ params }) {
         `/api/trivia/users/${id}/games/${params.id}`
       );
       if (response.data?.enrollment?.payment_intent_id) {
-        setInstructions(response.data?.game?.description.split("\n"))
+        setInstructions(response.data?.game?.description.split("\n"));
         setGameDetailData(response.data);
         const userProgress = response.data.enrollment.progress || [];
         setTotalQuestions(response.data.total_questions - userProgress.length);
@@ -146,7 +145,7 @@ export default function Page({ params }) {
         const timer = setTimeout(() => setTimeLeft((prev) => prev - 100), 100); // Decrease in 100ms intervals
         return () => clearTimeout(timer);
       }
-    }else if (!hasAnswered) {
+    } else if (!hasAnswered) {
       setHasAnswered(true);
       handleAnswer();
     }
@@ -183,7 +182,7 @@ export default function Page({ params }) {
       (p) => p.isCorrect
     ).length;
     const totalQuestions = myGameResult?.questions.length || 0;
-    const referral_code = UserState.value.data?.referral_code
+    const referral_code = UserState.value.data?.referral_code;
 
     const gameLink = `${window.location.origin}/game/trivia/${params.id}?time=${totalTime}&correct=${correctAnswers}&question=${totalQuestions}&referral=${referral_code}`;
     navigator.clipboard.writeText(gameLink).then(() => {
@@ -207,7 +206,7 @@ export default function Page({ params }) {
 
   return (
     <Box p={8} minH="100vh">
-      <GameCard gameDetailData={gameDetailData} instructions={instructions}/>
+      <GameCard gameDetailData={gameDetailData} instructions={instructions} />
       {myGameResult ? (
         <GameResult data={myGameResult} handleShareGame={handleShareGame} />
       ) : // gameDetailData?.game?.questions.length === progress.length ?
@@ -293,7 +292,26 @@ const GameCard = ({ gameDetailData, instructions }) => {
         {gameDetailData?.game?.title}
       </Heading>
 
-      <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={4}>
+      <Grid
+        templateColumns={{ base: "repeat(1, 1fr)", sm: "repeat(2, 1fr)" }}
+        gap={6}
+        mb={4}
+      >
+        <GridItem>
+          {instructions.length > 0 && (
+            <Stack dir={{ sm: "column", base: "row" }} justify={"center"}>
+              <Text fontWeight="bold">Game Instructions: </Text>
+              <VStack gap={0}>
+                {instructions.map((eachInstruction, index) => (
+                  <Text key={index} fontSize="sm">
+                    {`- ${eachInstruction}`}
+                  </Text>
+                ))}
+              </VStack>
+            </Stack>
+          )}
+        </GridItem>
+
         <GridItem>
           <Text fontWeight="bold">
             Prize:{" "}
@@ -324,26 +342,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
               : ""}
           </Text>
         </GridItem>
-        <GridItem>
-        {instructions.length > 0 && (
-          <HStack justify={'center'}>
-            <Text fontWeight="bold">
-            Game Instructions:{" "}
-
-          </Text>
-            <VStack  gap={0}>
-              {instructions.map((eachInstruction, index) => (
-                <Text key={index} fontSize="sm">
-                  {`- ${eachInstruction}`}
-                </Text>
-              ))}
-            </VStack>
-          </HStack>
-        )}
-        </GridItem>
       </Grid>
-
-      
 
       <Divider my={4} />
     </Box>
@@ -363,11 +362,11 @@ const GameResult = ({ data, handleShareGame }) => {
   return (
     <Box px={5} mx="auto">
       {/* Summary Box */}
-    <Flex>
-      <Spacer />
-      <Button colorScheme="teal" onClick={handleShareGame} mb={4}>
-        Share Game Result
-      </Button>
+      <Flex>
+        <Spacer />
+        <Button colorScheme="teal" onClick={handleShareGame} mb={4}>
+          Share Game Result
+        </Button>
       </Flex>
 
       <Box

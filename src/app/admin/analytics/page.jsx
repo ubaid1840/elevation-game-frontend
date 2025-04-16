@@ -54,7 +54,7 @@ export default function Analytics() {
           </TabPanel>
           <TabPanel>
             <TriviaSection />
-            <TriviaGameSection />
+            <TriviaGameSection /> 
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -86,6 +86,7 @@ const TriviaSection = () => {
             user_name: item.user_name,
             rank: item.rank,
             total_referrals: item.total_referrals,
+            game_fee : item.game_fee,
             game_prize: item.game_prize,
             winner_status: item.winner_status,
             user_email: item.user_email,
@@ -94,7 +95,7 @@ const TriviaSection = () => {
         setParticipants([...temp]);
 
         const csvFormattedData = [
-          ["Title", "Player", "Rank", "Game Referral Earning", "Prize"],
+          ["Title", "Player", "Rank", "Game Referral Earning","Entry fee", "Prize"],
           ...temp
             .filter((item) => item.winner_status === "Won")
             .map((tx) => [
@@ -102,6 +103,7 @@ const TriviaSection = () => {
               tx.user_name,
               tx.rank,
               tx.total_referrals,
+              tx.game_fee,
               tx.game_prize,
             ]),
         ];
@@ -128,6 +130,7 @@ const TriviaSection = () => {
           { key: "user_name", value: "Player" },
           { key: "rank", value: "Rank" },
           { key: "total_referrals", value: "Game Referral Earning" },
+          { key: "game_fee", value: "Entry fee" },
           { key: "game_prize", value: "Prize money" },
           { key: "winner_status", value: "Winning status" },
         ]}
@@ -189,6 +192,7 @@ const TriviaGameSection = () => {
     async function fetchData() {
       axios.get(`/api/trivia/leaderboard/game`).then((response) => {
         if (response.data.length > 0) {
+          console.log(response.data)
           const temp = response.data.map((item, index) => {
             return {
               id: index,
@@ -196,6 +200,7 @@ const TriviaGameSection = () => {
               user_name: item.top_player.user_name,
               total_enrollments: item.total_enrollments,
               game_prize: item.game_prize,
+              game_fee : item.game_fee,
               revenue_genarated : Number(item.total_enrollments) * Number(item.game_prize),
               winner_status: item.top_player.winner_status,
               user_email: item.top_player.user_email,
@@ -204,12 +209,13 @@ const TriviaGameSection = () => {
           setParticipants([...temp]);
   
           const csvFormattedData = [
-            ["Title", "Player", "Total Participants", "Prize Money", "Revenue Generated", "Winner Status"],
+            ["Title", "Player", "Total Participants","Entry fee", "Prize Money", "Revenue Generated", "Winner Status"],
             ...temp
               .map((tx) => [
                 tx.game_title,
                 tx.user_name,
                 tx.total_enrollments,
+                tx.game_fee,
                 tx.game_prize,
                 tx.revenue_genarated,
                 tx.winner_status
@@ -237,6 +243,7 @@ const TriviaGameSection = () => {
             { key: "game_title", value: "Title" },
             { key: "user_name", value: "Top Player" },
             { key: "total_enrollments", value: "Total Participants" },
+            { key: "game_fee", value: "Entry fee" },
             { key: "game_prize", value: "Prize money" },
             { key: "revenue_genarated", value: "Revenue Generated" },
             { key: "winner_status", value: "Winning status" },
@@ -430,7 +437,7 @@ const TriviaGameSection = () => {
             setParticipants([...temp]);
     
             const csvFormattedData = [
-              ["Title", "Player", "Score", "Prize", "Game Revenue"],
+              ["Title", "Player", "Score", "Prize", "Participants", "Game Revenue"],
               ...temp
                 .map((tx) => [
                   tx.game_title,
@@ -621,23 +628,22 @@ const TriviaTableData = ({
             {currentRows.length > 0 ? (
               currentRows.map((user) => (
                 <Tr key={user.id}>
-                  {Object.entries(user).map(([key, value], i) =>
-                    key && (key === "id" || key === "user_email") ? null : (
-                      <RenderRow
-                        key={i}
-                        index={i}
-                        value={value}
-                        original_key={key}
-                        user={user}
-                        onClickRow={() => {
-                          if (rowClickable) {
-                            onClickRow(user.id);
-                          }
-                        }}
-                        rowClickable={rowClickable}
-                      />
-                    )
-                  )}
+                   {columns.map((col, i) => (
+                    <RenderRow
+                      key={i}
+                      index={i}
+                      value={user[col.key]}
+                      original_key={col.key}
+                      user={user}
+                      onClickRow={() => {
+                        if (rowClickable) {
+                          onClickRow(user.id);
+                        }
+                      }}
+                      rowClickable={rowClickable}
+                    />
+                  ))}
+                  
                 </Tr>
               ))
             ) : (

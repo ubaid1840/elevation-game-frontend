@@ -22,8 +22,6 @@ export default function Footer() {
 
     return (
         
-           
-
             <Container   bg={useColorModeValue("gray.800", "gray.700")} color={'white'} maxW={'100%'} fontWeight={'600'} py={5} alignItems={'center'} justifyContent={'center'} display={'flex'} px={20}>
                 <Wrap justify={'space-between'} w={'100%'} align={'center'}>
                     <WrapItem>
@@ -34,13 +32,13 @@ export default function Footer() {
                     </WrapItem>
                     <WrapItem>
                     <VStack  align={'flex-start'} justify={'center'} w={'fit-content'}>
-                        <Text as={Link} href="#" _hover={{opacity:0.7}}>PRIVACY POLICY</Text>
+                        <Text as={Link} href="/privacy" _hover={{opacity:0.7}}>PRIVACY POLICY</Text>
                         <Text color={'whiteAlpha.700'} fontWeight={'400'}>Understand how we handle your data</Text>
                     </VStack>
                     </WrapItem>
                     <WrapItem>
                     <VStack align={'flex-start'}  justify={'center'} w={'fit-content'}>
-                        <Text as={Link} href="#" _hover={{opacity:0.7}}>TERMS OF SERVICE</Text>
+                        <Text as={Link} href="/terms" _hover={{opacity:0.7}}>TERMS OF SERVICE</Text>
                         <Text color={'whiteAlpha.700'} fontWeight={'400'}>Review the terms of using our service</Text>
                     </VStack>
                     </WrapItem>

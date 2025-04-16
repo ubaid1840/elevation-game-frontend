@@ -56,9 +56,9 @@ export async function PUT(req, { params }) {
 
 
                 await query(
-                    `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
-                 VALUES ($1, $2, $3, 'Completed', 'trivia', 'Trivia game referral earning')`,
-                    [referrer_id, commission, gid]
+                    `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type, reference_id) 
+                 VALUES ($1, $2, $3, 'Completed', 'trivia', 'Trivia game referral earning', $4)`,
+                    [referrer_id, commission, gid, id]
                 );
                 const tempStr = `Made payment of $${fee || ""} for trivia game - ${title || ""}`
                 await query(

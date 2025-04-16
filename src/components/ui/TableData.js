@@ -4,8 +4,8 @@ import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch,
 import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false, currentPage, setCurrentPage }) => {
-   
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false, currentPage, setCurrentPage, loading=false }) => {
+
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
     const rowsPerPage = 10;
@@ -32,7 +32,7 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
     };
 
     const RenderRow = ({ value, user, onClickRow, rowClickable = false, index }) => {
-        const [rowLoading, setRowLoading] = useState(false) 
+        const [rowLoading, setRowLoading] = useState(false)
 
         return (
             <Td width={'350px'}>
@@ -88,16 +88,20 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                         {currentRows.length > 0 ? (
                             currentRows.map((user) => (
                                 <Tr key={user.id}>
-                                    {Object.entries(user).map(([key, value], i) => (
-                                        key && key === "id" ? null :
-                                            <RenderRow key={i} index={i} value={value} user={user} onClickRow={() => {
+                                    {columns.map((col, i) => (
+                                        <RenderRow
+                                            key={i}
+                                            index={i}
+                                            value={user[col.key]}
+                                            user={user}
+                                            onClickRow={() => {
                                                 if (rowClickable) {
-                                                    onClickRow(user.id)
+                                                    onClickRow(user.id);
                                                 }
-                                            }
-                                            }
-                                                rowClickable={rowClickable} />
-                                    ))}
+                                            }}
+                                            rowClickable={rowClickable}
+                                        />
+                                    ))} 
 
                                     {button && (
                                         <Td>
@@ -132,7 +136,7 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                         ) : (
                             <Tr>
                                 <Td colSpan={5} textAlign="center">
-                                    No data found.
+                                    {loading ? <Spinner /> : "No data found"}
                                 </Td>
                             </Tr>
                         )}

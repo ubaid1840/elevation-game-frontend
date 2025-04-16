@@ -353,6 +353,7 @@ export default function Page() {
             !title ||
             !videoLink ||
             !gameDescription ||
+            !prize || isNaN(prize) || Number(prize) <= 0 ||
             !level ||
             !rounds ||
             !totalSpots ||

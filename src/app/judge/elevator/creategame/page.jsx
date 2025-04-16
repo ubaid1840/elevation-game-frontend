@@ -397,7 +397,7 @@ export default function Page() {
             !rounds ||
             !totalSpots ||
             selectedJudges.length === 0 ||
-            prize === 0 ||
+            !prize || isNaN(prize) || Number(prize) <= 0 ||
             !level ||
             !category ||
             !deadline

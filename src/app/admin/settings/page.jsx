@@ -27,11 +27,15 @@ import {
   FormLabel,
   Flex,
   useToast,
+  HStack,
+  IconButton,
+  Textarea,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
 import TableData from "@/components/ui/TableData";
+import { EditIcon } from "@chakra-ui/icons";
 
 export default function Page() {
   const [settings, setSettings] = useState([]);
@@ -53,7 +57,9 @@ export default function Page() {
   const [percentageID, setPercentageID] = useState("");
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [privacyPage, setPrivacyPage] = useState("");
+  const [termsPage, setTermsPage] = useState("");
+const [pageId, setPageId] = useState(null)
   const toast = useToast();
   const {
     isOpen: isOpenCategory,
@@ -62,11 +68,34 @@ export default function Page() {
   } = useDisclosure();
   const [newCategory, setNewCategory] = useState("");
 
+  const {
+    isOpen: isOpenPrivacy,
+    onOpen: onOpenPrivacy,
+    onClose: onClosePrivacy,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenTerms,
+    onOpen: onOpenTerms,
+    onClose: onCloseTerms,
+  } = useDisclosure();
+
+  const [pageLoading, setPageLoading] = useState(false);
+
   useEffect(() => {
     fetchCategories();
     fetchTriviaSettings();
     fetchSettings();
+    fetchPageSettings();
   }, []);
+
+  async function fetchPageSettings() {
+    axios.get("/api/pagesettings").then((response) => {
+      setPrivacyPage(response.data.privacy);
+      setTermsPage(response.data.terms);
+      setPageId(response.data.id);
+    });
+  }
 
   async function fetchTriviaSettings() {
     axios.get("/api/trivia/settings").then((response) => {
@@ -211,7 +240,6 @@ export default function Page() {
   };
 
   const RenderCategoriesTable = useCallback(() => {
-   
     return (
       <TableData
         data={categories}
@@ -227,6 +255,21 @@ export default function Page() {
       />
     );
   }, [categories, currentPage]);
+
+  async function handleSavePage() {
+    axios
+      .put("/api/pagesettings", {
+        privacy: privacyPage,
+        terms: termsPage,
+        id : pageId
+      })
+      .then(() => {
+        setPageLoading(false);
+        onClosePrivacy();
+        onCloseTerms();
+        callSuccessToast();
+      });
+  }
 
   return (
     <>
@@ -306,6 +349,30 @@ export default function Page() {
               </Button>
             </Flex>
           </Stack>
+
+          <HStack alignItems={"center"} justify={"space-between"} my={6}>
+            <Heading my={6} color="purple.700">
+              Privacy Policy
+            </Heading>
+            <IconButton
+              aria-label="Edit option"
+              icon={<EditIcon />}
+              size="sm"
+              onClick={() => onOpenPrivacy()}
+            />
+          </HStack>
+
+          <HStack alignItems={"center"} justify={"space-between"} my={6}>
+            <Heading my={6} color="purple.700">
+              Terms & Conditions
+            </Heading>
+            <IconButton
+              aria-label="Edit option"
+              icon={<EditIcon />}
+              size="sm"
+              onClick={() => onOpenTerms()}
+            />
+          </HStack>
 
           <Heading my={6} color="purple.700">
             Categories
@@ -416,6 +483,68 @@ export default function Page() {
                   Save
                 </Button>
                 <Button ml={3} onClick={onClose}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal isOpen={isOpenPrivacy} onClose={onClosePrivacy}>
+            <ModalOverlay />
+            <ModalContent maxW={"90vw"}>
+              <ModalHeader>Edit privacy page</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Textarea
+                  height={"50vh"}
+                  placeholder="Privacy page"
+                  value={privacyPage}
+                  onChange={(e) => setPrivacyPage(e.target.value)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                isLoading={pageLoading}
+                  colorScheme="blue"
+                  onClick={() => {
+                    setPageLoading(true);
+                    handleSavePage();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button ml={3} onClick={onClosePrivacy}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal isOpen={isOpenTerms} onClose={onCloseTerms}>
+            <ModalOverlay />
+            <ModalContent maxW={"90vw"}>
+              <ModalHeader>Edit terms page</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Textarea
+                  height={"50vh"}
+                  placeholder="Privacy page"
+                  value={termsPage}
+                  onChange={(e) => setTermsPage(e.target.value)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                isLoading={pageLoading}
+                  colorScheme="blue"
+                  onClick={() => {
+                    setPageLoading(true);
+                    handleSavePage();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button ml={3} onClick={onCloseTerms}>
                   Cancel
                 </Button>
               </ModalFooter>

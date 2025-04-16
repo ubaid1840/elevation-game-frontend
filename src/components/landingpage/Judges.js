@@ -1,20 +1,15 @@
 "use client";
-import React from "react";
 import {
-    Box,
-    Heading,
-    Text,
-    Stack,
-    Image,
-    VStack,
-    Badge,
-    SimpleGrid,
-    useColorModeValue,
-    Container,
     Avatar,
+    Badge,
+    Box,
+    Container,
+    Heading,
+    SimpleGrid,
+    Text,
+    useColorModeValue,
+    VStack
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
 
 // Sample top judges data
 const topJudges = [

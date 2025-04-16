@@ -108,9 +108,9 @@ export async function POST(req, { params }) {
                         [amountToSave, referrer_id]
                     );
                     await query(
-                        `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                     VALUES ($1, ($2 * 0.03), 'Completed', 'Silver subscription referral earning', 'elevator')`,
-                        [referrer_id, amountToSave]
+                        `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                     VALUES ($1, ($2 * 0.03), 'Completed', 'Silver subscription referral earning', 'elevator', $3)`,
+                        [referrer_id, amountToSave, id]
                     );
                 } else {
                     if(checkPlan === 'Platinum'){
@@ -120,9 +120,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.2), 'Completed', 'Tier1 20% subscription referral earning', 'elevator')`,
-                            [referrer_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.2), 'Completed', 'Tier1 20% subscription referral earning', 'elevator', $3)`,
+                            [referrer_id, amountToSave, id]
                         );
                     } else if(checkPlan === 'Gold'){
 
@@ -132,9 +132,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier2 10% subscription referral earning', 'elevator')`,
-                            [referrer_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier2 10% subscription referral earning', 'elevator', $3)`,
+                            [referrer_id, amountToSave, id]
                         );
 
                     } else if(checkPlan === 'Iridium'){
@@ -144,9 +144,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier3 5% subscription referral earning', 'elevator')`,
-                            [referrer_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier3 5% subscription referral earning', 'elevator', $3)`,
+                            [referrer_id, amountToSave, id]
                         );
                     }
                    
@@ -167,9 +167,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier1 10% subscription referral earning', 'elevator')`,
-                            [referrer2_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.1), 'Completed', 'Tier1 10% subscription referral earning', 'elevator', $3)`,
+                            [referrer2_id, amountToSave, id]
                         );
                     } else if(checkPlan === 'Gold'){
 
@@ -179,9 +179,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier2 5% subscription referral earning', 'elevator')`,
-                            [referrer2_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier2 5% subscription referral earning', 'elevator', $3)`,
+                            [referrer2_id, amountToSave, id]
                         );
 
                     } else if(checkPlan === 'Iridium'){
@@ -191,9 +191,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier3 2.5% subscription referral earning', 'elevator')`,
-                            [referrer2_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier3 2.5% subscription referral earning', 'elevator', $3)`,
+                            [referrer2_id, amountToSave, id]
                         );
                     }
                 }
@@ -212,9 +212,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier1 5% subscription referral earning', 'elevator')`,
-                            [referrer3_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.05), 'Completed', 'Tier1 5% subscription referral earning', 'elevator', $3)`,
+                            [referrer3_id, amountToSave, id]
                         );
                     } else if(checkPlan === 'Gold'){
 
@@ -224,9 +224,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier2 2.5% subscription referral earning', 'elevator')`,
-                            [referrer3_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.025), 'Completed', 'Tier2 2.5% subscription referral earning', 'elevator', $3)`,
+                            [referrer3_id, amountToSave, id]
                         );
 
                     } else if(checkPlan === 'Iridium'){
@@ -236,9 +236,9 @@ export async function POST(req, { params }) {
                         );
     
                         await query(
-                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type) 
-                         VALUES ($1, ($2 * 0.0125), 'Completed', 'Tier3 1.25% subscription referral earning', 'elevator')`,
-                            [referrer3_id, amountToSave]
+                            `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
+                         VALUES ($1, ($2 * 0.0125), 'Completed', 'Tier3 1.25% subscription referral earning', 'elevator', $3)`,
+                            [referrer3_id, amountToSave, id]
                         );
                     }
                 }

@@ -116,6 +116,20 @@ const GameCard = ({ gameDetailData, instructions }) => {
       </Heading>
 
       <Box gap={2} display={"flex"} flexDir={"column"}>
+      {instructions.length > 0 && (
+          <>
+            <Text fontSize="md">
+              <strong>Game Instructions:</strong>
+            </Text>
+            <VStack align={"flex-start"} gap={0}>
+              {instructions.map((eachInstruction, index) => (
+                <Text key={index} fontSize="sm">
+                  {`- ${eachInstruction}`}
+                </Text>
+              ))}
+            </VStack>
+          </>
+        )}
           <Text fontWeight="bold">
             Prize:{" "}
             <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
@@ -154,20 +168,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
             Total Participants: {gameDetailData?.game?.total_participants}
           </Text>
   
-        {instructions.length > 0 && (
-          <>
-            <Text fontSize="md">
-              <strong>Game Instructions:</strong>
-            </Text>
-            <VStack align={"flex-start"} gap={0}>
-              {instructions.map((eachInstruction, index) => (
-                <Text key={index} fontSize="sm">
-                  {`- ${eachInstruction}`}
-                </Text>
-              ))}
-            </VStack>
-          </>
-        )}
+      
 
       </Box>
     </Box>

@@ -53,7 +53,7 @@ export default function Page() {
             total_referrals: item.total_referrals,
             winner_status: item.winner_status,
             user_email: item.user_email,
-            game_prize : item.game_prize
+            game_prize: item.game_prize,
           };
         });
         setParticipants([...temp]);
@@ -62,12 +62,13 @@ export default function Page() {
   }
 
   const filteredUsers = participants.filter((user) => {
-    const matchesName = user.user_name.toLowerCase().includes(search.toLowerCase());
-    return matchesName
+    const matchesName = user.user_name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    return matchesName;
   });
 
   const RenderTableData = useCallback(() => {
-    
     return (
       <TableData
         data={filteredUsers}
@@ -127,7 +128,6 @@ const TableData = ({
   special = false,
   onClickRow,
   rowClickable = false,
-
 }) => {
   const [localData, setLocalData] = useState(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -247,23 +247,21 @@ const TableData = ({
             {currentRows.length > 0 ? (
               currentRows.map((user) => (
                 <Tr key={user.id}>
-                  {Object.entries(user).map(([key, value], i) =>
-                    key && (key === "id" || key === "user_email") ? null : (
-                      <RenderRow
-                        key={i}
-                        index={i}
-                        value={value}
-                        original_key={key}
-                        user={user}
-                        onClickRow={() => {
-                          if (rowClickable) {
-                            onClickRow(user.id);
-                          }
-                        }}
-                        rowClickable={rowClickable}
-                      />
-                    )
-                  )}
+                  {columns.map((col, i) => (
+                    <RenderRow
+                      key={i}
+                      index={i}
+                      value={user[col.key]}
+                      original_key={col.key}
+                      user={user}
+                      onClickRow={() => {
+                        if (rowClickable) {
+                          onClickRow(user.id);
+                        }
+                      }}
+                      rowClickable={rowClickable}
+                    />
+                  ))}
 
                   {button && (
                     <Td>
