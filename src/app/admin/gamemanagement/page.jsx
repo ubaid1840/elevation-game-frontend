@@ -147,7 +147,6 @@ const GameManagement = () => {
           { key: "spots_remaining", value: "Spots Remaining" },
           { key: "totalEnrollments", value: "Participants" },
           { key: "prize_amount", value: "Grand Prize" },
-          { value: "Action" },
         ]}
         button={true}
         buttonText={"Remove"}
@@ -185,7 +184,6 @@ const GameManagement = () => {
           { key: "prize", value: "Grand Prize" },
           { key: "spots_reamining", value: "Spots Remaining" },
           { key: "total_participants", value: "Total Participants" },
-          { value: "Action" },
         ]}
         button={true}
         buttonText={"Remove"}

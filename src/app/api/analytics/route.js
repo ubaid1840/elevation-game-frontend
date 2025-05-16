@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
-        const type = searchParams.get('type'); // 'user' or 'game'
+        const type = searchParams.get('type');
 
         if (!type || !['user', 'game'].includes(type)) {
             return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
@@ -86,6 +86,8 @@ export async function GET(req) {
 
             const prize_amount = pricePerSpot * totalSpots * 0.30;
 
+
+
             if (type === 'user') {
 
                 const userData = rankedUsers.map(async user => {
@@ -94,10 +96,7 @@ export async function GET(req) {
                         winnerStatus = (game.winner === user.user_id) ? "Won" : "Lost";
                     }
 
-
-
-
-                    return {
+                    responseData.push({
                         game_id: game.id,
                         game_title: game.title,
                         prize_amount: prize_amount,
@@ -107,11 +106,13 @@ export async function GET(req) {
                         rank: user.rank,
                         totalScore: user.totalScore,
                         winner_status: winnerStatus,
-                        revenue_generated : pricePerSpot * totalSpots
-                    };
+                        revenue_generated: prize_amount * totalEnrollments
+                    })
                 });
 
-                responseData.push(...userData);
+
+
+
             }
 
             if (type === 'game') {
@@ -141,7 +142,7 @@ export async function GET(req) {
                     } : null,
                     total_enrollments: totalEnrollments,
                     winner_name: winnerName,
-                     revenue_generated : pricePerSpot * totalSpots
+                    revenue_generated: prize_amount * totalEnrollments
                 });
             }
         }

@@ -195,14 +195,14 @@ const TriviaGameSection = () => {
           return {
             id: index,
             game_title: item.game_title,
-            user_name: item.top_player.user_name,
+            user_name: item?.top_player?.user_name || "N/A",
             total_enrollments: item.total_enrollments,
             game_prize: item.game_prize,
             game_fee: item.game_fee,
             revenue_generated:
               Number(item.total_enrollments) * Number(item.game_fee),
-            winner_status: item.top_player.winner_status,
-            user_email: item.top_player.user_email,
+            winner_status: item?.top_player?.winner_status || "N/A",
+            user_email: item?.top_player?.user_email || "N/A",
           };
         });
         setParticipants([...temp]);
@@ -421,8 +421,12 @@ const ElevatorSectionGame = () => {
           return {
             id: index,
             game_title: item.game_title,
-            user_name: item?.top_player?.user_name || "Unknown",
-            score: item?.top_player?.totalScore || "",
+            user_name: item?.top_player
+              ? item.top_player.user_name || "Unknown"
+              : "N/A",
+            score: item?.top_player
+              ? item?.top_player?.totalScore || ""
+              : "N/A",
             game_prize: item.prize_amount,
             enrollments: item.total_enrollments,
             revenue_generated: Number(item.revenue_generated),

@@ -184,7 +184,8 @@ export default function CreateTriviaGame({ page }) {
         start_date: startDate,
         category: category,
         description: gameDescription,
-        spots_remaining : spots
+        spots_remaining : spots,
+        total_spots : spots
       })
       .then(() => {
         toast({

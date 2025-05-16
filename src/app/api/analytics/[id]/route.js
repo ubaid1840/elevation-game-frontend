@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
 
         // Fetch all games
         const gamesResult = await query(`
-            SELECT id, title, prize_amount, winner 
+            SELECT id, title, level,total_spots, winner 
             FROM games
             WHERE created_by = $1::text OR $1::int = ANY(additional_judges)
             ORDER BY id DESC
@@ -81,6 +81,14 @@ export async function GET(req, { params }) {
             const rankedUsers = userScores.sort((a, b) => b.totalScore - a.totalScore)
                 .map((user, index) => ({ ...user, rank: index + 1 }));
 
+            const level = game.level;
+            const totalSpots = Number(game?.total_spots || 0);
+
+            const priceResult = await query(`SELECT price FROM settings WHERE label = $1`, [level]);
+            const pricePerSpot = Number(priceResult.rows[0]?.price || 0);
+
+            const prize_amount = pricePerSpot * totalSpots * 0.30;
+
             if (type === 'user') {
                 // Process each ranked user
                 const userData = rankedUsers.map(user => {
@@ -92,7 +100,8 @@ export async function GET(req, { params }) {
                     return {
                         game_id: game.id,
                         game_title: game.title,
-                        prize_amount: game.prize_amount,
+                        prize_amount: prize_amount,
+                        revenue_generated: prize_amount * totalEnrollments,
                         user_id: user.user_id,
                         user_name: user.user_name,
                         user_email: user.user_email,
@@ -120,7 +129,8 @@ export async function GET(req, { params }) {
                 responseData.push({
                     game_id: game.id,
                     game_title: game.title,
-                    prize_amount: game.prize_amount,
+                    prize_amount: prize_amount,
+                    revenue_generated: prize_amount * totalEnrollments,
                     top_player: topPlayer ? {
                         user_id: topPlayer.user_id,
                         user_name: topPlayer.user_name,

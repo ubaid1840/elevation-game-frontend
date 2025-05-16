@@ -42,6 +42,7 @@ export async function POST(req) {
       category,
       description,
       spots_remaining,
+      total_spots
     } = await req.json();
 
     if (!deadline || !fee  || !title || !questions || !created_by || !start_date || !category || !description || !spots_remaining) {
@@ -55,8 +56,8 @@ export async function POST(req) {
 
     // Step 1: Insert into `trivia_game` table
     const newGame = await pool.query(
-      `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+      `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage, total_spots) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
        RETURNING id`,
       [
         deadline,
@@ -68,7 +69,8 @@ export async function POST(req) {
         category,
         Number(spots_remaining),
         percentage,
-        gamePercentage
+        gamePercentage,
+        total_spots
       ]
     );
 

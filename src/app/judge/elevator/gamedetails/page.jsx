@@ -154,9 +154,9 @@ export default function Page() {
                             <Text fontWeight="bold" color="purple.700">
                               Total Participants: {game.enrollments.length}
                             </Text>
-                            <Text fontWeight="bold" color="purple.700">
+                            {/* <Text fontWeight="bold" color="purple.700">
                               Entry Level Prize: {game.prize_amount}
-                            </Text>
+                            </Text> */}
                             <Text fontWeight="bold" color="purple.700">
                               Current Round: {game.currentround || 0} /{" "}
                               {game.totalrounds}
@@ -209,9 +209,9 @@ export default function Page() {
                             <Text fontWeight="bold" color="purple.700">
                               Total Participants: {game.enrollments.length}
                             </Text>
-                            <Text fontWeight="bold" color="purple.700">
+                            {/* <Text fontWeight="bold" color="purple.700">
                               Entry Level Prize: {game.prize_amount}
-                            </Text>
+                            </Text> */}
                             <Text fontWeight="bold" color="purple.700">
                               Current Round: {game.currentround || 0} /{" "}
                               {game.totalrounds}

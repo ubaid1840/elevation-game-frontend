@@ -98,17 +98,19 @@ export default function SubscriptionPage({ page }) {
                     </Text>
                 }
 
-                {page === 'judge' && UserState.value.data && UserState.value.data?.annualSubscriptionStatus ?
-                    <Text fontSize={'lg'} color="purple.700">
-                        Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
-                    </Text>
-                    :
-                    <Flex align={'center'}>
+                {page == 'judge' ?
+                    UserState.value.data && UserState.value.data?.annualSubscriptionStatus ?
                         <Text fontSize={'lg'} color="purple.700">
-                            Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="red.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
+                            Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
                         </Text>
-                        <Button as={Link} href={'/judgepayment'} ml={4} colorScheme="purple">Renew annual subscription</Button>
-                    </Flex>}
+                        :
+                        <Flex align={'center'}>
+                            <Text fontSize={'lg'} color="purple.700">
+                                Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="red.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
+                            </Text>
+                            <Button as={Link} href={'/judgepayment'} ml={4} colorScheme="purple">Renew annual subscription</Button>
+                        </Flex>
+                    : null}
 
                 {subscriptionOptions.length > 0 && page == 'user' &&
                     <Tooltip fontSize={'md'} hasArrow label={
