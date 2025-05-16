@@ -22,7 +22,9 @@ export async function GET(req, { params }) {
 
     const game = gameResult.rows[0];
 
-    // Check if the winner is not null, and fetch the winner's name
+    const prize = Number(game.fee) * Number(game.total_spots) * (Number(game.game_percentage) / 100);
+    game.prize = prize
+
     if (game.winner_id !== null) {
       const winnerResult = await query(
         'SELECT name FROM users WHERE id = $1',
@@ -31,7 +33,6 @@ export async function GET(req, { params }) {
       game.winner = winnerResult.rows[0]?.name || null;
     }
 
-    // Fetch the createdBy name
     const createdByResult = await query(
       'SELECT name FROM users WHERE id = $1',
       [game.created_by]
@@ -50,7 +51,7 @@ export async function GET(req, { params }) {
     const response = {
       enrollment,
       game,
-      total_questions : questionResult.rows.length
+      total_questions: questionResult.rows.length
     };
 
     return NextResponse.json(response);

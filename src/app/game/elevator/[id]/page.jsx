@@ -15,6 +15,8 @@ export async function generateMetadata({ params, searchParams }, parent) {
   const response = await axios.get(`${pathname}/api/games/${params.id}`);
   const game = response.data;
 
+  
+
   return {
     title: `${game?.title || "Game Details"}`,
     description: `Win a grand prize of $${

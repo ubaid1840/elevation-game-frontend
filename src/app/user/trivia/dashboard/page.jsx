@@ -31,6 +31,8 @@ export default function Page() {
   const [modalVisible, setModalVisible] = useState(false);
   const toast = useToast();
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermMyGame, setSearchTermMyGame] = useState("");
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -105,7 +107,9 @@ export default function Page() {
           boxShadow="md"
           mb={8}
         >
-          <Heading>Welcome To Trivia Dashboard, {UserState.value.data?.name}</Heading>
+          <Heading>
+            Welcome To Trivia Dashboard, {UserState.value.data?.name}
+          </Heading>
           <Text mt={4} fontSize="lg">
             {`Here's a quick look at your game progress and referral stats.`}
           </Text>
@@ -115,46 +119,57 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             My Games
           </Heading>
+          <Input
+            placeholder="Search my games"
+            value={searchTermMyGame}
+            onChange={(e) => setSearchTermMyGame(e.target.value)}
+          />
           <Flex wrap={"wrap"} gap={6}>
-            {myGames.map(
-              (game, index) =>
-                !game.completed && (
-                  <Box
-                    maxW={"300px"}
-                    as={Link}
-                    href={`/user/trivia/enrolledgames/${game.id}`}
-                    key={index}
-                    p={6}
-                    bg="gray.100"
-                    borderRadius="lg"
-                    boxShadow="md"
-                    transition="transform 0.2s"
-                    _hover={{
-                      transform: "scale(1.05)",
-                      boxShadow: "xl",
-                      cursor: "pointer",
-                    }}
-                    justifyContent={"space-between"}
-                    display={"flex"}
-                    flexDir={"column"}
-                  >
-                    <Heading size="md" mb={2}>
-                      {game.title}
-                    </Heading>
-                    <div>
-                      <Badge
-                        colorScheme={
-                          game.status === "COMPLETED" ? "green" : "yellow"
-                        }
-                        variant="solid"
-                        fontSize="1rem"
-                      >
-                        {game.completed ? "COMPLETED" : "PENDING"}
-                      </Badge>
-                    </div>
-                  </Box>
-                )
-            )}
+            {myGames
+              .filter((game) =>
+                game.title
+                  ?.toLowerCase()
+                  .includes(searchTermMyGame.toLowerCase())
+              )
+              .map(
+                (game, index) =>
+                  !game.completed && (
+                    <Box
+                      maxW={"300px"}
+                      as={Link}
+                      href={`/user/trivia/enrolledgames/${game.id}`}
+                      key={index}
+                      p={6}
+                      bg="gray.100"
+                      borderRadius="lg"
+                      boxShadow="md"
+                      transition="transform 0.2s"
+                      _hover={{
+                        transform: "scale(1.05)",
+                        boxShadow: "xl",
+                        cursor: "pointer",
+                      }}
+                      justifyContent={"space-between"}
+                      display={"flex"}
+                      flexDir={"column"}
+                    >
+                      <Heading size="md" mb={2}>
+                        {game.title}
+                      </Heading>
+                      <div>
+                        <Badge
+                          colorScheme={
+                            game.status === "COMPLETED" ? "green" : "yellow"
+                          }
+                          variant="solid"
+                          fontSize="1rem"
+                        >
+                          {game.completed ? "COMPLETED" : "PENDING"}
+                        </Badge>
+                      </div>
+                    </Box>
+                  )
+              )}
           </Flex>
           {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
            
@@ -167,14 +182,19 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             Enroll in a Game
           </Heading>
+          <Input
+            placeholder="Search games"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <Flex wrap={"wrap"} gap={6}>
             {availableGames
               .filter((game) => {
-                if (
-                  game.spots_remaining === 0 
-                )
-                  return false;
-                return true;
+                const matchesSpots = game.spots_remaining !== 0;
+                const matchesTitle = game.title
+                  ?.toLowerCase()
+                  .includes(searchTerm.toLowerCase());
+                return matchesSpots && matchesTitle;
               })
               .map((game, index) => (
                 <RenderEachGame key={index} game={game} />

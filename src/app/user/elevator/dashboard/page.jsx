@@ -25,6 +25,8 @@ export default function Page() {
   const [myGames, setMyGames] = useState([]);
   const [availableGames, setAvailableGames] = useState([]);
   const toast = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermMyGame, setSearchTermMyGame] = useState("");
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -113,46 +115,57 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             My Games
           </Heading>
+          <Input
+            placeholder="Search my games"
+            value={searchTermMyGame}
+            onChange={(e) => setSearchTermMyGame(e.target.value)}
+          />
           <Flex wrap={"wrap"} gap={6}>
-            {myGames.map(
-              (game, index) =>
-                !game.completed && (
-                  <Box
-                    maxW={"300px"}
-                    as={Link}
-                    href={`/user/elevator/enrolledgames/${game.id}`}
-                    key={index}
-                    p={6}
-                    bg="gray.100"
-                    borderRadius="lg"
-                    boxShadow="md"
-                    transition="transform 0.2s"
-                    _hover={{
-                      transform: "scale(1.05)",
-                      boxShadow: "xl",
-                      cursor: "pointer",
-                    }}
-                    justifyContent={"space-between"}
-                    display={"flex"}
-                    flexDir={"column"}
-                  >
-                    <Heading size="md" mb={2}>
-                      {game.title}
-                    </Heading>
-                    <div>
-                      <Badge
-                        colorScheme={
-                          game.status === "COMPLETED" ? "green" : "yellow"
-                        }
-                        variant="solid"
-                        fontSize="1rem"
-                      >
-                        {game.completed ? "COMPLETED" : "PENDING"}
-                      </Badge>
-                    </div>
-                  </Box>
-                )
-            )}
+            {myGames
+              .filter((game) =>
+                game.title
+                  ?.toLowerCase()
+                  .includes(searchTermMyGame.toLowerCase())
+              )
+              .map(
+                (game, index) =>
+                  !game.completed && (
+                    <Box
+                      maxW={"300px"}
+                      as={Link}
+                      href={`/user/elevator/enrolledgames/${game.id}`}
+                      key={index}
+                      p={6}
+                      bg="gray.100"
+                      borderRadius="lg"
+                      boxShadow="md"
+                      transition="transform 0.2s"
+                      _hover={{
+                        transform: "scale(1.05)",
+                        boxShadow: "xl",
+                        cursor: "pointer",
+                      }}
+                      justifyContent={"space-between"}
+                      display={"flex"}
+                      flexDir={"column"}
+                    >
+                      <Heading size="md" mb={2}>
+                        {game.title}
+                      </Heading>
+                      <div>
+                        <Badge
+                          colorScheme={
+                            game.status === "COMPLETED" ? "green" : "yellow"
+                          }
+                          variant="solid"
+                          fontSize="1rem"
+                        >
+                          {game.completed ? "COMPLETED" : "PENDING"}
+                        </Badge>
+                      </div>
+                    </Box>
+                  )
+              )}
           </Flex>
           {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
           
@@ -165,11 +178,19 @@ export default function Page() {
           <Heading size="lg" color="purple.700">
             Enroll in a Game
           </Heading>
+          <Input
+            placeholder="Search games"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <Flex wrap={"wrap"} gap={6}>
             {availableGames
               .filter((game) => {
-                if (game.spots_remaining === 0) return false;
-                return true;
+                const matchesSpots = game.spots_remaining !== 0;
+                const matchesTitle = game.title
+                  ?.toLowerCase()
+                  .includes(searchTerm.toLowerCase());
+                return matchesSpots && matchesTitle;
               })
               .map((game) => (
                 <Box
@@ -191,9 +212,7 @@ export default function Page() {
                   <Text fontSize="lg">Entry Level: {game.level}</Text>
 
                   <Button
-                    isDisabled={
-                      !UserState.value.data?.navigationAllowed
-                    }
+                    isDisabled={!UserState.value.data?.navigationAllowed}
                     onClick={() => {
                       const userPackage = UserState.value.data?.package;
                       let status = false;

@@ -98,6 +98,7 @@ export default function Page({ params }) {
   }
 
   async function fetchData(id) {
+    
     try {
       const response = await axios.get(
         `/api/trivia/users/${id}/games/${params.id}`

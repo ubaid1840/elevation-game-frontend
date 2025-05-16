@@ -7,7 +7,7 @@ export async function GET() {
 
     // Step 1: Fetch all expired games
     const expiredGamesResult = await query(
-      `SELECT id, title, fee, game_percentage FROM trivia_game 
+      `SELECT id, title, fee, game_percentage, prize FROM trivia_game 
        WHERE spots_remaining = 0 
        AND winner_id IS NULL`
     );
@@ -19,7 +19,7 @@ export async function GET() {
     }
 
     for (const game of expiredGames) {
-      const { id: gameId, game_percentage, fee, title } = game;
+      const { id: gameId, game_percentage, fee, title, prize } = game;
 
       try {
         const enrollmentsResult = await query(
@@ -55,14 +55,12 @@ export async function GET() {
 
         await query(`UPDATE trivia_game SET winner_id = $1 WHERE id = $2`, [winner.user_id, gameId]);
 
-        const safeFee = Number(fee) || 0;
-        const safePercentage = Number(game_percentage) || 0;
-        const saveAmount = safeFee * enrollmentsResult.rows.length * (safePercentage / 100);
+       
 
         await query(
           `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
            VALUES ($1, $2, 'Trivia game winning', $3, 'Completed', 'trivia')`,
-          [winner.user_id, saveAmount, gameId]
+          [winner.user_id, prize, gameId]
         );
 
         const tempStr = `Won game Trivia game - ${title}`

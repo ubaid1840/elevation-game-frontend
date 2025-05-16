@@ -54,10 +54,12 @@ export async function POST(req) {
     const percentage = result.rows[0].percentage;
     const gamePercentage = gameResult.rows[0].percentage;
 
+    const prize_amount = Number(fee) * Number(total_spots) * (Number(gamePercentage) / 100);
+
     // Step 1: Insert into `trivia_game` table
     const newGame = await pool.query(
-      `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage, total_spots) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+      `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage, total_spots, prize) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
        RETURNING id`,
       [
         deadline,
@@ -70,7 +72,8 @@ export async function POST(req) {
         Number(spots_remaining),
         percentage,
         gamePercentage,
-        total_spots
+        total_spots,
+        prize_amount
       ]
     );
 

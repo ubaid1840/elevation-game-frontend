@@ -59,6 +59,12 @@ export async function GET(req, { params }) {
     game.additional_judges_ids = game.additional_judges || []
     game.additional_judges = judgeNames;
 
+    const priceResult = await pool.query(`SELECT price FROM settings WHERE label = $1`, [game.level]);
+    const pricePerSpot = Number(priceResult.rows[0]?.price || 0);
+
+    const prize_amount = pricePerSpot * Number(game.total_spots) * 0.30;
+    game.prize_amount = prize_amount;
+
     return NextResponse.json(game, { status: 200 });
   } catch (error) {
     console.error("Error fetching game:", error);
