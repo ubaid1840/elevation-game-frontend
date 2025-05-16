@@ -157,7 +157,7 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
       </Text>
       <Accordion allowMultiple>
         {enrollments.map((enrollment) => {
-          const { user_name, progress } = enrollment;
+          const { user_name, progress, user_email } = enrollment;
 
           return (
             <AccordionItem key={enrollment.id}>
