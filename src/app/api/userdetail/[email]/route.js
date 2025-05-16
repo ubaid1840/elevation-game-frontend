@@ -31,11 +31,12 @@ export async function GET(req, { params }) {
             navigationAllowed = false
         }
 
-        if (!user.annual_package_expiry || moment().isAfter(moment(user.annual_package_expiry, "YYYY-MM-DD"), "day")) {
-            annualSubscriptionStatus = false
-            navigationAllowed = false
+        if (user.role === 'judge') {
+            if (!user.annual_package_expiry || moment().isAfter(moment(user.annual_package_expiry, "YYYY-MM-DD"), "day")) {
+                annualSubscriptionStatus = false
+                navigationAllowed = false
+            }
         }
-
 
         if (user.role === 'judge' && user.waiver_start) {
             const now = new Date();
