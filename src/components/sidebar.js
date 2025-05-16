@@ -1,58 +1,40 @@
 "use client"
 
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { theme } from "@/data/data";
 import {
-    IconButton,
     Box,
+    Button,
+    Center,
     CloseButton,
-    Flex,
-    Icon,
-    useColorModeValue,
+    Divider,
     Drawer,
     DrawerContent,
-    Text,
-    useDisclosure,
-    Image,
-    Divider,
+    Flex,
     HStack,
-    Avatar,
-    VStack,
-    Switch,
-    Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    Heading,
-    AccordionIcon,
-    AlertDialog,
-    AlertDialogOverlay,
-    AlertDialogContent,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    useToast,
-    Center,
-    Tooltip,
-    Tag,
-    UnorderedList,
+    Icon,
+    IconButton,
     ListItem,
-    Button
+    Text,
+    Tooltip,
+    UnorderedList,
+    useColorModeValue,
+    useDisclosure,
+    useToast
 } from "@chakra-ui/react";
-import { FiLogOut, FiMenu } from "react-icons/fi";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { theme } from "@/data/data";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { FiLogOut, FiMenu } from "react-icons/fi";
 
-import { MdAttachMoney, MdNotificationsActive, MdOutlineEmergencyShare, MdSettings } from "react-icons/md";
-import Logo from "./logo";
+import { auth, db } from "@/config/firebase";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
 import { signOut } from "firebase/auth";
-import { auth, db } from "@/config/firebase";
-import { CgProfile } from "react-icons/cg";
 import { and, collection, onSnapshot, query, where } from "firebase/firestore";
-import { debounce } from "@/utils/debounce";
+import { CgProfile } from "react-icons/cg";
 import { LuArrowRightLeft } from "react-icons/lu";
+import { MdAttachMoney, MdNotificationsActive, MdSettings } from "react-icons/md";
+import Logo from "./logo";
 
 export default function Sidebar({ children, LinkItems, settingsLink, currentPage, id }) {
 
@@ -60,6 +42,7 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
     const checkSession = useCheckSession()
     const { state: UserState, setUser } = useContext(UserContext)
     const [haveNotifications, setHaveNotifications] = useState(0)
+    const toast = useToast()
 
     useEffect(() => {
         let unsubscribe;
@@ -74,6 +57,15 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
                 }
                 if (res.user) {
                     setUser(res.user)
+                    if (res?.user?.downgraded) {
+                        toast({
+                            title: "Judge status revoked",
+                            description: "You can visit subscription page to activate your judge status again.",
+                            status: "success",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }
                 }
             })
 
@@ -295,12 +287,41 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
 };
 
 const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, ...rest }) => {
+    const { state: UserState } = useContext(UserContext)
+    const pathname = usePathname()
 
+    const user = UserState?.value?.data;
+
+    let href = '#';
+
+
+    if (user?.role === 'user') {
+        if (pathname.includes('elevator') && user?.navigationAllowed) {
+            href = path;
+        }
+        else if (pathname.includes('trivia')) {
+            href = path;
+        }
+        else if (path.includes("subscription") || children.includes("Switch")) {
+            href = path;
+        }
+
+    } else if (user?.role === 'judge') {
+        if (user?.navigationAllowed) {
+            href = path;
+        }
+        if (path.includes("subscription") || children.includes("Switch")) {
+            href = path;
+        }
+
+    } else if (user?.role == 'admin') {
+        href = path
+    }
 
     return (
         <Link
             onClick={onClose}
-            href={`${path}`}
+            href={href}
             style={{ textDecoration: "none", fontSize: "14px", fontWeight: "300", height: '40px' }}
             _focus={{ boxShadow: "none" }}
         >
@@ -320,7 +341,7 @@ const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, .
                         }}
                         fontSize={'16px'}
                         fontWeight={'500'}
-                        color={isActive ? "purple.500" : '#344054'}
+                        color={isActive ? "purple.500" : href == '#' ? '#8C96A6FF' : '#344054'}
                         {...rest}
                     >
                         {icon && (
@@ -355,7 +376,7 @@ const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, .
                     }}
                     fontSize={'16px'}
                     fontWeight={'500'}
-                    color={isActive ? "purple.500" : '#344054'}
+                    color={isActive ? "purple.500" : href == '#' ? '#8C96A6FF' : '#344054'}
                     {...rest}
                 >
                     {icon && (

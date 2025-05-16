@@ -7,8 +7,8 @@ export async function GET() {
 
     // Step 1: Fetch all expired games
     const expiredGamesResult = await query(
-      `SELECT id, title, prize FROM trivia_game 
-       WHERE deadline::DATE < NOW()::DATE 
+      `SELECT id, title, fee, game_percentage FROM trivia_game 
+       WHERE spots_remaining = 0 
        AND winner_id IS NULL`
     );
 
@@ -19,8 +19,8 @@ export async function GET() {
     }
 
     for (const game of expiredGames) {
-      const { id: gameId, prize, title } = game;
-      
+      const { id: gameId, game_percentage, fee, title } = game;
+
       try {
         const enrollmentsResult = await query(
           `SELECT user_id, progress FROM trivia_game_enrollment WHERE game_id = $1`,
@@ -29,15 +29,15 @@ export async function GET() {
 
         if (enrollmentsResult.rows.length === 0) {
           console.log(`No participants found for game ID ${gameId}. Skipping.`);
-          continue; 
+          continue;
         }
 
-       
+
         const userScores = enrollmentsResult.rows.map((enrollment) => {
           const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
           const correctAnswers = progress.filter((p) => p.isCorrect).length;
           const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
-         
+
           return { user_id: enrollment.user_id, correctAnswers, totalTime };
         });
 
@@ -50,22 +50,26 @@ export async function GET() {
           continue;
         }
 
-       
+
         await query("BEGIN");
-        
+
         await query(`UPDATE trivia_game SET winner_id = $1 WHERE id = $2`, [winner.user_id, gameId]);
+
+        const safeFee = Number(fee) || 0;
+        const safePercentage = Number(game_percentage) || 0;
+        const saveAmount = safeFee * enrollmentsResult.rows.length * (safePercentage / 100);
 
         await query(
           `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
            VALUES ($1, $2, 'Trivia game winning', $3, 'Completed', 'trivia')`,
-          [winner.user_id, prize, gameId]
+          [winner.user_id, saveAmount, gameId]
         );
 
         const tempStr = `Won game Trivia game - ${title}`
         await query(
-            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
-            [winner.user_id, tempStr]
-          );
+          'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+          [winner.user_id, tempStr]
+        );
 
         await query("COMMIT");
 

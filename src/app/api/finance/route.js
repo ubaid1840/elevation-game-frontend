@@ -3,9 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Fetch all users
     const usersResult = await query(
-      `SELECT id, name, tier1, tier2, tier3, role FROM users`
+      `SELECT id, name, role FROM users`
     );
 
     const users = usersResult.rows;
@@ -14,25 +13,35 @@ export async function GET() {
       return NextResponse.json([], { status: 200 });
     }
 
-    // Get user IDs
-    const userIds = users.map(user => user.id);
-
-    // Fetch total amount from transactions for each user
-    const transactionsResult = await query(
-      `SELECT user_id, SUM(amount) AS trivia_total 
-     FROM transactions 
+    // Fetch elevator winnings per user
+    const elevatorResult = await query(
+      `SELECT user_id, SUM(amount) AS elevator_winning
+     FROM transactions
+     WHERE transaction_type = 'Elevator game winning'
      GROUP BY user_id`
     );
 
-    // Convert transactions result into a map for easy lookup
-    const transactionsMap = Object.fromEntries(
-      transactionsResult.rows.map(t => [t.user_id, t.trivia_total || 0])
+    const elevatorMap = Object.fromEntries(
+      elevatorResult.rows.map(row => [row.user_id, parseFloat(row.elevator_winning) || 0])
     );
 
-    // Append `trivia_total` to each user
+    // Fetch trivia winnings per user
+    const triviaResult = await query(
+      `SELECT user_id, SUM(amount) AS trivia_total
+     FROM transactions
+     WHERE transaction_type = 'Trivia game winning'
+     GROUP BY user_id`
+    );
+
+    const triviaMap = Object.fromEntries(
+      triviaResult.rows.map(row => [row.user_id, parseFloat(row.trivia_total) || 0])
+    );
+
+    // Append elevator and trivia winnings to each user
     const enrichedUsers = users.map(user => ({
       ...user,
-      trivia_total: transactionsMap[user.id] || 0,
+      elevator_winning: elevatorMap[user.id] || 0,
+      trivia_total: triviaMap[user.id] || 0,
     }));
 
     return NextResponse.json(enrichedUsers, { status: 200 });

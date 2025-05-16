@@ -39,7 +39,6 @@ export default function Page() {
   const [rounds, setRounds] = useState("");
   const [category, setCategory] = useState("");
   const [totalSpots, setTotalSpots] = useState("");
-  const [prize, setPrize] = useState(0);
   const [deadline, setDeadline] = useState(null);
   const [loading, setLoading] = useState(false);
   const [availableJudges, setAvailableJudges] = useState([]);
@@ -95,7 +94,6 @@ export default function Page() {
       total_spots: Number(totalSpots),
       video_link: videoLink,
       creator_id: UserState.value.data?.id,
-      prize_amount: prize,
       deadline,
       currentround: 0,
       level,
@@ -329,17 +327,7 @@ export default function Page() {
           </Box>
         </FormControl>
 
-        <FormControl mb={6}>
-          <FormLabel htmlFor="grandprize">Grand Prize</FormLabel>
-          <Input
-            id="grandprize"
-            type="number"
-            min={1}
-            value={prize}
-            onChange={(e) => setPrize(parseInt(e.target.value))}
-            placeholder="Enter grand prize"
-          />
-        </FormControl>
+       
 
         <FormControl mb={6}>
           <FormLabel htmlFor="category">Game Category</FormLabel>
@@ -397,7 +385,6 @@ export default function Page() {
             !rounds ||
             !totalSpots ||
             selectedJudges.length === 0 ||
-            !prize || isNaN(prize) || Number(prize) <= 0 ||
             !level ||
             !category ||
             !deadline

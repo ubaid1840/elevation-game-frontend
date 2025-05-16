@@ -85,6 +85,7 @@ export default function Page({ params }) {
   const [newScore, setNewScore] = useState("");
   const [roundLoading, setRoundLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+   const [selectedUserId2nd, setSelectedUserId2nd] = useState("");
   const [finalScore, setFinalScore] = useState([]);
   const [editInstruction, setEditInstruction] = useState("");
   const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
@@ -311,6 +312,8 @@ export default function Page({ params }) {
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
+        winnerid2nd: selectedUserId2nd,
+        
       })
       .then(async () => {
         toast({
@@ -428,7 +431,7 @@ export default function Page({ params }) {
               <strong>Tier:</strong> {gameData?.level}
             </Text>
             <Text>
-              <strong>Prize Amount: </strong> ${gameData?.prize_amount}
+              <strong>Spots Remaining: </strong> {gameData?.spots_remaining}
             </Text>
             <Text>
               <strong>Winner:</strong>{" "}
@@ -459,6 +462,7 @@ export default function Page({ params }) {
             </Box>
             <Text></Text>
             <Button
+            isDisabled={!UserState.value.data?.navigationAllowed}
               isLoading={editDescriptionLoading}
               colorScheme="blue"
               onClick={handleEditInstruction}
@@ -471,6 +475,7 @@ export default function Page({ params }) {
           <>
             {gameData.currentround === 0 ? (
               <Button
+               isDisabled={!gameData?.spots_remaining || Number(gameData?.spots_remaining) !== 0 || !UserState.value.data?.navigationAllowed}
                 isLoading={roundLoading}
                 colorScheme="purple"
                 mt={5}
@@ -585,6 +590,7 @@ export default function Page({ params }) {
                                     (pitch.scores[UserState.value.data?.id] ==
                                       undefined && (
                                       <Button
+                                      isDisabled={!UserState.value.data?.navigationAllowed}
                                         size={"sm"}
                                         colorScheme="purple"
                                         onClick={() => {
@@ -604,6 +610,7 @@ export default function Page({ params }) {
                                       Number(gameData?.created_by || 0) && (
                                       <>
                                         <Button
+                                         isDisabled={!UserState.value.data?.navigationAllowed}
                                           size={"sm"}
                                           colorScheme="teal"
                                           onClick={() => {
@@ -616,6 +623,7 @@ export default function Page({ params }) {
                                           Qualify
                                         </Button>
                                         <Button
+                                         isDisabled={!UserState.value.data?.navigationAllowed}
                                           size={"sm"}
                                           colorScheme="red"
                                           onClick={() => {
@@ -658,6 +666,7 @@ export default function Page({ params }) {
                                 </Box>
                               ))}
                               <Button
+                               isDisabled={!UserState.value.data?.navigationAllowed}
                                 mt={4}
                                 colorScheme="purple"
                                 onClick={() => {
@@ -686,7 +695,7 @@ export default function Page({ params }) {
         gameData.currentround === currentRound &&
         !gameData.winner && (
           <Button
-            isDisabled={gameData.currentround === gameData.totalrounds}
+            isDisabled={(gameData.currentround === gameData.totalrounds) || !UserState.value.data?.navigationAllowed}
             isLoading={roundLoading}
             m={4}
             colorScheme="purple"
@@ -703,6 +712,7 @@ export default function Page({ params }) {
         !gameData.winner &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
           <Button
+          isDisabled={!UserState.value.data?.navigationAllowed}
             m={4}
             colorScheme="teal"
             size={"lg"}
@@ -748,6 +758,7 @@ export default function Page({ params }) {
               Close
             </Button>
             <Button
+            isDisabled={!UserState.value.data?.navigationAllowed}
               ml={3}
               isLoading={loading}
               colorScheme="purple"
@@ -789,6 +800,7 @@ export default function Page({ params }) {
               Close
             </Button>
             <Button
+            isDisabled={!UserState.value.data?.navigationAllowed}
               ml={3}
               isLoading={loading}
               colorScheme="purple"
@@ -821,9 +833,9 @@ export default function Page({ params }) {
             >
               <Box flex={1}>
                 <FormControl id="user_id" mb={4}>
-                  <FormLabel>Select Winner</FormLabel>
+                  <FormLabel>Select 1st Winner</FormLabel>
                   <Select
-                    placeholder="Select a winner"
+                    placeholder="Select 1st winner"
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
                   >
@@ -835,6 +847,24 @@ export default function Page({ params }) {
                   </Select>
                 </FormControl>
               </Box>
+
+               <Box flex={1}>
+                <FormControl id="user_id_2nd" mb={4}>
+                  <FormLabel>Select 2nd Winner</FormLabel>
+                  <Select
+                    placeholder="Select 2nd winner"
+                    value={selectedUserId2nd}
+                    onChange={(e) => setSelectedUserId2nd(e.target.value)}
+                  >
+                    {winnersList.map((winner) => (
+                      <option key={winner.user_id} value={winner.user_id}>
+                        {winner.user_name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
               <Box
                 flex={1}
                 overflowY="auto"
@@ -844,24 +874,7 @@ export default function Page({ params }) {
                 <Text mb={2} fontSize="xl" fontWeight="bold">
                   Final Scores per round
                 </Text>
-                {/* {winnersList.map((eachWinner, ind) => (
-                  <Box key={ind} mb={4}>
-                    <Text fontWeight="bold">{eachWinner.user_name}</Text>
-                    {finalScore
-                      .filter(
-                        (eachScore) =>
-                          eachWinner?.user_id === eachScore?.pitch_user_id
-                      )
-                      .map((eachScore, i) => (
-                        <Text key={i}>
-                          Round {eachScore?.round} Total Score:{" "}
-                          {eachScore?.totalScore} <br /> Round{" "}
-                          {eachScore?.round} Average Score:{" "}
-                          {eachScore?.averageScore}
-                        </Text>
-                      ))}
-                  </Box>
-                ))} */}
+               
 
                 <>
                   {sortedPlayers.map((eachWinner, ind) => {
@@ -913,7 +926,7 @@ export default function Page({ params }) {
             </Button>
             <Button
               isLoading={winnerLoading}
-              isDisabled={!selectedUserId}
+              isDisabled={!selectedUserId || !selectedUserId2nd || winnerLoading || !UserState.value.data?.navigationAllowed}
               colorScheme="blue"
               ml={3}
               onClick={handleWinner}
@@ -968,6 +981,7 @@ export default function Page({ params }) {
                 moment(deadline).isSameOrBefore(
                   moment(new Date(gameData.deadline))
                 )
+                || !UserState.value.data?.navigationAllowed
               }
               colorScheme="blue"
               ml={3}

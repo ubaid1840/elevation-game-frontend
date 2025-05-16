@@ -14,8 +14,11 @@ export async function GET(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   const { name, phone, status, role } = await req.json();
+  const searchParams = req.nextUrl.searchParams
+  const checkwaiver = searchParams.get('checkwaiver')
+
 
   try {
 
@@ -29,6 +32,19 @@ export async function PUT(req, { params }) {
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [id, action]
       );
+
+      if (role === 'judge' && checkwaiver) {
+        const checkwaiverQuery = await query(
+          `SELECT waiver_start FROM users WHERE id = $1`, [id]
+        )
+        if (checkwaiverQuery.rows.length > 0) {
+          if (checkwaiverQuery.rows[0].waiver_start === null) {
+            await query(
+              `UPDATE users SET waiver_start = $1 WHERE id = $2`, [new Date(), id]
+            )
+          }
+        }
+      }
 
       return NextResponse.json(updatedUser.rows[0], { status: 200 });
     }

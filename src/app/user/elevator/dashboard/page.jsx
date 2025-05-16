@@ -1,33 +1,29 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import { UserContext } from "@/store/context/UserContext";
 import { debounce } from "@/utils/debounce";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  Grid,
-  GridItem,
   Badge,
-  VStack,
+  Box,
+  Button,
   Divider,
+  Flex,
+  Heading,
   HStack,
   Input,
+  Text,
   useToast,
-  Flex,
+  VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
 import Link from "next/link";
 import { useCallback, useContext, useEffect, useState } from "react";
+import { IoIosWarning } from "react-icons/io";
 
 export default function Page() {
   const { state: UserState } = useContext(UserContext);
   const [myGames, setMyGames] = useState([]);
   const [availableGames, setAvailableGames] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -65,17 +61,20 @@ export default function Page() {
   function checkUrl(game) {
     const userPackage = UserState.value.data?.package;
     let status = false;
-    if (
-      userPackage === "Platinum" ||
-      (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
-      (userPackage === "Iridium" &&
-        ["Iridium", "Silver"].includes(game.level)) ||
-      (userPackage === "Silver" && game.level === "Silver")
-    ) {
-      status = true;
-    } else {
-      status = false;
+    if (UserState.value.data?.monthlySubscriptionStatus == true) {
+      if (
+        userPackage === "Platinum" ||
+        (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
+        (userPackage === "Iridium" &&
+          ["Iridium", "Silver"].includes(game.level)) ||
+        (userPackage === "Silver" && game.level === "Silver")
+      ) {
+        status = true;
+      } else {
+        status = false;
+      }
     }
+
     if (status == true) {
       return `/user/elevator/dashboard/enrollment/${game.id}`;
     } else {
@@ -94,10 +93,20 @@ export default function Page() {
           boxShadow="md"
           mb={8}
         >
-          <Heading>Welcome To Elevator Dashboard, {UserState.value.data?.name}</Heading>
+          <Heading>
+            Welcome To Elevator Dashboard, {UserState.value.data?.name}
+          </Heading>
           <Text mt={4} fontSize="lg">
             {`Here's a quick look at your game progress and referral stats.`}
           </Text>
+          {UserState.value.data?.monthlySubscriptionStatus == false && (
+            <Flex alignItems={"center"} gap={2} mt={4} color={"orange.200"}>
+              <IoIosWarning size={"20"} />{" "}
+              <Text fontSize="lg">
+                Package expired, navigate to subscription page and buy again.
+              </Text>
+            </Flex>
+          )}
         </Box>
 
         <VStack align="start" spacing={6} mb={8}>
@@ -109,7 +118,7 @@ export default function Page() {
               (game, index) =>
                 !game.completed && (
                   <Box
-                  maxW={'300px'}
+                    maxW={"300px"}
                     as={Link}
                     href={`/user/elevator/enrolledgames/${game.id}`}
                     key={index}
@@ -160,26 +169,11 @@ export default function Page() {
             {availableGames
               .filter((game) => {
                 if (game.spots_remaining === 0) return false;
-                if (
-                  game.deadline &&
-                  moment(game.deadline).isBefore(moment(), "day")
-                )
-                  return false;
-                // const userPackage = UserState.value.data?.package;
-                // if (
-                //   userPackage === "Platinum" ||
-                //   (userPackage === "Gold" && !["Platinum"].includes(game.level)) ||
-                //   (userPackage === "Iridium" && ["Iridium", "Silver"].includes(game.level)) ||
-                //   (userPackage === "Silver" && game.level === "Silver")
-                // ) {
-                //   return true;
-                // }
-
                 return true;
               })
               .map((game) => (
                 <Box
-                maxW={'300px'}
+                  maxW={"300px"}
                   key={game.id}
                   p={6}
                   bg="gray.100"
@@ -197,6 +191,9 @@ export default function Page() {
                   <Text fontSize="lg">Entry Level: {game.level}</Text>
 
                   <Button
+                    isDisabled={
+                      !UserState.value.data?.navigationAllowed
+                    }
                     onClick={() => {
                       const userPackage = UserState.value.data?.package;
                       let status = false;

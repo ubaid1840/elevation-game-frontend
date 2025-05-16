@@ -55,6 +55,7 @@ const JudgeManagement = () => {
         email: email.toLocaleLowerCase(),
         schedule: {},
         role: "judge",
+        waiver: true,
       })
       .then(() => {
         toast({
@@ -106,12 +107,13 @@ const JudgeManagement = () => {
         setJudges([...temp]);
         toast({
           title: "Success",
-          description: "Judge removed successfully",
+          description: "Judge status revoked successfully",
           status: "success",
           duration: 3000,
           isClosable: true,
         });
-      }) .catch((e) => {
+      })
+      .catch((e) => {
         toast({
           title: "Error",
           description: e?.response?.data?.message || e?.message,
@@ -126,15 +128,15 @@ const JudgeManagement = () => {
     return (
       <TableData
         data={filteredJudges.map((item) => {
-          return { id: item.id, name: item.name, email: item.email };
+          return { id: item.id, name: item.name, email: item.email, waiver_status : item.waiver_status };
         })}
         columns={[
           { key: "name", value: "Name" },
           { key: "email", value: "Email" },
-          { value: "Suspend" },
+          { key: "waiver_status", value: "Waiver Status" },
         ]}
         button={true}
-        buttonText={"Remove"}
+        buttonText={"Suspend"}
         onButtonClick={(val) => handleJudgeStatus(val)}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

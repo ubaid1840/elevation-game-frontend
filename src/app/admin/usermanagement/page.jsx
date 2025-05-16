@@ -97,7 +97,7 @@ const UserManagement = () => {
 
   async function handlePromote(id) {
     axios
-      .put(`/api/users/${id}`, {
+      .put(`/api/users/${id}?checkwaiver=true`, {
         role: "judge",
       })
       .then(() => {
@@ -134,7 +134,7 @@ const UserManagement = () => {
           { key: "role", value: "Role" },
           { key: "last_active", value: "Last Active" },
           { key: "active", value: "Active" },
-          { value: "Activity Log" },
+          
         ]}
         button={true}
         buttonText={"View Logs"}

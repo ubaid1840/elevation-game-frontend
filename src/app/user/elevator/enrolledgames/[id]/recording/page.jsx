@@ -1,23 +1,14 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
-  Heading,
-  Text,
-  Grid,
-  GridItem,
-  VStack,
-  HStack,
-  Select,
   Button,
-  Badge,
   Divider,
+  Heading,
   Input,
-  Stack,
-  Textarea,
+  Text,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
@@ -166,7 +157,7 @@ export default function GameEnrollmentPage({ params }) {
                 setLoading(true);
                 handleSubmit();
               }}
-              isDisabled={!videoLink}
+              isDisabled={!videoLink || !UserState.value.data?.navigationAllowed}
               _hover={{ bg: "purple.600" }}
             >
               Submit

@@ -16,6 +16,7 @@ import {
     UnorderedList,
     ListItem,
     useToast,
+    Flex,
 } from "@chakra-ui/react";
 import Sidebar from "@/components/sidebar";
 import GetLinkItems from "@/utils/SideBarItems";
@@ -26,6 +27,7 @@ import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
 import { UserContext } from "@/store/context/UserContext";
 import axios from "axios";
 import moment from "moment";
+import Link from "next/link";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
@@ -92,19 +94,27 @@ export default function SubscriptionPage({ page }) {
 
                 {currentPlan &&
                     <Text fontSize={'lg'} color="purple.700">
-                        Expiry: <Text as="span" color="green.500">{UserState.value.data && UserState.value.data?.package_expiry ? moment(UserState.value.data.package_expiry).format("MMM DD, yyyy") : "Expired"}</Text>
+                        Expiry: <Text as="span" color={UserState.value.data?.monthlySubscriptionStatus ? "green.500" : "red.500"}>{UserState.value.data && UserState.value.data?.package_expiry ? moment(UserState.value.data.package_expiry).format("MMM DD, yyyy") : "Expired"}</Text>
                     </Text>
                 }
 
-                {page === 'judge' &&
+                {page === 'judge' && UserState.value.data && UserState.value.data?.annualSubscriptionStatus ?
                     <Text fontSize={'lg'} color="purple.700">
-                        Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>} 
-                    </Text>}
+                        Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
+                    </Text>
+                    :
+                    <Flex align={'center'}>
+                        <Text fontSize={'lg'} color="purple.700">
+                            Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="red.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
+                        </Text>
+                        <Button as={Link} href={'/judgepayment'} ml={4} colorScheme="purple">Renew annual subscription</Button>
+                    </Flex>}
 
                 {subscriptionOptions.length > 0 && page == 'user' &&
                     <Tooltip fontSize={'md'} hasArrow label={
                         <Box p={2}>
                             <UnorderedList>
+                                <ListItem>Must have  Platinum subscription</ListItem>
                                 <ListItem>Must have 50 referrals with Platinum subscription</ListItem>
                                 <ListItem>Pay an annual fee of $750</ListItem>
                             </UnorderedList>

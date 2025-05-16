@@ -22,13 +22,12 @@ import {
   Thead,
   Tr,
   useToast,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { IoIosArrowRoundDown, IoIosArrowRoundUp } from "react-icons/io";
-
 
 const FinancialOverview = () => {
   const [payments, setPayments] = useState([]);
@@ -44,14 +43,17 @@ const FinancialOverview = () => {
   }, []);
 
   async function fetchData() {
-    axios.get("/api/finance").then((response) => {
-      if (response.data.length > 0) {
-        const temp = response.data.filter((item) => item.role !== "admin");
-        setPayments([...temp]);
-      }
-    }).finally(()=>{
-      setLoading(false)
-    })
+    axios
+      .get("/api/finance")
+      .then((response) => {
+        if (response.data.length > 0) {
+          const temp = response.data.filter((item) => item.role !== "admin");
+          setPayments([...temp]);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   async function handleSendNotifications(msg) {
@@ -85,13 +87,12 @@ const FinancialOverview = () => {
   const RenderTable = useCallback(() => {
     return (
       <TableData
-      loading={loading}
+        loading={loading}
         data={filteredUsers.map((item) => {
           return {
             id: item.id,
             name: item.name,
-            amount:
-              Number(item.tier1) + Number(item.tier2) + Number(item.tier3),
+            amount: Number(item.elevator_winning),
             trivia_total: Number(item.trivia_total),
           };
         })}

@@ -171,9 +171,7 @@ export default function Page() {
             {availableGames
               .filter((game) => {
                 if (
-                  game.spots_remaining === 0 ||
-                  (game.deadline &&
-                    moment(game.deadline).isBefore(moment(), "day"))
+                  game.spots_remaining === 0 
                 )
                   return false;
                 return true;

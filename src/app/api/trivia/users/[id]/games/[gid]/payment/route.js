@@ -33,7 +33,7 @@ export async function PUT(req, { params }) {
             [id, gid]
         );
 
-        const result = await query(`SELECT percentage FROM trivia_settings`);
+        const result = await query(`SELECT percentage FROM trivia_settings WHERE id = 1`);
         const percentage = result.rows[0].percentage;
         const referrerResult = await query(
             "SELECT referrer_id FROM referrals WHERE referred_id = $1",

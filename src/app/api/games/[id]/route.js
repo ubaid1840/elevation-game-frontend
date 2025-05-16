@@ -68,8 +68,8 @@ export async function GET(req, { params }) {
 
 
 export async function PUT(req, { params }) {
-  const { id } = params;
-  const { winnerid, roundinstruction } = await req.json();
+  const { id } = await params;
+  const { winnerid, roundinstruction, winnerid2nd } = await req.json();
 
   if (!id) {
     return NextResponse.json({ message: 'Required information missing' }, { status: 404 });
@@ -77,20 +77,46 @@ export async function PUT(req, { params }) {
 
   try {
 
-    if (winnerid) {
+    if (winnerid && winnerid2nd) {
+
+      const gameResult = await pool.query(`SELECT * FROM games WHERE id = $1`, [id]);
+      const gameData = gameResult.rows[0];
+
+      const amountQuery = await pool.query(`SELECT price FROM settings WHERE label = $1`, [gameData.level])
+      const amount = Number(amountQuery.rows[0].price);
+      const winnerAmount1st = amount * Number(gameData.total_spots) * 0.30
+      const winnerAmount2nd = amount * Number(gameData.total_spots) * 0.10
+
+      if (!gameData || !amountQuery.rows[0]) {
+        return NextResponse.json({ message: 'Invalid game or amount data' }, { status: 400 });
+      }
+
       await pool.query(
         `UPDATE users 
-           SET winner_earnings = winner_earnings + (SELECT prize_amount FROM games WHERE games.id = $1) 
+           SET winner_earnings = winner_earnings + $1 
            WHERE users.id = $2`,
-        [id, winnerid]
+        [winnerAmount1st, winnerid]
       );
 
-      await query(
+      await pool.query(
         `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
-         SELECT $1, prize_amount, id, 'Completed', 'elevator', 'Elevator game winning'
-         FROM games WHERE id = $2`,
-        [winnerid, id]
-    );
+         VALUES ($1, $2, $3, 'Completed', 'elevator', 'Elevator game winning')`,
+        [winnerid, winnerAmount1st, id]
+      );
+
+      await pool.query(
+        `UPDATE users 
+           SET winner_earnings = winner_earnings + $1 
+           WHERE users.id = $2`,
+        [winnerAmount2nd, winnerid2nd]
+      );
+      await pool.query(
+        `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
+         VALUES ($1, $2, $3, 'Completed', 'elevator', 'Elevator game winning')`,
+        [winnerid2nd, winnerAmount2nd, id]
+      );
+
+
 
       const updatedGame = await pool.query(
         `UPDATE games 

@@ -5,7 +5,7 @@ export async function GET() {
     try {
         // Fetch all games
         const gamesResult = await query(`
-            SELECT id, title, winner_id, prize, fee 
+            SELECT id, title, winner_id, game_percentage, fee 
             FROM trivia_game 
             ORDER BY id DESC
         `);
@@ -54,12 +54,16 @@ export async function GET() {
             // Total enrolled players
             const totalEnrollments = gameEnrollments.length;
 
+            const safeFee = Number(game.fee) || 0;
+            const safePercentage = Number(game.game_percentage) || 0;
+            const saveAmount = safeFee * gameEnrollments.length * (safePercentage / 100);
+
             if (totalEnrollments === 0) {
                 leaderboard.push({
                     game_id: game.id,
                     game_title: game.title,
-                    game_prize: game.prize,
-                    game_fee : game.fee,
+                    game_prize: saveAmount,
+                    game_fee: game.fee,
                     total_enrollments: 0,
                     top_player: null
                 });
@@ -122,7 +126,7 @@ export async function GET() {
                 game_id: game.id,
                 game_title: game.title,
                 game_prize: game.prize,
-                game_fee : game.fee,
+                game_fee: game.fee,
                 total_enrollments: totalEnrollments,
                 top_player: {
                     user_id: topPlayer.user_id,

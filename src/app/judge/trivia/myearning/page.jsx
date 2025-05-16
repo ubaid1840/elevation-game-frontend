@@ -202,8 +202,8 @@ const GameSection = () => {
               total_enrollments: item.total_enrollments,
               game_prize: item.game_prize,
               game_fee: item.game_fee,
-              revenue_genarated:
-                Number(item.total_enrollments) * Number(item.game_prize),
+              revenue_generated:
+                Number(item.total_enrollments) * Number(item.game_fee),
               winner_status: item.top_player.winner_status,
               user_email: item.top_player.user_email,
             };
@@ -226,7 +226,7 @@ const GameSection = () => {
               tx.total_enrollments,
               tx.game_fee,
               tx.game_prize,
-              tx.revenue_genarated,
+              tx.revenue_generated,
               tx.winner_status,
             ]),
           ];
@@ -257,7 +257,7 @@ const GameSection = () => {
           { key: "total_enrollments", value: "Total Participants" },
           { key: "game_fee", value: "Entry fee" },
           { key: "game_prize", value: "Prize money" },
-          { key: "revenue_genarated", value: "Revenue Generated" },
+          { key: "revenue_generated", value: "Revenue Generated" },
           { key: "winner_status", value: "Winning status" },
         ]}
       />

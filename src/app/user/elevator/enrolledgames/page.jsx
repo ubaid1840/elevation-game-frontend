@@ -1,20 +1,18 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
 import {
   Box,
+  Button,
   Heading,
+  Link,
+  SimpleGrid,
   Stack,
   Text,
-  Button,
-  SimpleGrid,
   useColorModeValue,
-  Link,
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { useRouter } from "next/navigation";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
 
 
 export default function Page() {
@@ -74,9 +72,10 @@ export default function Page() {
                 </Text>
               </Stack>
               <Button
+              isDisabled={!UserState.value.data?.navigationAllowed}
               _hover={{textDecoration:'none'}}
                as={Link}
-               href={`/user/elevator/enrolledgames/${game.id}`}
+               href={!UserState.value.data?.navigationAllowed ? "#" :`/user/elevator/enrolledgames/${game.id}`}
                 colorScheme="purple"
                 mt={4}
                 variant="solid"

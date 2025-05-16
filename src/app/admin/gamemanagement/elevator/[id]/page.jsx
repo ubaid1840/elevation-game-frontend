@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -101,7 +101,6 @@ export default function Page({ params }) {
     axios
       .get(`/api/games/${params.id}/judge`)
       .then((response) => {
-        console.log(response.data);
         setGameData(response.data);
         setCurrentRound(Number(response.data.currentround || 1));
       })
@@ -145,6 +144,35 @@ export default function Page({ params }) {
       setFinalScore(qualifiedPitchesWithAverageScore);
     }
   }, [gameData]);
+
+
+    const playersWithCumulativeScores = useMemo(() => {
+      return winnersList.map((eachWinner) => {
+        const playerScores = finalScore.filter(
+          (eachScore) => eachWinner?.user_id === eachScore?.user_id
+        );
+  
+        const cumulativeTotal = playerScores.reduce(
+          (acc, curr) => acc + curr.totalScore,
+          0
+        );
+        const cumulativeAverage =
+          playerScores.length > 0 ? cumulativeTotal / playerScores.length : 0;
+  
+        return {
+          ...eachWinner,
+          cumulativeTotal,
+          cumulativeAverage,
+        };
+      });
+    }, [finalScore, winnersList]);
+
+   const sortedPlayers = useMemo(() => {
+      return playersWithCumulativeScores.sort(
+        (a, b) => b.cumulativeTotal - a.cumulativeTotal
+      );
+    }, [playersWithCumulativeScores]);
+  
 
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
@@ -368,9 +396,9 @@ export default function Page({ params }) {
             <Text>
               <strong>Tier:</strong> {gameData?.level}
             </Text>
-            <Text>
+            {/* <Text>
               <strong>Prize Amount: </strong> ${gameData?.prize_amount}
-            </Text>
+            </Text> */}
             <Text>
               <strong>Winner:</strong>{" "}
               {gameData?.winner ? (
@@ -412,6 +440,10 @@ export default function Page({ params }) {
           <>
             {gameData.currentround === 0 ? (
               <Button
+                isDisabled={
+                  !gameData?.spots_remaining ||
+                  Number(gameData?.spots_remaining) !== 0
+                }
                 isLoading={roundLoading}
                 colorScheme="purple"
                 mt={5}
@@ -772,6 +804,22 @@ export default function Page({ params }) {
                   </Select>
                 </FormControl>
               </Box>
+              <Box flex={1}>
+                <FormControl id="user_id_2nd" mb={4}>
+                  <FormLabel>Select 2nd Winner</FormLabel>
+                  <Select
+                    placeholder="Select 2nd winner"
+                    value={selectedUserId2nd}
+                    onChange={(e) => setSelectedUserId2nd(e.target.value)}
+                  >
+                    {winnersList.map((winner) => (
+                      <option key={winner.user_id} value={winner.user_id}>
+                        {winner.user_name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
               <Box
                 flex={1}
                 overflowY="auto"
@@ -781,24 +829,46 @@ export default function Page({ params }) {
                 <Text mb={2} fontSize="xl" fontWeight="bold">
                   Final Scores
                 </Text>
-                {winnersList.map((eachWinner, ind) => (
-                  <Box key={ind} mb={4}>
-                    <Text fontWeight="bold">{eachWinner.user_name}</Text>
-                    {finalScore
-                      .filter(
-                        (eachScore) =>
-                          eachWinner?.user_id === eachScore?.pitch_user_id
-                      )
-                      .map((eachScore, i) => (
-                        <Text key={i}>
-                          Round {eachScore?.round} Total Score:{" "}
-                          {eachScore?.totalScore} <br /> Round{" "}
-                          {eachScore?.round} Average Score:{" "}
-                          {eachScore?.averageScore}
+                <>
+                  {sortedPlayers.map((eachWinner, ind) => {
+                    const playerScores = finalScore.filter(
+                      (eachScore) => eachWinner?.user_id === eachScore?.user_id
+                    );
+
+                    return (
+                      <Box key={ind} mb={4}>
+                        <Text fontWeight="bold">{eachWinner.user_name}</Text>
+                        {playerScores.map((eachScore, i) => (
+                          <Text key={i}>
+                            Round {eachScore?.round} Total Score:{" "}
+                            {eachScore?.totalScore} <br />
+                            Round {eachScore?.round} Average Score:{" "}
+                            {eachScore?.averageScore}
+                          </Text>
+                        ))}
+                      </Box>
+                    );
+                  })}
+
+                  {/* Show cumulative total and average for each player at the bottom */}
+                  <Text mb={2} fontSize="xl" fontWeight="bold">
+                    Final Scores Cumulative
+                  </Text>
+                  <Box mt={4}>
+                    {sortedPlayers.map((eachWinner, i) => (
+                      <Box key={i} mb={2}>
+                        <Text fontWeight="bold">{eachWinner.user_name}</Text>
+                        <Text>
+                          Cumulative Total Score: {eachWinner.cumulativeTotal}
                         </Text>
-                      ))}
+                        <Text>
+                          Cumulative Average Score:{" "}
+                          {eachWinner.cumulativeAverage.toFixed(2)}
+                        </Text>
+                      </Box>
+                    ))}
                   </Box>
-                ))}
+                </>
               </Box>
             </VStack>
           </ModalBody>

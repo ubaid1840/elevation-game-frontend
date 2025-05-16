@@ -35,7 +35,6 @@ export async function POST(req) {
     const {
       deadline,
       fee,
-      prize,
       title,
       questions,
       created_by,
@@ -45,29 +44,31 @@ export async function POST(req) {
       spots_remaining,
     } = await req.json();
 
-    if (!deadline || !fee || !prize || !title || !questions || !created_by || !start_date || !category || !description || !spots_remaining) {
+    if (!deadline || !fee  || !title || !questions || !created_by || !start_date || !category || !description || !spots_remaining) {
       return NextResponse.json({ message: "All fields are required" }, { status: 400 });
     }
 
-    const result = await query(`SELECT percentage FROM trivia_settings`);
+    const result = await query(`SELECT percentage FROM trivia_settings WHERE id = 1`);
+    const gameResult = await query(`SELECT percentage FROM trivia_settings WHERE id = 2`);
     const percentage = result.rows[0].percentage;
+    const gamePercentage = gameResult.rows[0].percentage;
 
     // Step 1: Insert into `trivia_game` table
     const newGame = await pool.query(
-      `INSERT INTO trivia_game (deadline, fee, prize, title, created_by, start_date, description, category, spots_remaining, percentage) 
+      `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-       RETURNING id`, // Get the game_id after insertion
+       RETURNING id`,
       [
         deadline,
         fee,
-        prize,
         title,
         created_by,
         start_date,
         description,
         category,
         Number(spots_remaining),
-        percentage
+        percentage,
+        gamePercentage
       ]
     );
 

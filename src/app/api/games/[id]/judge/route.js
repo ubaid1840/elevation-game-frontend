@@ -18,6 +18,7 @@ export async function GET(req, { params }) {
         g.winner, 
         g.created_by, 
         g.roundinstruction,
+        g.spots_remaining,
         g.additional_judges
        FROM games g 
        WHERE g.id = $1`,
@@ -27,7 +28,7 @@ export async function GET(req, { params }) {
     const game = gameResult.rows[0];
 
     if (!game) {
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({}, { status: 200 });
     }
 
     // Replace created_by (user_id) with the user's name

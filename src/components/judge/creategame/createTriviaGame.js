@@ -47,7 +47,6 @@ export default function CreateTriviaGame({ page }) {
   const [questions, setQuestions] = useState([
     { text: "", options: [""], correct: "", time: "" },
   ]);
-  const [prize, setPrize] = useState("");
   const [fee, setFee] = useState("");
   const { state: UserState } = useContext(UserContext);
   const toast = useToast();
@@ -144,7 +143,6 @@ export default function CreateTriviaGame({ page }) {
     if (!gameName.trim()) missing.push("Game Name");
     if (!deadline) missing.push("Deadline");
     if (!fee || Number(fee) <= 0) missing.push("Entry Fee cannot be zero or empty");
-    if (!prize) missing.push("Prize");
     if (!category) missing.push("Category")
     if (!startDate) missing.push("Start Date")
     if (!spots || Number(spots) == 0) missing.push("Total Spots cannot be zero or empty")
@@ -180,7 +178,6 @@ export default function CreateTriviaGame({ page }) {
       .post("/api/trivia/game", {
         deadline: deadline,
         fee: fee,
-        prize: prize,
         title: gameName,
         questions: questions,
         created_by: UserState.value.data.id,
@@ -213,27 +210,7 @@ export default function CreateTriviaGame({ page }) {
       });
   };
 
-  const isFormInvalid = () => {
-    if (!gameName.trim() || !deadline || !fee || !prize) {
-      return true;
-    }
-    if (questions.length == 0) {
-      return true;
-    }
-    for (let question of questions) {
-      if (!question.text.trim() || !question.correct || !question.time) {
-        return true;
-      }
-      if (
-        question.options.length === 0 ||
-        question.options.some((opt) => !opt.trim())
-      ) {
-        return true;
-      }
-    }
 
-    return false;
-  };
 
   const handleAddNewCategory = () => {
     axios.post("/api/categories", { value: newCategory }).then(() => {
@@ -338,16 +315,7 @@ export default function CreateTriviaGame({ page }) {
         />
       </FormControl>
 
-      <FormControl mb={6}>
-        <FormLabel>Prize</FormLabel>
-        <Input
-          type="number"
-          min={1}
-          placeholder="Enter prize"
-          value={prize}
-          onChange={(e) => setPrize(e.target.value)}
-        />
-      </FormControl>
+    
 
       <FormControl mb={6}>
         <FormLabel>Total Spots</FormLabel>

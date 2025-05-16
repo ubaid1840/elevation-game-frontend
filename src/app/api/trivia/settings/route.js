@@ -6,10 +6,10 @@ export async function GET() {
 
     try {
         const result = await query(`
-            SELECT id, percentage FROM trivia_settings 
+            SELECT * FROM trivia_settings
         `);
 
-        return NextResponse.json({ referral_incentive_percentage: result.rows[0].percentage, id: result.rows[0].id }, { status: 200 });
+        return NextResponse.json(result.rows, { status: 200 });
     }
     catch (e) {
         return NextResponse.json({ referral_incentive_percentage: 0 }, { status: 500 });

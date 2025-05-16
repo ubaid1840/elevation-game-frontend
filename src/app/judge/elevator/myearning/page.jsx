@@ -37,7 +37,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { IoIosArrowRoundDown, IoIosArrowRoundUp } from "react-icons/io";
 
-
 export default function Page() {
   const { state: UserState } = useContext(UserContext);
   const [csvData, setCsvData] = useState([]);
@@ -208,8 +207,7 @@ const GameSection = () => {
               score: item?.top_player?.totalScore || "",
               game_prize: item.prize_amount,
               enrollments: item.total_enrollments,
-              revenue_generated:
-                Number(item.total_enrollments) * Number(item.prize_amount),
+              revenue_generated: Number(item.revenue_generated),
               user_email: item?.top_player?.user_email || "",
             };
           });

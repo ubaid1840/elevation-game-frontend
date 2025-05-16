@@ -12,7 +12,7 @@ export async function GET(req) {
 
         // Fetch all games
         const gamesResult = await query(`
-            SELECT id, title, prize_amount, winner 
+            SELECT id, title, level, total_spots , winner 
             FROM games
             ORDER BY id DESC
         `);
@@ -78,24 +78,36 @@ export async function GET(req) {
             const rankedUsers = userScores.sort((a, b) => b.totalScore - a.totalScore)
                 .map((user, index) => ({ ...user, rank: index + 1 }));
 
+            const level = game.level;
+            const totalSpots = Number(game?.total_spots || 0);
+
+            const priceResult = await query(`SELECT price FROM settings WHERE label = $1`, [level]);
+            const pricePerSpot = Number(priceResult.rows[0]?.price || 0);
+
+            const prize_amount = pricePerSpot * totalSpots * 0.30;
+
             if (type === 'user') {
-                // Process each ranked user
-                const userData = rankedUsers.map(user => {
+
+                const userData = rankedUsers.map(async user => {
                     let winnerStatus = "TBD";
                     if (game.winner) {
                         winnerStatus = (game.winner === user.user_id) ? "Won" : "Lost";
                     }
 
+
+
+
                     return {
                         game_id: game.id,
                         game_title: game.title,
-                        prize_amount: game.prize_amount,
+                        prize_amount: prize_amount,
                         user_id: user.user_id,
                         user_name: user.user_name,
                         user_email: user.user_email,
                         rank: user.rank,
                         totalScore: user.totalScore,
-                        winner_status: winnerStatus
+                        winner_status: winnerStatus,
+                        revenue_generated : pricePerSpot * totalSpots
                     };
                 });
 
@@ -114,10 +126,12 @@ export async function GET(req) {
                     winnerStatus = (topPlayer?.user_id === game.winner) ? "Won" : "Lost";
                 }
 
+
+
                 responseData.push({
                     game_id: game.id,
                     game_title: game.title,
-                    prize_amount: game.prize_amount,
+                    prize_amount: prize_amount,
                     top_player: topPlayer ? {
                         user_id: topPlayer.user_id,
                         user_name: topPlayer.user_name,
@@ -126,7 +140,8 @@ export async function GET(req) {
                         winner_status: winnerStatus
                     } : null,
                     total_enrollments: totalEnrollments,
-                    winner_name: winnerName
+                    winner_name: winnerName,
+                     revenue_generated : pricePerSpot * totalSpots
                 });
             }
         }

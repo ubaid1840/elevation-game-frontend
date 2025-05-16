@@ -10,8 +10,33 @@ export async function GET(req) {
   const role = searchParams.get('role');
 
   try {
-    const users = await query('SELECT id, name, email, role, last_active, schedule, active FROM users WHERE role = $1', [role]);
-    return NextResponse.json(users.rows);
+    const users = await query('SELECT id, name, email, role, last_active, schedule, active, waiver_start FROM users WHERE role = $1', [role]);
+
+    const usersWithWaiverStatus = users.rows.map((eachUser) => {
+      let hasActiveWaiver = false;
+      let waiver_status = 'N/A';
+
+      if (eachUser.role === 'judge' && eachUser.waiver_start) {
+        const now = new Date();
+        const waiverEnds = new Date(eachUser.waiver_start);
+        waiverEnds.setFullYear(waiverEnds.getFullYear() + 1);
+
+        if (now <= waiverEnds) {
+          hasActiveWaiver = true;
+          waiver_status = `Expiry: ${moment(waiverEnds).format("YYYY-MM-DD")}`;
+        } else {
+          waiver_status = 'Expired';
+        }
+      }
+
+      return {
+        ...eachUser,
+        hasActiveWaiver,
+        waiver_status,
+      };
+    });
+
+    return NextResponse.json(usersWithWaiverStatus, { status: 200 });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json({ message: 'Error fetching users', error: error.message }, { status: 500 });
@@ -19,7 +44,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const { name, email, role, refered_by, schedule } = await req.json();
+  const { name, email, role, refered_by, schedule, waiver } = await req.json();
   const referral_code = generateReferralCode();
   let referrer_id = null;
 
@@ -109,10 +134,19 @@ export async function POST(req) {
 
     }
 
-    const newUser = await query(
-      'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [name, email, role || 'user', referral_code, schedule]
-    );
+    let newUser = null
+    if (role === "judge" && waiver) {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [name, email, role, referral_code, schedule, new Date()]
+      );
+    } else {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, email, role || 'user', referral_code, schedule]
+      );
+    }
+
 
     if (referrer_id) {
       const referred_id = newUser.rows[0].id;

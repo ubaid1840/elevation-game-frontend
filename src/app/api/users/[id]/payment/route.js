@@ -98,10 +98,11 @@ export async function POST(req, { params }) {
                 }
             }
             if (referrer_id) {
-                const checkPlan = await query(
+                const checkPlanQuery = await query(
                     'SELECT package FROM users WHERE id = $1 LIMIT 1',
                     [referrer_id]
                 );
+                const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan === 'Silver') {
                     await query(
                         'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
@@ -154,10 +155,11 @@ export async function POST(req, { params }) {
 
             }
             if (referrer2_id) {
-                const checkPlan = await query(
+                const checkPlanQuery = await query(
                     'SELECT package FROM users WHERE id = $1 LIMIT 1',
                     [referrer2_id]
                 );
+                const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan !== 'Silver') {
 
                     if(checkPlan === 'Platinum'){
@@ -200,10 +202,11 @@ export async function POST(req, { params }) {
             }
 
             if (referrer3_id) {
-                const checkPlan = await query(
+                const checkPlanQuery = await query(
                     'SELECT package FROM users WHERE id = $1 LIMIT 1',
                     [referrer3_id]
                 );
+                const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan !== 'Silver') {
                     if(checkPlan === 'Platinum'){
                         await query(

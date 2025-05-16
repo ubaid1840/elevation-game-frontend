@@ -83,10 +83,10 @@ export default function PublicGame({ game }) {
                         <Text fontWeight="bold">Total Rounds:</Text>
                         <Text fontSize="sm">{game?.totalrounds}</Text>
                     </GridItem>
-                    <GridItem>
+                    {/* <GridItem>
                         <Text fontWeight="bold">Prize Amount:</Text>
                         <Text fontSize="sm">${game?.prize_amount}</Text>
-                    </GridItem>
+                    </GridItem> */}
                     <GridItem>
                         <Text fontWeight="bold">Tier:</Text>
                         <Text fontSize="sm">{game?.level}</Text>

@@ -1,42 +1,36 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { db } from "@/config/firebase";
+import { UserContext } from "@/store/context/UserContext";
 import {
+    Badge,
     Box,
-    Heading,
-    Stack,
-    Text,
-    Textarea,
     Button,
     Divider,
     FormControl,
     FormLabel,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    Input,
-    NumberInput,
-    NumberInputField,
-    Link,
     Grid,
     GridItem,
-    Badge,
-    useDisclosure,
-    Progress,
+    Heading,
     HStack,
-    VStack,
+    Link,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Progress,
+    Stack,
+    Text,
+    Textarea,
+    useDisclosure,
+    VStack
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
-import moment from "moment";
-import Head from "next/head";
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import moment from "moment";
+import { useContext, useEffect, useState } from "react";
 
 export default function GameDetail({ params }) {
 
@@ -67,7 +61,6 @@ export default function GameDetail({ params }) {
                 const total = Number(response.data?.game?.totalrounds || 1)
                 setProgress((current / total) * 100)
             }
-            console.log(response.data)
             setGameDetailData(response.data);
             setCurrentRound(response.data.game?.currentround || 1)
         } catch (error) {
@@ -163,11 +156,11 @@ export default function GameDetail({ params }) {
                             Tier: <span>{gameDetailData?.game?.level}</span>
                         </Text>
                     </GridItem>
-                    <GridItem>
+                    {/* <GridItem>
                         <Text fontWeight="bold" color="purple.600">
                             Prize Amount: <span>${gameDetailData?.game?.prize_amount}</span>
                         </Text>
-                    </GridItem>
+                    </GridItem> */}
                     <GridItem>
                         <Text fontWeight="bold" color="purple.600">
                             Challenge:{" "}
@@ -329,6 +322,7 @@ export default function GameDetail({ params }) {
                                         </Stack>
                                     </Box>
                                     <Button
+                                    isDisabled={!UserState.value.data?.navigationAllowed}
                                         mt={4}
                                         colorScheme="purple"
                                         onClick={() => {
@@ -344,11 +338,12 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && moment(gameDetailData.game.deadline).isSameOrAfter(moment()) && (
+                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner  && (
                             <Button
+                                isDisabled={!UserState.value.data?.navigationAllowed}
                                 w={"full"}
                                 as={Link}
-                                href={`/user/elevator/enrolledgames/${params.id}/recording`}
+                                href={!UserState.value.data?.navigationAllowed ? "#" : `/user/elevator/enrolledgames/${params.id}/recording`}
                                 colorScheme="teal"
                                 mt={4}
                                 _hover={{ textDecoration: "none" }}

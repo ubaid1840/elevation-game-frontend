@@ -54,12 +54,14 @@ export default function Page() {
 
   const packageOptions = ["Silver", "Iridium", "Gold", "Platinum"];
   const [percentage, setPercentage] = useState("");
+  const [percentageGame, setPercentageGame] = useState("");
   const [percentageID, setPercentageID] = useState("");
+  const [percentageIDGame, setPercentageIDGame] = useState("");
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [privacyPage, setPrivacyPage] = useState("");
   const [termsPage, setTermsPage] = useState("");
-const [pageId, setPageId] = useState(null)
+  const [pageId, setPageId] = useState(null);
   const toast = useToast();
   const {
     isOpen: isOpenCategory,
@@ -99,8 +101,17 @@ const [pageId, setPageId] = useState(null)
 
   async function fetchTriviaSettings() {
     axios.get("/api/trivia/settings").then((response) => {
-      setPercentage(response.data.referral_incentive_percentage);
-      setPercentageID(response.data.id);
+      const apiData = response.data;
+      apiData.map((item) => {
+        if (item.type === "referral") {
+          setPercentage(item.precentage);
+          setPercentageID(item.id);
+        }
+        if (item.type === "game") {
+          setPercentageGame(item.percentage);
+          setPercentageIDGame(item.id);
+        }
+      });
     });
   }
 
@@ -176,15 +187,18 @@ const [pageId, setPageId] = useState(null)
   async function handleUpdateTriviaSettings() {
     setLoading(true);
     try {
-      await axios
-        .put(`/api/trivia/settings`, {
-          percentage: percentage,
-          id: percentageID,
-        })
-        .then(() => {
-          fetchTriviaSettings();
-          callSuccessToast();
-        });
+      const firstUpdate = await axios.put(`/api/trivia/settings`, {
+        id: percentageID,
+        percentage: percentage,
+      });
+
+      const secondUpdate = await axios.put(`/api/trivia/settings`, {
+        id: percentageIDGame,
+        percentage: percentageGame,
+      });
+
+      fetchTriviaSettings();
+      callSuccessToast();
     } catch (error) {
       console.error("Error updating trivia settings:", error);
       callFailedToast();
@@ -261,7 +275,7 @@ const [pageId, setPageId] = useState(null)
       .put("/api/pagesettings", {
         privacy: privacyPage,
         terms: termsPage,
-        id : pageId
+        id: pageId,
       })
       .then(() => {
         setPageLoading(false);
@@ -339,15 +353,27 @@ const [pageId, setPageId] = useState(null)
                   setPercentage(Number(e.target.value));
                 }}
               />
-              <Button
-                isDisabled={!percentage}
-                colorScheme="blue"
-                ml={3}
-                onClick={handleUpdateTriviaSettings}
-              >
-                Update
-              </Button>
             </Flex>
+
+            <FormLabel>Game winning percentage</FormLabel>
+            <Flex>
+              <Input
+                type="number"
+                placeholder="Enter game winning percentage"
+                value={percentageGame ? percentageGame : ""}
+                onChange={(e) => {
+                  setPercentageGame(Number(e.target.value));
+                }}
+              />
+            </Flex>
+            <Button
+              isDisabled={!percentage || !percentageGame}
+              colorScheme="blue"
+              ml={3}
+              onClick={() => handleUpdateTriviaSettings()}
+            >
+              Update
+            </Button>
           </Stack>
 
           <HStack alignItems={"center"} justify={"space-between"} my={6}>
@@ -416,7 +442,11 @@ const [pageId, setPageId] = useState(null)
                   isLoading={loading}
                   colorScheme="green"
                   onClick={handleAddPackage}
-                  isDisabled={!newPackage || !newPackagePrice}
+                  isDisabled={
+                    !newPackage ||
+                    !newPackagePrice ||
+                    Number(newPackagePrice) <= 0
+                  }
                 >
                   Add Package
                 </Button>
@@ -504,7 +534,7 @@ const [pageId, setPageId] = useState(null)
               </ModalBody>
               <ModalFooter>
                 <Button
-                isLoading={pageLoading}
+                  isLoading={pageLoading}
                   colorScheme="blue"
                   onClick={() => {
                     setPageLoading(true);
@@ -535,7 +565,7 @@ const [pageId, setPageId] = useState(null)
               </ModalBody>
               <ModalFooter>
                 <Button
-                isLoading={pageLoading}
+                  isLoading={pageLoading}
                   colorScheme="blue"
                   onClick={() => {
                     setPageLoading(true);

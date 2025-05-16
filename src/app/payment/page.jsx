@@ -118,7 +118,7 @@ export default function Page() {
             templateColumns={{
               base: "1fr",
               md: "repeat(2, 1fr)",
-              lg: "repeat(4, 1fr)",
+              lg: "repeat(3, 1fr)",
             }}
             gap={6}
           >
