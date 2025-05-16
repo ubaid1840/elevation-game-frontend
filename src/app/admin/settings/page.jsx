@@ -104,7 +104,7 @@ export default function Page() {
       const apiData = response.data;
       apiData.map((item) => {
         if (item.type === "referral") {
-          setPercentage(item.precentage);
+          setPercentage(item.percentage);
           setPercentageID(item.id);
         }
         if (item.type === "game") {
