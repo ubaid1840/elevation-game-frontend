@@ -383,7 +383,7 @@ const ElevatorSection = () => {
       {csvData.length > 0 && (
         <Flex mt={5}>
           <Spacer />
-          <CSVLink data={csvData} filename="analytics_trivia_winners.csv">
+          <CSVLink data={csvData} filename="analytics_elevator_winners.csv">
             <Button colorScheme="purple">Export Winners List (CSV)</Button>
           </CSVLink>
         </Flex>
