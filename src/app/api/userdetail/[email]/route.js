@@ -20,6 +20,27 @@ export async function GET(req, { params }) {
         }
 
         const user = data.rows[0];
+
+        const transactionsResult = await pool.query(`
+            SELECT * FROM transactions 
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+          `, [user.id]);
+
+        const transactions = transactionsResult.rows;
+
+        let totalEarnings = 0;
+
+        transactions.forEach((transaction) => {
+            if (transaction.transaction_type.includes('winning')) {
+                totalEarnings += Number(transaction.amount);
+            } else if (transaction.transaction_type.includes("referral")) {
+                totalEarnings += Number(transaction.amount);
+            }
+        });
+
+
+
         let hasActiveWaiver = false;
         let monthlySubscriptionStatus = true
         let annualSubscriptionStatus = true
@@ -56,7 +77,7 @@ export async function GET(req, { params }) {
             }
         }
 
-        return NextResponse.json({ ...user, hasActiveWaiver, monthlySubscriptionStatus, annualSubscriptionStatus, navigationAllowed }, { status: 200 });
+        return NextResponse.json({ ...user, hasActiveWaiver, monthlySubscriptionStatus, annualSubscriptionStatus, navigationAllowed, residual_income: totalEarnings }, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching role:', error);

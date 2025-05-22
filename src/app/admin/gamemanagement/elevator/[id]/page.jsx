@@ -85,6 +85,7 @@ export default function Page({ params }) {
   const [newScore, setNewScore] = useState("");
   const [roundLoading, setRoundLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedUserId2nd, setSelectedUserId2nd] = useState("");
   const [finalScore, setFinalScore] = useState([]);
   const [editInstruction, setEditInstruction] = useState("");
   const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
@@ -284,6 +285,7 @@ export default function Page({ params }) {
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
+         winnerid2nd: selectedUserId2nd,
       })
       .then(async () => {
         toast({
@@ -375,7 +377,7 @@ export default function Page({ params }) {
   return (
     <>
       <Box p={6} minH="100vh" bg="gray.50">
-        <Box p={6} bg="white" borderRadius="lg" boxShadow="md">
+        <Box p={6} bg="white" borderRadius="lg" boxShadow="md" whiteSpace="pre-wrap" wordBreak="break-word">
           <Heading as="h1" size="xl" mb={4} color="teal.600">
             {gameData?.title}
           </Heading>
@@ -440,10 +442,7 @@ export default function Page({ params }) {
           <>
             {gameData.currentround === 0 ? (
               <Button
-                isDisabled={
-                  !gameData?.spots_remaining ||
-                  Number(gameData?.spots_remaining) !== 0
-                }
+              isDisabled={Number(gameData?.spots_remaining ?? -1) !== 0}
                 isLoading={roundLoading}
                 colorScheme="purple"
                 mt={5}
@@ -462,7 +461,7 @@ export default function Page({ params }) {
                 >
                   Previous Round
                 </Button>
-                <Text fontWeight="bold" color="purple.700">
+                <Text fontWeight="bold" color="purple.700" mx={'5px'}>
                   Round: {currentRound}/{gameData?.totalrounds}
                 </Text>
                 <Button

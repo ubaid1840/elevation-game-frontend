@@ -20,6 +20,8 @@ import {
     Skeleton,
     Avatar,
     SkeletonCircle,
+    Divider,
+    HStack,
 } from "@chakra-ui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -58,9 +60,9 @@ export default function ProfilePage({ page }) {
                 confirmPassword: "",
                 currentPassword: "",
             });
-            getDisplayPicture(UserState?.value?.data?.email).then((url)=>{
+            getDisplayPicture(UserState?.value?.data?.email).then((url) => {
                 setImage(url)
-            }).finally(()=>{
+            }).finally(() => {
                 setImageLoading(false)
             })
         }
@@ -219,12 +221,12 @@ export default function ProfilePage({ page }) {
     };
 
 
-   
+
 
     const RenderImage = useCallback(() => {
         return (
             <>
-                <Avatar _hover={{ cursor: 'pointer' }} height={200} width={200} src={image}  name={UserState.value.data?.name} onClick={() => {
+                <Avatar _hover={{ cursor: 'pointer' }} height={200} width={200} src={image} name={UserState.value.data?.name} onClick={() => {
                     if (inputRef.current) inputRef.current.click();
                 }} />
                 <input
@@ -349,6 +351,39 @@ export default function ProfilePage({ page }) {
                             </Button>
                         )}
                     </VStack>
+
+
+                    {page == 'judge' &&
+                        <>
+                            <Divider borderColor="gray.300" />
+                            <VStack align="start" spacing={6} mt={8}>
+                                <Heading size="lg" color="purple.700">
+                                    Referral Program
+                                </Heading>
+                                <HStack>
+                                    <Text fontSize="lg" fontWeight="bold">
+                                        Referral Code:
+                                    </Text>
+                                    <Input
+                                        onChange={() => { }}
+                                        value={UserState.value.data?.referral_code || ""}
+                                        readOnly
+                                        size="md"
+                                        width="auto"
+                                        borderColor="purple.400"
+                                    />
+                                </HStack>
+                                <Text fontSize="lg">
+                                    Number of Referrals: {UserState.value.data?.referral_count || 0}
+                                </Text>
+                                <Text fontSize="lg">
+                                    Residual Income Earned: $
+                                    {UserState.value.data?.residual_income || 0}
+                                </Text>
+                            </VStack>
+                        </>
+                    }
+
                 </Box>
 
                 <Modal isOpen={isEditModalOpen} onClose={handleEditModalClose}>

@@ -173,7 +173,7 @@ const GameManagement = () => {
             id: item.id,
             title: item.title,
             fee: item.fee,
-            prize: item.prize,
+            prize: item.calculated_prize,
             spots_remaining: item.spots_remaining,
             total_participants: item.total_participants,
           };
@@ -182,7 +182,7 @@ const GameManagement = () => {
           { key: "title", value: "Name" },
           { key: "fee", value: "Entry Fee" },
           { key: "prize", value: "Grand Prize" },
-          { key: "spots_reamining", value: "Spots Remaining" },
+          { key: "spots_remaining", value: "Spots Remaining" },
           { key: "total_participants", value: "Total Participants" },
         ]}
         button={true}

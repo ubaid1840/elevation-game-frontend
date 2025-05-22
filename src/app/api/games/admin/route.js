@@ -16,9 +16,12 @@ export async function GET() {
           'SELECT COUNT(*) as totalEnrollments FROM game_enrollments WHERE game_id = $1',
           [game.id]
         );
+        const tierPriceQuery = await query(`SELECT price FROM settings WHERE label = $1`, [game.level])
+        const prize_amount = Number(tierPriceQuery.rows[0].price) * 0.3 * Number(game.total_spots)
         return {
           ...game,
           totalEnrollments: parseInt(enrollments.rows[0].totalenrollments, 10) || 0,
+          prize_amount : prize_amount
         };
       })
     );

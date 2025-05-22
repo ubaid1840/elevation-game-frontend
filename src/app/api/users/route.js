@@ -68,6 +68,19 @@ export async function POST(req) {
       }
     }
 
+    let newUser = null
+    if (role === "judge" && waiver) {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [name, email, role, referral_code, schedule, new Date()]
+      );
+    } else {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, email, role || 'user', referral_code, schedule]
+      );
+    }
+
     if (refered_by) {
       const referrer = await query(
         'SELECT id FROM users WHERE referral_code = $1',
@@ -134,18 +147,7 @@ export async function POST(req) {
 
     }
 
-    let newUser = null
-    if (role === "judge" && waiver) {
-      newUser = await query(
-        'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [name, email, role, referral_code, schedule, new Date()]
-      );
-    } else {
-      newUser = await query(
-        'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [name, email, role || 'user', referral_code, schedule]
-      );
-    }
+
 
 
     if (referrer_id) {
@@ -162,10 +164,19 @@ export async function POST(req) {
       );
     }
 
+
+
     await query(
       'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
       [newUser.rows[0].id, 'New User Created']
     );
+
+    if (waiver) {
+      await query(
+        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+        [newUser.rows[0].id, 'Waiver started for user']
+      );
+    }
 
     return NextResponse.json(newUser.rows[0], { status: 201 });
   } catch (error) {

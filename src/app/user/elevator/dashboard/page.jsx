@@ -176,7 +176,7 @@ export default function Page() {
 
         <VStack align="start" spacing={6} mt={8} mb={8}>
           <Heading size="lg" color="purple.700">
-            Enroll in a Game
+            Participate in a Game
           </Heading>
           <Input
             placeholder="Search games"
@@ -202,15 +202,19 @@ export default function Page() {
                   boxShadow="md"
                   transition="transform 0.2s"
                   _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+                  justifyContent={"space-between"}
+                  display={"flex"}
+                  flexDir={"column"}
                 >
-                  <Heading size="md" mb={2}>
-                    {game.title}
-                  </Heading>
-                  <Text fontSize="lg">
-                    Spots Remaining: {game.spots_remaining}
-                  </Text>
-                  <Text fontSize="lg">Entry Level: {game.level}</Text>
-
+                  <Box mb={4}>
+                    <Heading size="md" mb={2}>
+                      {game.title}
+                    </Heading>
+                    <Text fontSize="lg">
+                      Spots Remaining: {game.spots_remaining}
+                    </Text>
+                    <Text fontSize="lg">Entry Level: {game.level}</Text>
+                  </Box>
                   <Button
                     isDisabled={!UserState.value.data?.navigationAllowed}
                     onClick={() => {
@@ -240,13 +244,12 @@ export default function Page() {
                     }}
                     as={Link}
                     href={checkUrl(game)}
-                    mt={4}
                     colorScheme="purple"
                     variant="solid"
                     size="md"
                     _hover={{ bg: "purple.600" }}
                   >
-                    Enroll
+                    Participate
                   </Button>
                 </Box>
               ))}
@@ -280,10 +283,7 @@ export default function Page() {
           </Text>
           <Text fontSize="lg">
             Residual Income Earned: $
-            {Number(UserState.value.data?.tier1 || 0) +
-              Number(UserState.value.data?.tier2 || 0) +
-              Number(UserState.value.data?.tier3 || 0) +
-              Number(UserState.value.data?.winner_earnings || 0)}
+            {Number(UserState.value.data?.residual_income || 0)}
           </Text>
         </VStack>
       </Box>

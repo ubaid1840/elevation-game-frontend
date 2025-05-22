@@ -143,7 +143,7 @@ export default function GameEnrollmentPage({ params }) {
           mt={6}
           width="100%"
         >
-          Enroll
+          Participate
         </Button>
       </Box>
     </>

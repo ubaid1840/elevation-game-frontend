@@ -1,22 +1,16 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import TableData from "@/components/ui/TableData";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
-  Heading,
-  Text,
-  VStack,
-  HStack,
   Button,
   Divider,
-  SimpleGrid,
+  Heading,
   Stat,
   StatLabel,
   StatNumber,
-  useToast,
-  Checkbox,
+  Text,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -51,26 +45,6 @@ export default function Page() {
         };
       })
       setTableData([...tempData])
-
-      // console.log(response.data)
-      // const tempData = response.data.map((item) => {
-      //   let transactionType = item.transaction_type;
-
-      //   if (transactionType === "referral earning") {
-      //     transactionType = "Trivia game referral earning";
-      //   } else if (transactionType === "winning") {
-      //     transactionType = "Trivia game winning";
-      //   }
-
-      //   return {
-      //     id : item.id,
-      //     amount: transactionType.includes("entry") ?  -Math.abs(item.amount) : Math.abs(item.amount),
-      //     transaction_type: transactionType,
-      //     created_at: moment(new Date(item.created_at)).format("DD/MM/YYYY"),
-      //   };
-      // });
-
-      // setTableData([...tempData]);
 
       const transactions = response.data;
       const winnings = [];
