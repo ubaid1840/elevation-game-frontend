@@ -68,18 +68,7 @@ export async function POST(req) {
       }
     }
 
-    let newUser = null
-    if (role === "judge" && waiver) {
-      newUser = await query(
-        'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [name, email, role, referral_code, schedule, new Date()]
-      );
-    } else {
-      newUser = await query(
-        'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [name, email, role || 'user', referral_code, schedule]
-      );
-    }
+   
 
     if (refered_by) {
       const referrer = await query(
@@ -148,6 +137,18 @@ export async function POST(req) {
     }
 
 
+      let newUser = null
+    if (role === "judge" && waiver) {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [name, email, role, referral_code, schedule, new Date()]
+      );
+    } else {
+      newUser = await query(
+        'INSERT INTO users (name, email, role, referral_code, schedule) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, email, role || 'user', referral_code, schedule]
+      );
+    }
 
 
     if (referrer_id) {
@@ -164,6 +165,7 @@ export async function POST(req) {
       );
     }
 
+   
 
 
     await query(
@@ -174,7 +176,7 @@ export async function POST(req) {
     if (waiver) {
       await query(
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
-        [newUser.rows[0].id, 'Waiver started for user']
+        [newUser.rows[0].id, 'Waiver started for judge']
       );
     }
 
