@@ -44,7 +44,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const { name, email, role, refered_by, schedule, waiver } = await req.json();
+  const { name, email, role, referred_by, schedule, waiver } = await req.json();
   const referral_code = generateReferralCode();
   let referrer_id = null;
 
@@ -68,12 +68,12 @@ export async function POST(req) {
       }
     }
 
-   
 
-    if (refered_by) {
+
+    if (referred_by) {
       const referrer = await query(
         'SELECT id FROM users WHERE referral_code = $1',
-        [refered_by]
+        [referred_by]
       );
 
       if (referrer.rows.length > 0) {
@@ -106,25 +106,33 @@ export async function POST(req) {
               'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
               ['judge']
             );
-            referrer_id = firstJudge.rows[0].id;
+            if (firstJudge.rows.length > 0) {
+              referrer_id = firstJudge.rows[0].id;
+            }
+
           }
 
-          await query(
-            'UPDATE referral_tracker SET last_assigned_judge_id = $1',
-            [referrer_id]
-          );
+          if (referrer_id) {
+            await query(
+              'UPDATE referral_tracker SET last_assigned_judge_id = $1',
+              [referrer_id]
+            );
+          }
 
         } else {
           const firstJudge = await query(
             'SELECT id, referral_code FROM users WHERE role = $1 ORDER BY id ASC LIMIT 1',
             ['judge']
           );
-          referrer_id = firstJudge.rows[0].id;
+          if (firstJudge.rows.length > 0) {
+            referrer_id = firstJudge.rows[0].id;
 
-          await query(
-            'INSERT INTO referral_tracker (last_assigned_judge_id) VALUES ($1)',
-            [referrer_id]
-          );
+            await query(
+              'INSERT INTO referral_tracker (last_assigned_judge_id) VALUES ($1)',
+              [referrer_id]
+            );
+          }
+
         }
 
         await query('COMMIT');
@@ -137,7 +145,7 @@ export async function POST(req) {
     }
 
 
-      let newUser = null
+    let newUser = null
     if (role === "judge" && waiver) {
       newUser = await query(
         'INSERT INTO users (name, email, role, referral_code, schedule, waiver_start) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
@@ -165,7 +173,7 @@ export async function POST(req) {
       );
     }
 
-   
+
 
 
     await query(

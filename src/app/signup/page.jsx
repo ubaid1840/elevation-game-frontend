@@ -73,7 +73,7 @@ export default function Page() {
         email: email.toLocaleLowerCase(),
         name: name,
         role: "user",
-        refered_by: referral,
+        referred_by: referral,
         schedule: [],
       })
       .then(() => {
