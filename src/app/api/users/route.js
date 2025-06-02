@@ -1,4 +1,5 @@
 import { query } from '@/lib/db';
+import moment from 'moment';
 import { NextResponse } from 'next/server';
 
 function generateReferralCode() {
