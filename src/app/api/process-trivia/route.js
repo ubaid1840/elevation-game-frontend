@@ -7,7 +7,7 @@ export async function GET() {
 
     // Step 1: Fetch all expired games
     const expiredGamesResult = await query(
-      `SELECT id, title, fee, game_percentage, prize FROM trivia_game 
+      `SELECT id, title, fee, game_percentage, prize, spots_remaining, winner_id FROM trivia_game 
        WHERE spots_remaining = 0 
        AND winner_id IS NULL`
     );
