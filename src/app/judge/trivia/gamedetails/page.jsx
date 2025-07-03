@@ -78,7 +78,7 @@ export default function Page() {
           <Text mt={4} fontSize="lg">
             {`Here's a quick look at your games.`}
           </Text>
-          {UserState.value.data?.hasActiveWaiver ? null : (
+          {/* {UserState.value.data?.hasActiveWaiver ? null : (
             <>
               {UserState.value.data?.monthlySubscriptionStatus == false && (
                 <Flex alignItems={"center"} gap={2} mt={4} color={"orange.200"}>
@@ -99,7 +99,7 @@ export default function Page() {
                 </Flex>
               )}
             </>
-          )}
+          )} */}
         </Box>
 
         <Input
@@ -178,7 +178,7 @@ export default function Page() {
                 <TabPanel>
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                     {filteredGames
-                      .filter((item) => item.winner)
+                      .filter((item) => item.winner_id)
                       .map((game, index) => (
                         <Box
                           as={Link}
@@ -220,7 +220,7 @@ export default function Page() {
                                   game.winner_id ? "green" : "yellow"
                                 }
                               >
-                                {game.winner_id ? "Completed" : "Pending"}
+                                {game.winner_id ? "Winner Announced" : "Pending"}
                               </Badge>
                             </Text>
                           </Stack>

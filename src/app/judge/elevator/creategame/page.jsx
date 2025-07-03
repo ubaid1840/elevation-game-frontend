@@ -384,7 +384,7 @@ export default function Page() {
             !gameDescription ||
             !rounds ||
             !totalSpots ||
-            selectedJudges.length === 0 ||
+            Number(totalSpots) === 0 ||
             !level ||
             !category ||
             !deadline

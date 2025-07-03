@@ -109,20 +109,17 @@ export default function Page() {
          {UserState.value.data?.package === "Platinum" ? (
                   <Text fontSize="md">
                     You can earn <strong>20%, 10% and 5%</strong> from unique referral
-                    numbers and can earn up to <strong>3%</strong> of Trivia game fee
-                    based on unique referral numbers.
+                    numbers. Additionally, you can earn at least <strong>3%</strong> and up to <strong>60%</strong> or more of the Trivia game fee based on referral performance and network activity.
                   </Text>
                 ) : UserState.value.data?.package === "Gold" ? (
                   <Text fontSize="md">
                     You can earn <strong>10%, 5% and 2.5%</strong> from unique referral
-                    numbers and can earn up to <strong>3%</strong> of Trivia game fee
-                    based on unique referral numbers.
+                    numbers. Additionally, you can earn at least <strong>3%</strong> and up to <strong>60%</strong> or more of the Trivia game fee based on referral performance and network activity.
                   </Text>
                 ) : UserState.value.data?.package === "Iridium" ? (
                   <Text fontSize="md">
                     You can earn <strong>5%, 2.5% and 1.25%</strong> from unique
-                    referral numbers and can earn up to <strong>3%</strong> of Trivia game fee
-                    based on unique referral numbers.
+                    referral numbers. Additionally, you can earn at least <strong>3%</strong> and up to <strong>60%</strong> or more of the Trivia game fee based on referral performance and network activity.
                   </Text>
                 ) : null}
 

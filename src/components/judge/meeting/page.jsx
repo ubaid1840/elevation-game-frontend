@@ -1,17 +1,11 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
   Button,
   Center,
-  Divider,
-  Flex,
   Heading,
-  HStack,
   Input,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -27,17 +21,14 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
 export default function JudgeMeeting() {
-  const [session, setSession] = useState(false);
   const { state: UserState } = useContext(UserContext);
   const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [meetingLink, setMeetingLink] = useState("");
 
@@ -98,6 +89,15 @@ export default function JudgeMeeting() {
       .finally(() => {
         fetchData(UserState.value.data?.id);
       });
+  }
+
+  function isValidUrl(url) {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   return (
@@ -196,10 +196,16 @@ export default function JudgeMeeting() {
                   value={meetingLink}
                   onChange={(e) => setMeetingLink(e.target.value)}
                 />
+                {meetingLink && !isValidUrl(meetingLink) && (
+                  <Text color={"red"} fontSize="sm">
+                    Please enter a valid URL
+                  </Text>
+                )}
               </Stack>
             </ModalBody>
             <ModalFooter>
               <Button
+                isDisabled={!meetingLink || !isValidUrl(meetingLink)}
                 colorScheme="blue"
                 onClick={() => {
                   setLoading(true);

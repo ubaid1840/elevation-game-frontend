@@ -62,8 +62,10 @@ export async function GET(req, { params }) {
     const priceResult = await pool.query(`SELECT price FROM settings WHERE label = $1`, [game.level]);
     const pricePerSpot = Number(priceResult.rows[0]?.price || 0);
 
-    const prize_amount = pricePerSpot * Number(game.total_spots) * 0.30;
+    const prize_amount = pricePerSpot * Number(game.total_spots);
     game.prize_amount = prize_amount;
+    game.first_prize = prize_amount  * 0.3
+    game.second_prize = prize_amount * 0.1
 
     return NextResponse.json(game, { status: 200 });
   } catch (error) {

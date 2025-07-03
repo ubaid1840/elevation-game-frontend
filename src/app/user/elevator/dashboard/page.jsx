@@ -15,7 +15,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
-import moment from "moment";
 import Link from "next/link";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { IoIosWarning } from "react-icons/io";
@@ -42,18 +41,6 @@ export default function Page() {
   );
 
   async function fetchData(id) {
-    // axios
-    //   .get(`/api/users/${UserState.value.data?.id}/games`)
-    //   .then((response) => {
-    //     console.log(response.data)
-    //     setMyGames(response.data);
-    //   });
-
-    // axios.get(`/api/games`).then((response) => {
-    //   console.log(response.data)
-    //   setAvailableGames(response.data);
-    // });
-
     axios.get(`/api/users/${id}/games`).then((response) => {
       setMyGames(response.data.myGames);
       setAvailableGames(response.data.availableGames);
@@ -214,6 +201,8 @@ export default function Page() {
                       Spots Remaining: {game.spots_remaining}
                     </Text>
                     <Text fontSize="lg">Entry Level: {game.level}</Text>
+                    <Text fontSize="lg">1st Prize: {game?.firstPrize}$</Text>
+                    <Text fontSize="lg">2nd Prize: {game?.secondPrize}$</Text>
                   </Box>
                   <Button
                     isDisabled={!UserState.value.data?.navigationAllowed}

@@ -168,7 +168,7 @@ export default function Page() {
                           variant="solid"
                           fontSize="1rem"
                         >
-                          {game.completed ? "COMPLETED" : "PENDING"}
+                          {game.completed ? "WINNER ANNOUNCED" : "PENDING"}
                         </Badge>
                       </div>
                     </Box>

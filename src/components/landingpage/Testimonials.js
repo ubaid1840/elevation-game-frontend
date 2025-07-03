@@ -51,25 +51,38 @@ function Toolbar() {
 
 const testimonials = [
     {
-        name: "Jane Cooper",
-
+        name: "Darius King",
+        text: "As a former Shark Tank hopeful, the Game of Challenges gave me a second chance to shine—this time without giving up equity!",
         bg: "red.200",
 
     },
     {
-        name: "Kai Doe",
+        name: "Nia Martinez",
+        text : "I’ve earned real money playing Trivia and pitching my business ideas—this is the future of virtual competitions.",
         bg: "orange.200",
 
     },
     {
-        name: "Gina Smith",
+        name: "Elisa (Judge)",
+        text : "As a judge, I’ve been blown away by the creativity of the participants. This platform is unlike anything I’ve ever seen.",
         bg: "blue.200",
 
     },
     {
-        name: "Brad Watkins",
+        name: "Game Fact",
+        text : "Game of Challenges is backed by a real U.S. Patent and built with purpose: to empower entrepreneurs, content creators, and thinkers.",
         bg: "purple.200",
 
+    },
+    {
+        name : "Malik R. (Trivia Winner)",
+        text : "I made $1,200 from two trivia games and I didn’t even need a subscription. This is way better than traditional giveaways.",
+        bg : "orange.200"
+    },
+    {
+        name : "Sandra J. (Platinum Member)",
+        text : "The elevator pitch helped me raise awareness for my nonprofit—judges gave me real feedback, not just scores.",
+        bg : "yellow.200"
     }
 ];
 
@@ -120,8 +133,7 @@ function Testimonial({ bg, heading }) {
                 <Text
                     fontSize="sm"
                     textAlign="center"
-                >{`Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor
-                  neque sed imperdiet nibh lectus feugiat nunc sem.`}</Text>
+                >{heading}</Text>
             </VStack>
         </Flex>
     );
@@ -135,11 +147,11 @@ function TestimonialDemo() {
             <Carousel>
                 <Flex w="fit-content" flexDir="column">
                     <CarouselItems mx={2}>
-                        {testimonials.map(({ name, title, bg, src, heading }, index) => {
+                        {testimonials.map(({ name, text, bg }, index) => {
                             return (
                                 <CarouselItem index={index} key={name}>
                                     <Box p={10}>
-                                        <Testimonial bg={bg} />
+                                        <Testimonial heading={text} bg={bg} />
                                         <TestimonialAvatar name={name} />
                                     </Box>
                                 </CarouselItem>

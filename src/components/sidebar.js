@@ -307,7 +307,7 @@ const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, .
         }
 
     } else if (user?.role === 'judge') {
-        if (user?.navigationAllowed) {
+        if (user?.navigationAllowed || pathname.includes("trivia")) {
             href = path;
         }
         if (path.includes("subscription") || children.includes("Switch")) {

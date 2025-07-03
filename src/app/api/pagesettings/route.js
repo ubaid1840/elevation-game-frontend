@@ -18,10 +18,10 @@ export async function GET(req) {
 
 export async function PUT(req) {
 
-    const { id, privacy, terms } = await req.json();
+    const { id, privacy, terms, about } = await req.json();
 
     try {
-        const result = await query(`UPDATE page_settings SET privacy = $1, terms = $2 WHERE id = $3`, [privacy, terms, id]);
+        const result = await query(`UPDATE page_settings SET privacy = $1, terms = $2, about = $3 WHERE id = $4`, [privacy, terms, about, id]);
         return NextResponse.json({ message: "Page settings updated successfully" }, { status: 200 })
     } catch (error) {
         return NextResponse.json({ message: "Server error" }, { status: 500 })

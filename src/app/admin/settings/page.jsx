@@ -61,6 +61,7 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [privacyPage, setPrivacyPage] = useState("");
   const [termsPage, setTermsPage] = useState("");
+  const [aboutSection, setAboutSection] = useState("");
   const [pageId, setPageId] = useState(null);
   const toast = useToast();
   const {
@@ -82,6 +83,12 @@ export default function Page() {
     onClose: onCloseTerms,
   } = useDisclosure();
 
+  const {
+    isOpen: isOpenAbout,
+    onOpen: onOpenAbout,
+    onClose: onCloseAbout,
+  } = useDisclosure();
+
   const [pageLoading, setPageLoading] = useState(false);
 
   useEffect(() => {
@@ -95,6 +102,7 @@ export default function Page() {
     axios.get("/api/pagesettings").then((response) => {
       setPrivacyPage(response.data.privacy);
       setTermsPage(response.data.terms);
+      setAboutSection(response.data.about)
       setPageId(response.data.id);
     });
   }
@@ -275,6 +283,7 @@ export default function Page() {
       .put("/api/pagesettings", {
         privacy: privacyPage,
         terms: termsPage,
+        about : aboutSection,
         id: pageId,
       })
       .then(() => {
@@ -400,6 +409,18 @@ export default function Page() {
             />
           </HStack>
 
+             <HStack alignItems={"center"} justify={"space-between"} my={6}>
+            <Heading my={6} color="purple.700">
+              About Section
+            </Heading>
+            <IconButton
+              aria-label="Edit option"
+              icon={<EditIcon />}
+              size="sm"
+              onClick={() => onOpenAbout()}
+            />
+          </HStack>
+
           <Heading my={6} color="purple.700">
             Categories
           </Heading>
@@ -466,9 +487,10 @@ export default function Page() {
               <ModalBody>
                 <Stack spacing={4}>
                   <Input
+                  disabled
                     placeholder="Label"
                     value={label}
-                    onChange={(e) => setLabel(e.target.value)}
+                    onChange={(e) => {}}
                   />
                   <Input
                     placeholder="Price"
@@ -575,6 +597,37 @@ export default function Page() {
                   Save
                 </Button>
                 <Button ml={3} onClick={onCloseTerms}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+           <Modal isOpen={isOpenAbout} onClose={onCloseAbout}>
+            <ModalOverlay />
+            <ModalContent maxW={"90vw"}>
+              <ModalHeader>Edit about section</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Textarea
+                  height={"50vh"}
+                  placeholder="About section"
+                  value={aboutSection}
+                  onChange={(e) => setAboutSection(e.target.value)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  isLoading={pageLoading}
+                  colorScheme="blue"
+                  onClick={() => {
+                    setPageLoading(true);
+                    handleSavePage();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button ml={3} onClick={onCloseAbout}>
                   Cancel
                 </Button>
               </ModalFooter>
