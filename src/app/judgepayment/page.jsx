@@ -1,14 +1,10 @@
 "use client";
-import CheckoutPage from "@/components/stripe/Checkout";
+import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
-import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
 import { UserContext } from "@/store/context/UserContext";
 import { Box, Heading } from "@chakra-ui/react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Page() {
   const checkSession = useCheckSession();
@@ -39,20 +35,13 @@ export default function Page() {
     return (
       <Box maxW={"500px"} mt={10}>
         {UserState.value.data?.email && (
-          <Elements
-            stripe={stripePromise}
-            options={{
-              mode: "payment",
-              amount: convertToSubcurrency(750),
-              currency: "usd",
-            }}
-          >
-            <CheckoutPage
+          
+            <SquareCheckout
               amount={750}
-              userID={UserState.value.data?.id}
+              user={UserState.value.data}
               plan={"Promotion"}
             />
-          </Elements>
+        
         )}
       </Box>
     );

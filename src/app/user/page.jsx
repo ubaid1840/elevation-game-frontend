@@ -1,7 +1,11 @@
-"use client"
-import { redirect } from "next/navigation";
 
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Page () {
-   redirect("/user/trivia")
+export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/user/trivia");
+  }, []);
 }

@@ -31,14 +31,14 @@ export async function GET(req, { params }) {
         if (priceQuery.rows.length && priceQuery.rows[0].price) {
           price = Number(priceQuery.rows[0].price)
         }
-        const poolPrize = price * Number(totalspots) / 12
+        const poolPrize = price * Number(totalspots)
         const first = poolPrize * 0.3
         const second = poolPrize * 0.1
         return {
           ...game,
           totalEnrollments: parseInt(enrollments.rows[0].totalenrollments, 10) || 0,
-          firstPrize: first,
-          secondPrize: second
+          firstPrize: Number(first.toFixed(2)),
+          secondPrize: Number(second.toFixed(2))
         };
       })
     );

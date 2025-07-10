@@ -52,7 +52,7 @@ export default function Page() {
   const fetchPaymentVerification = useCallback(
     debounce((paymentIntentId) => {
       axios
-        .post("/api/verify-payment", { paymentIntentId })
+        .post("/api/square/verify", { paymentId : paymentIntentId })
         .then((response) => {
           if (response.data.plan) {
             if (response.data.plan == "trivia") {

@@ -1,6 +1,11 @@
-"use client";
-import { redirect,} from "next/navigation";
 
-export default function GameEnrollmentPage() {
-  redirect("/user/elevator/dashboard")
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/user/elevator/dashboard");
+  }, []);
 }

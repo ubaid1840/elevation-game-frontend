@@ -1,35 +1,24 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
 import {
     Box,
-    Heading,
-    Text,
     Button,
-    Stack,
+    Flex,
+    Heading,
+    ListItem,
     Radio,
     RadioGroup,
-    FormControl,
-    FormLabel,
-    Input,
-    FormHelperText,
+    Stack,
+    Text,
     Tooltip,
     UnorderedList,
-    ListItem,
-    useToast,
-    Flex,
+    useToast
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import CheckoutPage from "../stripe/Checkout";
-import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
-import { UserContext } from "@/store/context/UserContext";
 import axios from "axios";
 import moment from "moment";
 import Link from "next/link";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+import { useContext, useEffect, useState } from "react";
+import SquareCheckout from "../square/checkout";
 
 export default function SubscriptionPage({ page }) {
     const [selectedPlan, setSelectedPlan] = useState("");
@@ -146,25 +135,23 @@ export default function SubscriptionPage({ page }) {
                     ?
                     <Box maxW={'500px'}>
                         {annualFee !== 0 && UserState.value.data?.email && (
-                            <Elements stripe={stripePromise} options={{
-                                mode: "payment",
-                                amount: convertToSubcurrency(annualFee),
-                                currency: "usd"
-                            }}>
-                                <CheckoutPage amount={annualFee} userID={UserState.value.data?.id} plan={"Promotion"} />
-                            </Elements>
+
+                            <SquareCheckout amount={annualFee} plan={"Promotion"}
+                                user={UserState.value.data} />
+
                         )}
                     </Box>
                     :
                     <Box maxW={'500px'}>
                         {amount !== 0 && UserState.value.data?.email && selectedPlan && (
-                            <Elements stripe={stripePromise} options={{
-                                mode: "payment",
-                                amount: convertToSubcurrency(amount),
-                                currency: "usd"
-                            }}>
-                                <CheckoutPage amount={amount} userID={UserState.value.data?.id} plan={selectedPlan} />
-                            </Elements>
+                            // <Elements stripe={stripePromise} options={{
+                            //     mode: "payment",
+                            //     amount: convertToSubcurrency(amount),
+                            //     currency: "usd"
+                            // }}>
+                            //     <CheckoutPage amount={amount} userID={UserState.value.data?.id} plan={selectedPlan} />
+                            // </Elements>
+                            <SquareCheckout amount={amount} plan={selectedPlan} user={UserState.value.data} />
                         )}
                     </Box>
                 }

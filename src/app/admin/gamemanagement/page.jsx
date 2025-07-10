@@ -91,7 +91,6 @@ const GameManagement = () => {
   };
 
   async function handleRemoveGame(val) {
-    // console.log(val)
     axios
       .delete(`/api/games/${val}`)
       .then(() => {
@@ -103,7 +102,6 @@ const GameManagement = () => {
   }
 
   async function handleRemoveGameTrivia(val) {
-    // console.log(val)
     axios
       .delete(`/api/trivia/game/${val}`)
       .then(() => {

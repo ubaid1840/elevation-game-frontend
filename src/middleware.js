@@ -10,19 +10,17 @@ export async function middleware(request) {
   const headers = new Headers(request.headers);
   headers.set("x-current-path-elevation", origin);
 
-  // Send traffic data to an API route
   fetch(`${origin}/api/track`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pathname, userAgent, ipAddress }),
-  }).catch(() => {}); // Prevent blocking request flow
+  }).catch(() => {});
 
   return NextResponse.next({ headers });
 }
 
 export const config = {
   matcher: [
-    // match all routes except static files and APIs
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

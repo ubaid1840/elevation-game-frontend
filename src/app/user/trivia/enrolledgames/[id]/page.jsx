@@ -98,7 +98,6 @@ export default function Page({ params }) {
   }
 
   async function fetchData(id) {
-    
     try {
       const response = await axios.get(
         `/api/trivia/users/${id}/games/${params.id}`
@@ -390,7 +389,7 @@ const GameResult = ({ data, handleShareGame }) => {
         <Text fontSize="lg" mt={2}>
           ⏳ Total Time Taken:{" "}
           <Badge colorScheme="blue" fontSize="lg">
-            {totalTime} seconds
+            {totalTime && totalTime.toFixed(4)} seconds
           </Badge>
         </Text>
       </Box>

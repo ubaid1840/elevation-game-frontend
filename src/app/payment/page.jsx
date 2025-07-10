@@ -1,7 +1,6 @@
 "use client";
-import CheckoutPage from "@/components/stripe/Checkout";
+import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
-import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
 import { UserContext } from "@/store/context/UserContext";
 import {
   Box,
@@ -13,22 +12,14 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Page() {
   const [packages, setPackages] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("");
   const [amount, setAmount] = useState(null);
-  const [subscriptionOptions, setSubscriptionOptions] = useState([]);
-  const [currentPlan, setCurrentPlan] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const router = useRouter();
   const checkSession = useCheckSession();
   const { state: UserState, setUser } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
@@ -36,19 +27,21 @@ export default function Page() {
   useEffect(() => {
     let unsubscribe;
 
-    checkSession().then((res) => {
-      if (res.error) {
-        console.log(res.error);
-      }
-      if (typeof res === "function") {
-        unsubscribe = res;
-      }
-      if (res.user) {
-        setUser(res.user);
-      }
-    }).finally(()=>{
-      setLoading(false)
-    })
+    checkSession()
+      .then((res) => {
+        if (res.error) {
+          console.log(res.error);
+        }
+        if (typeof res === "function") {
+          unsubscribe = res;
+        }
+        if (res.user) {
+          setUser(res.user);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     return () => {
       if (unsubscribe) {
@@ -69,12 +62,7 @@ export default function Page() {
     });
   }
 
-  const handlePlanChange = (value) => {
-    setSelectedPlan(value);
-    const temp = subscriptionOptions.filter((item) => item.label === value);
-    setAmount(temp[0].price);
-  };
-
+ 
   async function handlePackageSelect(pkg) {
     setSelectedPlan(pkg.label);
     setAmount(pkg.price);
@@ -84,20 +72,11 @@ export default function Page() {
     return (
       <Box maxW={"500px"} mt={10}>
         {amount && UserState.value.data?.email && selectedPlan && (
-          <Elements
-            stripe={stripePromise}
-            options={{
-              mode: "payment",
-              amount: convertToSubcurrency(amount),
-              currency: "usd",
-            }}
-          >
-            <CheckoutPage
-              amount={amount}
-              userID={UserState.value.data?.id}
-              plan={selectedPlan}
-            />
-          </Elements>
+          <SquareCheckout
+            amount={amount}
+            user={UserState.value.data}
+            plan={selectedPlan}
+          />
         )}
       </Box>
     );
@@ -123,7 +102,7 @@ export default function Page() {
             gap={6}
           >
             {packages.map((pkg) => (
-              // pkg.label !== 'Silver' &&
+            
               <Box
                 key={pkg.label}
                 borderWidth="1px"

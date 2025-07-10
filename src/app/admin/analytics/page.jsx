@@ -416,7 +416,6 @@ const ElevatorSectionGame = () => {
   async function fetchData() {
     axios.get(`/api/analytics?type=game`).then((response) => {
       if (response.data.length > 0) {
-        //   console.log(response.data)
         const temp = response.data.map((item, index) => {
           return {
             id: index,

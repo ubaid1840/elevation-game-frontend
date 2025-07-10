@@ -113,44 +113,61 @@ export async function POST(req, { params }) {
                      VALUES ($1, ($2 * 0.03), 'Completed', 'Silver subscription referral earning', 'elevator', $3)`,
                         [referrer_id, amountToSave, id]
                     );
+                    await query(
+                        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                        [referrer_id, `Residual income 3% (Silver)`]
+                    )
                 } else {
-                    if(checkPlan === 'Platinum'){
+                    if (checkPlan === 'Platinum') {
                         await query(
                             'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.2), 'Completed', 'Tier1 20% subscription referral earning', 'elevator', $3)`,
                             [referrer_id, amountToSave, id]
                         );
-                    } else if(checkPlan === 'Gold'){
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer_id, `Residual income 20%`]
+                        )
+                    } else if (checkPlan === 'Gold') {
 
                         await query(
                             'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.1), 'Completed', 'Tier2 10% subscription referral earning', 'elevator', $3)`,
                             [referrer_id, amountToSave, id]
                         );
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer_id, `Residual income 10%`]
+                        )
 
-                    } else if(checkPlan === 'Iridium'){
+                    } else if (checkPlan === 'Iridium') {
                         await query(
                             'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.05), 'Completed', 'Tier3 5% subscription referral earning', 'elevator', $3)`,
                             [referrer_id, amountToSave, id]
                         );
+
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer_id, `Residual income 5%`]
+                        )
                     }
-                   
+
                 }
 
             }
@@ -162,41 +179,53 @@ export async function POST(req, { params }) {
                 const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan !== 'Silver') {
 
-                    if(checkPlan === 'Platinum'){
+                    if (checkPlan === 'Platinum') {
                         await query(
                             'UPDATE users SET tier1 = tier1 + ($1 * 0.1) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.1), 'Completed', 'Tier1 10% subscription referral earning', 'elevator', $3)`,
                             [referrer2_id, amountToSave, id]
                         );
-                    } else if(checkPlan === 'Gold'){
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer2_id, `Residual income 10%`]
+                        )
+                    } else if (checkPlan === 'Gold') {
 
                         await query(
                             'UPDATE users SET tier2 = tier2 + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.05), 'Completed', 'Tier2 5% subscription referral earning', 'elevator', $3)`,
                             [referrer2_id, amountToSave, id]
                         );
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer2_id, `Residual income 5%`]
+                        )
 
-                    } else if(checkPlan === 'Iridium'){
+                    } else if (checkPlan === 'Iridium') {
                         await query(
                             'UPDATE users SET tier3 = tier3 + ($1 * 0.025) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.025), 'Completed', 'Tier3 2.5% subscription referral earning', 'elevator', $3)`,
                             [referrer2_id, amountToSave, id]
                         );
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer2_id, `Residual income 2.5%`]
+                        )
                     }
                 }
             }
@@ -208,122 +237,57 @@ export async function POST(req, { params }) {
                 );
                 const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan !== 'Silver') {
-                    if(checkPlan === 'Platinum'){
+                    if (checkPlan === 'Platinum') {
                         await query(
                             'UPDATE users SET tier1 = tier1 + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.05), 'Completed', 'Tier1 5% subscription referral earning', 'elevator', $3)`,
                             [referrer3_id, amountToSave, id]
                         );
-                    } else if(checkPlan === 'Gold'){
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer3_id, `Residual income 5%`]
+                        );
+                    } else if (checkPlan === 'Gold') {
 
                         await query(
                             'UPDATE users SET tier2 = tier2 + ($1 * 0.025) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.025), 'Completed', 'Tier2 2.5% subscription referral earning', 'elevator', $3)`,
                             [referrer3_id, amountToSave, id]
                         );
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer3_id, `Residual income 2.25%`]
+                        );
 
-                    } else if(checkPlan === 'Iridium'){
+                    } else if (checkPlan === 'Iridium') {
                         await query(
                             'UPDATE users SET tier3 = tier3 + ($1 * 0.0125) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
-    
+
                         await query(
                             `INSERT INTO transactions (user_id, amount,  status, transaction_type, game_type, reference_id) 
                          VALUES ($1, ($2 * 0.0125), 'Completed', 'Tier3 1.25% subscription referral earning', 'elevator', $3)`,
                             [referrer3_id, amountToSave, id]
                         );
+
+                        await query(
+                            'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+                            [referrer3_id, `Residual income 1.25%`]
+                        );
                     }
                 }
             }
-
-
-            //// related to code above first ReferralResult
-
-            // const referrer = await query(
-            //     'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
-            //     [id]
-            // )
-
-            // if (referrer.rows.length != 0) {
-            //     const referrer_id = referrer.rows[0].referrer_id
-            //     if (referrer_id) {
-            //         const referrerInfo = await query(
-            //             'SELECT package FROM users WHERE id = $1 LIMIT 1',
-            //             [referrer_id]
-            //         )
-            //         if (referrerInfo.rows[0].package) {
-            //             if (referrerInfo.rows[0].package === 'Silver') {
-            //                 await query(
-            //                     'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
-            //                     [amountToSave, referrer_id]
-            //                 );
-
-            //             } else if (referrerInfo.rows[0].package === 'Platinum') {
-            //                 await query(
-            //                     'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
-            //                     [amountToSave, referrer_id]
-            //                 );
-            //             } else if (referrerInfo.rows[0].package === 'Gold') {
-            //                 await query(
-            //                     'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
-            //                     [amountToSave, referrer_id]
-            //                 );
-            //             } else if (referrerInfo.rows[0].package === 'Iridium') {
-            //                 await query(
-            //                     'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
-            //                     [amountToSave, referrer_id]
-            //                 );
-            //             }
-            //         }
-            //     }
-            // }
-
-            //// related to code above first ReferralResult ends here
-
-            ///// Old work below keep it for safety
-
-            // if (!user.package_intent_id) {
-            //     const silverReferrer = await query(
-            //         'SELECT referrer_id FROM referrals WHERE referred_id = $1 LIMIT 1',
-            //         [id]
-            //     );
-
-            //     if (silverReferrer.rows.length !== 0) {
-            //         const referrer_id = silverReferrer.rows[0].referrer_id;
-            //         if (referrer_id) {
-            //             const referrerInfo = await query (
-            //                 'SELECT package FROM users WHERE id = $1',
-            //                 [referrer_id]
-            //             )
-            //             if(referrerInfo.rows[0].package && referrerInfo.rows[0].package == 'Silver'){
-            //                 const planResult = await query(
-            //                     'SELECT price FROM settings WHERE label = $1 LIMIT 1',
-            //                     [subscription]
-            //                 );
-            //                 const amount = Number(planResult.rows[0].price);
-            //                 await query(
-            //                     'UPDATE users SET direct_referral = direct_referral + ($1 * 0.3) WHERE id = $2',
-            //                     [amount, referrer_id]
-            //                 );
-            //             }
-
-            //         }
-            //     }
-
-            // }
-
-            //// old work ends here
 
             await query(
                 'INSERT INTO logs (user_id, action) VALUES ($1, $2)',

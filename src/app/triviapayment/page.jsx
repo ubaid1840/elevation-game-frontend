@@ -1,21 +1,18 @@
 "use client";
-import CheckoutPage from "@/components/stripe/Checkout";
+import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
-import convertToSubcurrency from "@/lib/ConvertToSubcurrency";
 import { UserContext } from "@/store/context/UserContext";
-import { Box, Center, Heading, Spinner } from "@chakra-ui/react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { redirect } from "next/navigation";
+import { Box, Heading, Spinner } from "@chakra-ui/react";
+import { redirect, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function Page() {
   const checkSession = useCheckSession();
   const { state: UserState, setUser } = useContext(UserContext);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter()
 
   useEffect(() => {
     let unsubscribe;
@@ -47,7 +44,7 @@ export default function Page() {
         setData({ fee: Number(allParams.fee), gid: Number(allParams.g) });
         setLoading(false);
       } else {
-        redirect(`/${UserState.value.data.role}`);
+        router.replace(`/${UserState.value.data.role}`);
       }
     }
   }, [UserState.value.data]);
@@ -60,20 +57,12 @@ export default function Page() {
     ) : (
       <Box maxW={"500px"} mt={10}>
         {UserState.value.data?.email && (
-          <Elements
-            stripe={stripePromise}
-            options={{
-              mode: "payment",
-              amount: convertToSubcurrency(data?.fee),
-              currency: "usd",
-            }}
-          >
-            <CheckoutPage
-              amount={data?.fee}
-              gameId={data?.gid}
-              plan={"trivia"}
-            />
-          </Elements>
+          <SquareCheckout
+          user={UserState.value.data}
+            amount={data?.fee}
+            gameId={data?.gid}
+            plan={"trivia"}
+          />
         )}
       </Box>
     );

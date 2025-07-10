@@ -333,7 +333,7 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
                 </Badge>
 
                 <Badge colorScheme="blue" px={3} py={1} borderRadius="md">
-                  ⏱ {user.totalTime} sec
+                  ⏱ {user.totalTime && user.totalTime.toFixed(4)} sec
                 </Badge>
               </Flex>
             )

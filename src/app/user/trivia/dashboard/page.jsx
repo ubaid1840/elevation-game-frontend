@@ -94,7 +94,7 @@ export default function Page() {
           size="md"
           _hover={{ bg: "purple.600" }}
         >
-          Participate
+          More Info
         </Button>
       </Box>
     );

@@ -1,30 +1,29 @@
 "use client";
 
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { auth } from "@/config/firebase";
+import useCheckSession from "@/lib/checkSession";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { Link } from "@chakra-ui/next-js";
 import {
-  Flex,
   Box,
+  Button,
+  Flex,
   FormControl,
   FormLabel,
+  Icon,
   Input,
   InputGroup,
   InputRightElement,
   Stack,
-  Button,
   Text,
   useColorModeValue,
   useToast,
-  Icon,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { useRouter } from "next/navigation";
-import { Link } from "@chakra-ui/next-js";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import useCheckSession from "@/lib/checkSession";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/config/firebase";
 import axios from "axios";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +35,6 @@ export default function Page() {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const checkSession = useCheckSession();
-  const router = useRouter();
   const toast = useToast()  
 
   useEffect(() => {

@@ -64,8 +64,8 @@ export async function GET(req, { params }) {
 
     const prize_amount = pricePerSpot * Number(game.total_spots);
     game.prize_amount = prize_amount;
-    game.first_prize = prize_amount  * 0.3
-    game.second_prize = prize_amount * 0.1
+    game.first_prize = Number((prize_amount  * 0.3).toFixed(2))
+    game.second_prize = Number((prize_amount * 0.1).toFixed(2))
 
     return NextResponse.json(game, { status: 200 });
   } catch (error) {
@@ -91,9 +91,9 @@ export async function PUT(req, { params }) {
       const gameData = gameResult.rows[0];
 
       const amountQuery = await pool.query(`SELECT price FROM settings WHERE label = $1`, [gameData.level])
-      const amount = Number(amountQuery.rows[0].price);
-      const winnerAmount1st = amount * Number(gameData.total_spots) * 0.30
-      const winnerAmount2nd = amount * Number(gameData.total_spots) * 0.10
+      const amount = Number(amountQuery.rows[0].price || 0);
+      const winnerAmount1st = Number((amount * Number(gameData.total_spots) * 0.30).toFixed(2))
+      const winnerAmount2nd = Number((amount * Number(gameData.total_spots) * 0.10).toFixed(2))
 
       if (!gameData || !amountQuery.rows[0]) {
         return NextResponse.json({ message: 'Invalid game or amount data' }, { status: 400 });

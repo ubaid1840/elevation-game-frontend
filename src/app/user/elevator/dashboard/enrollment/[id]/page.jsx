@@ -114,12 +114,12 @@ export default function GameEnrollmentPage({ params }) {
 
              <GridItem>
               <Text fontWeight="bold">1st Prize:</Text>
-              <Text fontSize="sm">{game?.first_prize}$</Text>
+              <Text fontSize="sm">${game?.first_prize}</Text>
             </GridItem>
 
              <GridItem>
               <Text fontWeight="bold">2nd Prize:</Text>
-              <Text fontSize="sm">{game?.second_prize}$</Text>
+              <Text fontSize="sm">${game?.second_prize}</Text>
             </GridItem>
           </Grid>
         </Box>

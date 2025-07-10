@@ -201,8 +201,8 @@ export default function Page() {
                       Spots Remaining: {game.spots_remaining}
                     </Text>
                     <Text fontSize="lg">Entry Level: {game.level}</Text>
-                    <Text fontSize="lg">1st Prize: {game?.firstPrize}$</Text>
-                    <Text fontSize="lg">2nd Prize: {game?.secondPrize}$</Text>
+                    <Text fontSize="lg">1st Prize: ${game?.firstPrize}</Text>
+                    <Text fontSize="lg">2nd Prize: ${game?.secondPrize}</Text>
                   </Box>
                   <Button
                     isDisabled={!UserState.value.data?.navigationAllowed}
@@ -238,7 +238,7 @@ export default function Page() {
                     size="md"
                     _hover={{ bg: "purple.600" }}
                   >
-                    Participate
+                    More Info
                   </Button>
                 </Box>
               ))}
