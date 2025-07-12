@@ -3,16 +3,14 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
     const { id } = await params
-    console.log(id)
     try {
         const { searchParams } = new URL(req.url);
-        const type = searchParams.get('type'); // 'user' or 'game'
+        const type = searchParams.get('type'); 
 
         if (!type || !['user', 'game'].includes(type)) {
             return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
         }
 
-        // Fetch all games
         const gamesResult = await query(`
             SELECT id, title, level,total_spots, winner 
             FROM games
@@ -26,21 +24,18 @@ export async function GET(req, { params }) {
 
         const gameIds = gamesResult.rows.map(game => game.id);
 
-        // Fetch all enrollments
         const enrollmentsResult = await query(`
             SELECT user_id, game_id 
             FROM game_enrollments 
             WHERE game_id = ANY($1)
         `, [gameIds]);
 
-        // Fetch all pitches
         const pitchesResult = await query(`
             SELECT user_id, game_id, scores 
             FROM pitches 
             WHERE game_id = ANY($1)
         `, [gameIds]);
 
-        // Fetch user details
         const userIds = [...new Set(enrollmentsResult.rows.map(e => e.user_id))];
         const usersResult = userIds.length > 0 ? await query(`
             SELECT id, name, email 
@@ -48,19 +43,16 @@ export async function GET(req, { params }) {
             WHERE id = ANY($1)
         `, [userIds]) : { rows: [] };
 
-        // Create a user mapping { user_id -> { name, email } }
         const usersMap = Object.fromEntries(usersResult.rows.map(user => [
             user.id, { name: user.name || "Unknown User", email: user.email || "No Email" }
         ]));
 
-        // Process data
         let responseData = [];
 
         for (const game of gamesResult.rows) {
             const gameEnrollments = enrollmentsResult.rows.filter(e => e.game_id === game.id);
             const totalEnrollments = gameEnrollments.length;
 
-            // Process each enrolled user and calculate their total score
             const userScores = gameEnrollments.map(enrollment => {
                 const userPitches = pitchesResult.rows.filter(p => p.game_id === game.id && p.user_id === enrollment.user_id);
 
@@ -77,7 +69,6 @@ export async function GET(req, { params }) {
                 };
             });
 
-            // Rank users (highest totalScore first)
             const rankedUsers = userScores.sort((a, b) => b.totalScore - a.totalScore)
                 .map((user, index) => ({ ...user, rank: index + 1 }));
 
@@ -90,7 +81,6 @@ export async function GET(req, { params }) {
             const prize_amount = pricePerSpot * totalSpots * 0.30;
 
             if (type === 'user') {
-                // Process each ranked user
                 const userData = rankedUsers.map(user => {
                     let winnerStatus = "TBD";
                     if (game.winner) {
@@ -115,7 +105,6 @@ export async function GET(req, { params }) {
             }
 
             if (type === 'game') {
-                // Select only the top player
                 const topPlayer = rankedUsers[0] || null;
 
                 let winnerStatus = "TBD";

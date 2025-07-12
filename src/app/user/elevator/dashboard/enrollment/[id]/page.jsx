@@ -1,15 +1,23 @@
 "use client";
-import Sidebar from "@/components/sidebar";
+import SquareCheckout from "@/components/square/checkout";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
+  Badge,
   Box,
-  Heading,
-  Text,
+  Button,
   Grid,
   GridItem,
-  Button,
-  Badge,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  Text,
+  useDisclosure,
+  useToast
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -21,6 +29,10 @@ export default function GameEnrollmentPage({ params }) {
 
   const router = useRouter();
   const { state: UserState } = useContext(UserContext);
+  const [paymentData, setPaymentData] = useState({});
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [proceed, setProceed] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -34,41 +46,57 @@ export default function GameEnrollmentPage({ params }) {
     });
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (paymentIntent = null, price = null) => {
     axios
       .post("/api/games/enroll", {
         userId: UserState.value.data?.id,
         gameId: params.id,
         entryLevel: "PENDING",
+        paymentIntent: paymentIntent,
+        price: price,
       })
-      .then(() => {
-        router.push("/user/elevator/dashboard");
+      .then((response) => {
+        if (response.data?.alreadyEnrolled) {
+          setPaymentData({ price: response.data?.price, game: params.id });
+          setProceed(false);
+          onOpen();
+        } else {
+          router.push("/user/elevator/dashboard");
+        }
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: e.response.data.message || e?.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        console.error("Error fetching data:", e);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
   function formatYouTubeURL(url) {
-    // Handle YouTube shortened URL (youtu.be)
     if (url.includes("youtu.be")) {
       const videoId = url.split("youtu.be/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle standard YouTube watch URL (youtube.com/watch?v=VIDEO_ID)
+
     } else if (url.includes("youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle YouTube Shorts URL (youtube.com/shorts/VIDEO_ID)
+
     } else if (url.includes("youtube.com/shorts/")) {
       const videoId = url.split("youtube.com/shorts/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
-    // Handle mobile YouTube URL (m.youtube.com/watch?v=VIDEO_ID)
+
     } else if (url.includes("m.youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
     }
-  
-    // Return the URL as is if it's not recognized
+
     return url;
   }
 
@@ -89,7 +117,9 @@ export default function GameEnrollmentPage({ params }) {
             </GridItem>
             <GridItem>
               <Text fontWeight="bold">Category:</Text>
-              <Badge colorScheme="purple" fontSize="sm">{game?.category}</Badge>
+              <Badge colorScheme="purple" fontSize="sm">
+                {game?.category}
+              </Badge>
             </GridItem>
             <GridItem>
               <Text fontWeight="bold">Total Spots:</Text>
@@ -112,12 +142,12 @@ export default function GameEnrollmentPage({ params }) {
               <Text fontSize="sm">{game?.level}</Text>
             </GridItem>
 
-             <GridItem>
+            <GridItem>
               <Text fontWeight="bold">1st Prize:</Text>
               <Text fontSize="sm">${game?.first_prize}</Text>
             </GridItem>
 
-             <GridItem>
+            <GridItem>
               <Text fontWeight="bold">2nd Prize:</Text>
               <Text fontSize="sm">${game?.second_prize}</Text>
             </GridItem>
@@ -156,6 +186,49 @@ export default function GameEnrollmentPage({ params }) {
           Participate
         </Button>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Payment</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {!proceed ? (
+              <Stack dir="column">
+                <Text fontSize="lg" color={"orange.600"}>
+                  You already have an active subscription. This Elevator Pitch
+                  game requires a separate participation fee. Proceeding will
+                  initiate another active subscription entry for this game.
+                </Text>
+
+                <Button
+                  onClick={() => {
+                    setProceed(true);
+                  }}
+                  colorScheme="purple"
+                  my={2}
+                >
+                  Proceed
+                </Button>
+              </Stack>
+            ) : (
+              <Stack dir="column">
+                <SquareCheckout
+                  amount={Number(paymentData.price)}
+                  user={UserState.value.data?.id}
+                  plan={"elevator"}
+                  gameId={paymentData?.game}
+                  onElevatorPayment={(intentId) => {
+                    onClose();
+                    setLoading(true);
+                    handleSubmit(intentId, paymentData.price);
+                  }}
+                />
+              </Stack>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </>
   );
 }

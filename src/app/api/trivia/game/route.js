@@ -1,34 +1,6 @@
 import pool, { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-// export async function GET() {
-//   try {
-//     const games = await query(
-//       `SELECT id, title, total_participants, prize_amount, level, spots_remaining, currentRound, totalRounds, total_spots, deadline, 
-//        array_length(additional_judges, 1) + 1 as totalJudges 
-//        FROM games WHERE winner IS NULL`
-//     );
-
-//     const gamesWithEnrollments = await Promise.all(
-//       games.rows.map(async (game) => {
-//         const enrollments = await query(
-//           'SELECT COUNT(*) as totalEnrollments FROM game_enrollments WHERE game_id = $1',
-//           [game.id]
-//         );
-//         return {
-//           ...game,
-//           totalEnrollments: parseInt(enrollments.rows[0].totalenrollments, 10) || 0,
-//         };
-//       })
-//     );
-
-//     return NextResponse.json(gamesWithEnrollments, { status: 200 });
-//   } catch (error) {
-//     console.error('Error fetching games:', error);
-//     return NextResponse.json({ message: 'Error fetching games', error: error.message }, { status: 500 });
-//   }
-// }
-
 
 export async function POST(req) {
   try {
@@ -56,7 +28,7 @@ export async function POST(req) {
 
     const prize_amount = Number(fee) * Number(total_spots) * (Number(gamePercentage) / 100);
 
-    // Step 1: Insert into `trivia_game` table
+    
     const newGame = await pool.query(
       `INSERT INTO trivia_game (deadline, fee, title, created_by, start_date, description, category, spots_remaining, percentage, game_percentage, total_spots, prize) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
@@ -77,9 +49,9 @@ export async function POST(req) {
       ]
     );
 
-    const gameId = newGame.rows[0].id; // Retrieve the inserted game ID
+    const gameId = newGame.rows[0].id; 
 
-    // Step 2: Insert questions into `trivia_questions` table
+    
     for (const question of questions) {
       await pool.query(
         `INSERT INTO trivia_questions (game_id, text, options, correct, time) 
@@ -87,14 +59,14 @@ export async function POST(req) {
         [
           gameId,
           question.text,
-          JSON.stringify(question.options), // Save options as JSON
+          JSON.stringify(question.options), 
           question.correct,
           question.time
         ]
       );
     }
 
-    // Step 3: Log the action
+    
     const tempStr = `Created new trivia game - ${title}`;
     await query(
       'INSERT INTO logs (user_id, action) VALUES ($1, $2)',

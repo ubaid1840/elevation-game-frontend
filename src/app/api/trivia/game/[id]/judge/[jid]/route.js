@@ -5,7 +5,7 @@ export async function GET(req, { params }) {
   const { id, jid } = await params;
 
   try {
-   // Fetch game data
+   
   const gameData = await query(
     `
     SELECT 
@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
     [id, jid]
   );
 
-  // Fetch enrollments
+  
   const enrollments = await query(
     `
     SELECT 

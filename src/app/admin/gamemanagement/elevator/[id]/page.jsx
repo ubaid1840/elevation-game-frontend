@@ -146,34 +146,32 @@ export default function Page({ params }) {
     }
   }, [gameData]);
 
-
-    const playersWithCumulativeScores = useMemo(() => {
-      return winnersList.map((eachWinner) => {
-        const playerScores = finalScore.filter(
-          (eachScore) => eachWinner?.user_id === eachScore?.user_id
-        );
-  
-        const cumulativeTotal = playerScores.reduce(
-          (acc, curr) => acc + curr.totalScore,
-          0
-        );
-        const cumulativeAverage =
-          playerScores.length > 0 ? cumulativeTotal / playerScores.length : 0;
-  
-        return {
-          ...eachWinner,
-          cumulativeTotal,
-          cumulativeAverage,
-        };
-      });
-    }, [finalScore, winnersList]);
-
-   const sortedPlayers = useMemo(() => {
-      return playersWithCumulativeScores.sort(
-        (a, b) => b.cumulativeTotal - a.cumulativeTotal
+  const playersWithCumulativeScores = useMemo(() => {
+    return winnersList.map((eachWinner) => {
+      const playerScores = finalScore.filter(
+        (eachScore) => eachWinner?.user_id === eachScore?.user_id
       );
-    }, [playersWithCumulativeScores]);
-  
+
+      const cumulativeTotal = playerScores.reduce(
+        (acc, curr) => acc + curr.totalScore,
+        0
+      );
+      const cumulativeAverage =
+        playerScores.length > 0 ? cumulativeTotal / playerScores.length : 0;
+
+      return {
+        ...eachWinner,
+        cumulativeTotal,
+        cumulativeAverage,
+      };
+    });
+  }, [finalScore, winnersList]);
+
+  const sortedPlayers = useMemo(() => {
+    return playersWithCumulativeScores.sort(
+      (a, b) => b.cumulativeTotal - a.cumulativeTotal
+    );
+  }, [playersWithCumulativeScores]);
 
   const handleNextRound = () => {
     if (currentRound < gameData?.totalrounds) {
@@ -285,7 +283,7 @@ export default function Page({ params }) {
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
-         winnerid2nd: selectedUserId2nd,
+        winnerid2nd: selectedUserId2nd,
       })
       .then(async () => {
         toast({
@@ -377,7 +375,14 @@ export default function Page({ params }) {
   return (
     <>
       <Box p={6} minH="100vh" bg="gray.50">
-        <Box p={6} bg="white" borderRadius="lg" boxShadow="md" whiteSpace="pre-wrap" wordBreak="break-word">
+        <Box
+          p={6}
+          bg="white"
+          borderRadius="lg"
+          boxShadow="md"
+          whiteSpace="pre-wrap"
+          wordBreak="break-word"
+        >
           <Heading as="h1" size="xl" mb={4} color="teal.600">
             {gameData?.title}
           </Heading>
@@ -402,7 +407,7 @@ export default function Page({ params }) {
               <strong>Prize Amount: </strong> ${gameData?.prize_amount}
             </Text> */}
             <Text>
-              <strong>Winner:</strong>{" "}
+              <strong>Winner 1st:</strong>{" "}
               {gameData?.winner ? (
                 <Badge fontSize={"lg"} color={"green"}>
                   {gameData?.winner_name}
@@ -411,6 +416,18 @@ export default function Page({ params }) {
                 "TBA"
               )}
             </Text>
+            
+              <Text>
+                <strong>Winner 2nd:</strong>{" "}
+                {gameData?.winner_2nd ? (
+                  <Badge fontSize={"lg"} color={"green"}>
+                    {gameData?.winner_2nd_name}
+                  </Badge>
+                ) : (
+                  "TBA"
+                )}
+              </Text>
+            
             <Text>
               <strong>Additional Judges:</strong>{" "}
               {gameData?.additional_judges_names.join(", ")}
@@ -442,7 +459,7 @@ export default function Page({ params }) {
           <>
             {gameData.currentround === 0 ? (
               <Button
-              isDisabled={Number(gameData?.spots_remaining ?? -1) !== 0}
+                isDisabled={Number(gameData?.spots_remaining ?? -1) !== 0}
                 isLoading={roundLoading}
                 colorScheme="purple"
                 mt={5}
@@ -461,7 +478,7 @@ export default function Page({ params }) {
                 >
                   Previous Round
                 </Button>
-                <Text fontWeight="bold" color="purple.700" mx={'5px'}>
+                <Text fontWeight="bold" color="purple.700" mx={"5px"}>
                   Round: {currentRound}/{gameData?.totalrounds}
                 </Text>
                 <Button

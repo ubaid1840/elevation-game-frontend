@@ -1,11 +1,9 @@
 "use client";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { usePathname, useRouter } from "next/navigation";
 import { UserContext } from "@/store/context/UserContext";
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import axios from "axios";
+import { usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
 
 function randomID(len = 5) {
     const chars =
@@ -40,9 +38,7 @@ export default function Meeting({ page, onEndMeeting, group }) {
                 meeting_link: meeting_link,
                 status: 'Started'
             })
-                .then((response) => {
-                    // console.log(response.data)
-                })
+              
         })
 
     }
@@ -54,9 +50,7 @@ export default function Meeting({ page, onEndMeeting, group }) {
                 meeting_link: "",
                 status: "Ended"
             })
-                .then((response) => {
-                    // console.log(response.data)
-                })
+               
         })
         onEndMeeting()
 

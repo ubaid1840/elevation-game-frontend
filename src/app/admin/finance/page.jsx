@@ -275,7 +275,7 @@ const UserSection = () => {
       </VStack>
 
       <Input
-        placeholder="Search by game"
+        placeholder="Search by participant"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

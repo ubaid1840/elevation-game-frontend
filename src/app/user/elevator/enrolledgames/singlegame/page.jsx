@@ -1,20 +1,16 @@
 "use client";
-import React, { useState } from "react";
 import {
   Box,
-  Heading,
-  Stack,
-  Text,
-  Textarea,
   Button,
-  Divider,
   FormControl,
   FormLabel,
-  useColorModeValue,
+  Heading,
   Progress,
+  Stack,
+  Text,
+  Textarea
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
+import { useState } from "react";
 
 
 const participantDetailData = {
@@ -38,7 +34,6 @@ export default function Page() {
   };
 
   const handleResubmitPitch = () => {
-    // console.log(`New pitch submitted: ${newPitchLink}`);
     setNewPitchLink("");
   };
 

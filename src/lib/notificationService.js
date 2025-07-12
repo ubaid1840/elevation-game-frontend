@@ -17,12 +17,12 @@ const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 export const sendBulkNotifications = async (message, subject, type) => {
   
   try {
-    // Fetch all users' emails and phone numbers
+    
     const users = await query('SELECT email, phone FROM users');
 
-    // Conditionally send notifications based on type
+    
     if (type === 'email') {
-      // Send Email notifications
+      
       const emailPromises = users.rows.map(user => {
         return transporter.sendMail({
           from: process.env.BULK_EMAIL_USER,
@@ -37,7 +37,7 @@ export const sendBulkNotifications = async (message, subject, type) => {
       await Promise.all(emailPromises);
       console.log('All emails sent successfully');
     } else if (type === 'sms') {
-      // Send SMS notifications
+      
       const smsPromises = users.rows.map(user => {
         if (user.phone) {
           return twilioClient.messages.create({

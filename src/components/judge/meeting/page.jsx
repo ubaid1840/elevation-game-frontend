@@ -150,7 +150,6 @@ export default function JudgeMeeting() {
                         <Button
                           colorScheme="purple"
                           onClick={() => {
-                            // setLoading(true)
                             handleStartSession(group);
                           }}
                         >

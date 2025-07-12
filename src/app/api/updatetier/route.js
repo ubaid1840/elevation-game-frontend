@@ -1,4 +1,4 @@
-import { query } from '@/lib/db'; // Assuming you have this query helper
+import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {

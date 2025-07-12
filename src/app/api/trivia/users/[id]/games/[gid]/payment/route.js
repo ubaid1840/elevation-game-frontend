@@ -8,13 +8,13 @@ export async function PUT(req, { params }) {
 
     try {
 
-        // Check if the same payment_intent_id already exists for this user and game
+        
         const existingPayment = await query(
             "SELECT 1 FROM trivia_game_enrollment WHERE user_id = $1 AND game_id = $2 AND payment_intent_id = $3",
             [id, gid, payment_intent_id]
         );
 
-        // If payment_intent_id already exists, prevent duplicate processing
+        
         if (existingPayment.rows.length > 0) {
             return NextResponse.json({ message: "Payment already recorded" }, { status: 200 });
         }

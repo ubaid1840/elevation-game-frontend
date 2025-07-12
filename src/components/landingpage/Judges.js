@@ -11,7 +11,6 @@ import {
     VStack
 } from "@chakra-ui/react";
 
-// Sample top judges data
 const topJudges = [
     {
         id: 1,

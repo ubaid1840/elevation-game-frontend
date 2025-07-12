@@ -5,8 +5,7 @@ export async function POST(req) {
 
   try {
     const { booked_by, booked_for, booking_date, booking_time } = await req.json();
-    console.log(booked_by, booked_for, booking_date, booking_time)
-
+   
     if (!booked_by || !booked_for || !booking_date || !booking_time) {
       return NextResponse.json(
         { message: 'Parameters missing' },
@@ -63,7 +62,6 @@ export async function POST(req) {
         return NextResponse.json(updatedBooking[0]);
       }
     } else {
-      console.log("here")
       const insertBookingQuery = `
         INSERT INTO bookings (booked_for, booking_date, booking_time, users)
         VALUES ($1, $2, $3, ARRAY[$4]::integer[])

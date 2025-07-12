@@ -1,39 +1,37 @@
 "use client";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
+import { debounce } from "@/utils/debounce";
 import {
-  Box,
-  Heading,
-  Stack,
-  Text,
-  Button,
-  Progress,
-  VStack,
-  RadioGroup,
-  Radio,
   Badge,
+  Box,
+  Button,
+  Center,
+  Divider,
+  Flex,
   Grid,
   GridItem,
-  Divider,
-  useToast,
-  Skeleton,
-  Center,
+  Heading,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
   ModalBody,
+  ModalCloseButton,
+  ModalContent,
   ModalFooter,
-  Spinner,
-  HStack,
-  Flex,
+  ModalHeader,
+  ModalOverlay,
+  Progress,
+  Radio,
+  RadioGroup,
   Spacer,
+  Spinner,
+  Stack,
+  Text,
+  useToast,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
 import moment from "moment";
-import { redirect, useRouter } from "next/navigation";
-import { debounce } from "@/utils/debounce";
+import { useRouter } from "next/navigation";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export default function Page({ params }) {
   const { state: UserState } = useContext(UserContext);
@@ -90,7 +88,6 @@ export default function Page({ params }) {
         title: e?.response?.data?.message || e?.message,
         status: "error",
       });
-      // router.push("/user/trivia/enrolledgames");
     } finally {
       setLoading(false);
       setHasAnswered(false);
@@ -127,22 +124,15 @@ export default function Page({ params }) {
     axios
       .get(`/api/trivia/users/${id}/games/${params.id}/result`)
       .then((response) => {
-        console.log(response.data);
         setMyGameResult(response.data);
       });
   }
 
-  // useEffect(() => {
-  //   if (questions) {
-  //     setStartTime(performance.now());
-  //     setTimeLeft(questions[currentIndex].time * 1000); // Convert seconds to ms
-  //   }
-  // }, [currentIndex, questions]);
-
+  
   useEffect(() => {
     if (timeLeft && timeLeft > 0) {
       if (!isModalOpen && !isLoading) {
-        const timer = setTimeout(() => setTimeLeft((prev) => prev - 100), 100); // Decrease in 100ms intervals
+        const timer = setTimeout(() => setTimeLeft((prev) => prev - 100), 100);
         return () => clearTimeout(timer);
       }
     } else if (!hasAnswered) {
@@ -209,11 +199,7 @@ export default function Page({ params }) {
       <GameCard gameDetailData={gameDetailData} instructions={instructions} />
       {myGameResult ? (
         <GameResult data={myGameResult} handleShareGame={handleShareGame} />
-      ) : // gameDetailData?.game?.questions.length === progress.length ?
-      //  (
-
-      // )
-      //  :
+      ) :
       loading ? (
         <Center mt={10}>
           <Spinner />

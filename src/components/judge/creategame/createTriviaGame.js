@@ -1,43 +1,41 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
   Box,
   Button,
-  Input,
-  VStack,
-  HStack,
-  Text,
-  Select,
-  IconButton,
-  Heading,
+  Center,
   FormControl,
   FormLabel,
-  Center,
-  Spinner,
-  useToast,
-  useDisclosure,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
   ModalBody,
-  Stack,
+  ModalCloseButton,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
+  Select,
+  Spinner,
+  Stack,
+  Text,
   Textarea,
+  useDisclosure,
+  useToast,
+  VStack
 } from "@chakra-ui/react";
-import { Calendar } from "primereact/calendar";
-import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
-import { UserContext } from "@/store/context/UserContext";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { Calendar } from "primereact/calendar";
+import { useContext, useEffect, useRef, useState } from "react";
 
 export default function CreateTriviaGame({ page }) {
   const router = useRouter();
@@ -81,21 +79,21 @@ export default function CreateTriviaGame({ page }) {
     })
   }
 
-  // Function to update question text
+  
   const updateQuestionText = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].text = value;
     setQuestions(updatedQuestions);
   };
 
-  // Function to update time for question
+  
   const updateQuestionTime = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].time = value;
     setQuestions(updatedQuestions);
   };
 
-  // Function to add a new question
+  
   const addQuestion = () => {
     setQuestions([
       ...questions,
@@ -103,34 +101,34 @@ export default function CreateTriviaGame({ page }) {
     ]);
   };
 
-  // Function to remove a question
+  
   const removeQuestion = (index) => {
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
   };
 
-  // Function to add an option to a question
+  
   const addOption = (questionIndex) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options.push("");
     setQuestions(updatedQuestions);
   };
 
-  // Function to update an option
+  
   const updateOption = (questionIndex, optionIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options[optionIndex] = value;
     setQuestions(updatedQuestions);
   };
 
-  // Function to remove an option
+  
   const removeOption = (questionIndex, optionIndex) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options.splice(optionIndex, 1);
     setQuestions(updatedQuestions);
   };
 
-  // Function to set the correct answer
+  
   const setCorrectAnswer = (questionIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].correct = value;
@@ -168,7 +166,7 @@ export default function CreateTriviaGame({ page }) {
     const missing = validateForm();
     if (missing.length > 0) {
       setMissingFields(missing);
-      onOpen(); // Open modal if validation fails
+      onOpen(); 
       return;
     }
 
@@ -398,7 +396,7 @@ export default function CreateTriviaGame({ page }) {
                   size="sm"
                   colorScheme="red"
                   onClick={() => removeOption(qIndex, oIndex)}
-                  isDisabled={question.options.length === 1} // Prevent deleting the last option
+                  isDisabled={question.options.length === 1} 
                 />
               </HStack>
             ))}

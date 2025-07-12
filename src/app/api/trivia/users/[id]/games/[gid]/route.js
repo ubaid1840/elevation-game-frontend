@@ -45,7 +45,7 @@ export async function GET(req, { params }) {
       [game.id]
     );
 
-    // Fetch additional judges if available
+    
 
 
     const response = {

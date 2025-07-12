@@ -180,9 +180,16 @@ export default function GameDetail({ params }) {
                     </GridItem>
                     <GridItem >
                         <Text fontWeight="bold" color="purple.600">
-                            Winner: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
+                            Winner 1st: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
                         </Text>
                     </GridItem>
+
+                    <GridItem >
+                        <Text fontWeight="bold" color="purple.600">
+                            Winner 2nd: <span>{gameDetailData?.game?.winner_2nd ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner_2nd}</Badge> : "TBA"}</span>
+                        </Text>
+                    </GridItem>
+
                     <GridItem >
                         <Text fontWeight="bold" color="purple.600">
                             Deadline: <span>{gameDetailData?.game?.deadline ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY") : ""}</span>
@@ -322,7 +329,7 @@ export default function GameDetail({ params }) {
                                         </Stack>
                                     </Box>
                                     <Button
-                                    isDisabled={!UserState.value.data?.navigationAllowed}
+                                        isDisabled={!UserState.value.data?.navigationAllowed}
                                         mt={4}
                                         colorScheme="purple"
                                         onClick={() => {
@@ -338,7 +345,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner  && (
+                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && (
                             <Button
                                 isDisabled={!UserState.value.data?.navigationAllowed}
                                 w={"full"}

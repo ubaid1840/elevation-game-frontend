@@ -69,7 +69,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: "Enrollment successful" }, { status: 200 });
 
     } else {
-      // No spots remaining, send an error response
+      
       return NextResponse.json({ message: 'No spots remaining' }, { status: 400 });
     }
 
@@ -84,7 +84,7 @@ export async function GET(req, { params }) {
   const { id } = await params;
 
   try {
-    // Fetch game data
+    
     const gameData = await query(
       `
       SELECT 
@@ -99,7 +99,7 @@ export async function GET(req, { params }) {
       [id]
     );
   
-    // Fetch enrollments
+    
     const enrollments = await query(
       `
       SELECT 

@@ -4,11 +4,10 @@ import { db } from "@/config/firebase";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
 import { debounce } from "@/utils/debounce";
-import { Button, Center, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Center, Flex, Heading, Spinner } from "@chakra-ui/react";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 
@@ -139,25 +138,7 @@ export default function Page() {
         });
 
         callTimeout();
-        // if (response.data.success) {
-        //   setMessage("Payment Verified Updating Record");
-        //   axios
-        //     .post("/api/updatetier", {
-        //       user_id: UserState.value.data?.id,
-        //       plan: plan,
-        //       intent_id : UserState.value.data?.package_intent_id || null
-        //     })
-        //     .then(() => {
-        //       callTimeout();
-        //     })
-        //     .catch((e) => {
-        //       setMessage("Something went wrong, refresh the page");
-        //       console.log(e);
-        //     });
-        // } else {
-        //   setMessage("Payment Verified");
-        //   callTimeout();
-        // }
+      
       })
       .catch((e) => {
         console.log(e);

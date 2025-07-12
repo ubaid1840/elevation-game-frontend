@@ -1,35 +1,32 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { db } from "@/config/firebase";
+import { UserContext } from "@/store/context/UserContext";
+import { CloseIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Heading,
-  Textarea,
   Button,
-  Input,
-  Stack,
   FormControl,
   FormLabel,
-  Text,
-  Select,
+  Heading,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
   ModalBody,
-  useDisclosure,
+  ModalCloseButton,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
+  Select,
+  Stack,
+  Text,
+  Textarea,
+  useDisclosure
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
+import { addDoc, collection } from "firebase/firestore";
+import moment from "moment";
 import { useRouter } from "next/navigation";
 import { Calendar } from "primereact/calendar";
-import { CloseIcon } from "@chakra-ui/icons";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/firebase";
-import moment from "moment";
+import { useContext, useEffect, useState } from "react";
 
 export default function Page() {
   const [title, setTitle] = useState("");
@@ -158,29 +155,23 @@ export default function Page() {
   };
 
   function formatYouTubeURL(url) {
-    // Handle YouTube shortened URL (youtu.be)
     if (url.includes("youtu.be")) {
       const videoId = url.split("youtu.be/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
 
-      // Handle standard YouTube watch URL (youtube.com/watch?v=VIDEO_ID)
     } else if (url.includes("youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
 
-      // Handle YouTube Shorts URL (youtube.com/shorts/VIDEO_ID)
     } else if (url.includes("youtube.com/shorts/")) {
       const videoId = url.split("youtube.com/shorts/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
 
-      // Handle mobile YouTube URL (m.youtube.com/watch?v=VIDEO_ID)
     } else if (url.includes("m.youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
     }
-
-    // Return the URL as is if it's not recognized
-    return url;
+  return url;
   }
 
   return (

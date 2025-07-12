@@ -5,7 +5,6 @@ export async function GET(req, { params }) {
   const { id } = params;
 
   try {
-    // Fetch the main game details along with participants and pitches
     const gameResult = await pool.query(
       `SELECT 
         g.created_by AS createdBy, 
@@ -45,16 +44,13 @@ export async function GET(req, { params }) {
       return NextResponse.json({ message: "Game not found" }, { status: 404 });
     }
 
-    // Fetch the name of the creator
     const creatorResult = await pool.query(`SELECT name FROM users WHERE id = $1`, [game.createdby]);
     const creatorName = creatorResult.rows[0]?.name || null;
 
-    // Fetch the names of additional judges
     const judgeIds = game.additional_judges || [];
     const judgesResult = await pool.query(`SELECT id, name FROM users WHERE id = ANY($1::int[])`, [judgeIds]);
     const judgeNames = judgesResult.rows.map(judge => judge.name);
 
-    // Replace the IDs with names
     game.createdBy = creatorName;
     game.additional_judges_ids = game.additional_judges || []
     game.additional_judges = judgeNames;
@@ -128,10 +124,10 @@ export async function PUT(req, { params }) {
 
       const updatedGame = await pool.query(
         `UPDATE games 
-         SET winner = $1 
+         SET winner = $1, winner_2nd = $2 
          WHERE id = $2 
          RETURNING *`,
-        [winnerid, id]
+        [winnerid, winnerid2nd, id]
       );
       return NextResponse.json(updatedGame.rows[0], { status: 200 });
     }

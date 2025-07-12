@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db"; // PostgreSQL connection
+import { query } from "@/lib/db"; 
 
 export async function GET() {
   try {
     console.log("Processing expired trivia games...");
 
-    // Step 1: Fetch all expired games
+    
     const expiredGamesResult = await query(
       `SELECT id, title, fee, game_percentage, prize, spots_remaining, winner_id FROM trivia_game 
        WHERE spots_remaining = 0 

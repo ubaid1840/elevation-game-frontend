@@ -1,17 +1,15 @@
 "use client"
-import { BsCashStack} from "react-icons/bs";
+import { BsCashStack } from "react-icons/bs";
 import { FaUserFriends } from "react-icons/fa";
-import { MdOutlineGamepad, MdOutlineLeaderboard, MdOutlineSchedule} from "react-icons/md";
-import { RiDashboard3Line,  RiTeamLine } from "react-icons/ri";
-import {  SiNintendogamecube } from "react-icons/si";
-import { SlGameController } from "react-icons/sl";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { IoCalendarNumberOutline } from "react-icons/io5";
-import { TbReport } from "react-icons/tb";
+import { MdMultilineChart, MdOutlineGamepad, MdOutlineLeaderboard, MdOutlineSchedule } from "react-icons/md";
 import { PiNetworkDuotone } from "react-icons/pi";
+import { RiDashboard3Line, RiTeamLine } from "react-icons/ri";
+import { SiGotomeeting, SiNintendogamecube } from "react-icons/si";
+import { SlGameController } from "react-icons/sl";
+import { TbReport } from "react-icons/tb";
 import { VscGame } from "react-icons/vsc";
-import { SiGotomeeting } from "react-icons/si";
-import { MdMultilineChart } from "react-icons/md";
 
 const GetLinkItems = (role, type) => {
     switch (role) {
@@ -94,18 +92,6 @@ const GetLinkItems = (role, type) => {
                         icon: VscGame,
                         path: `/user/${type}/enrolledgames`,
                     },
-                    // {
-                    //     name: "Competition Progress",
-                    //     icon: RiFirstAidKitLine,
-                    //     path: `/user/competitionprogress`,
-                    // },
-                   
-                    // {
-                    //     name: "Enrollment",
-                    //     icon: RiFirstAidKitLine,
-                    //     path: `enrollment`,
-                    // },
-                  
                     {
                         name: "Leaderboard",
                         icon: MdOutlineLeaderboard,

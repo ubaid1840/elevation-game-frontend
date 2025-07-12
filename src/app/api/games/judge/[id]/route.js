@@ -5,7 +5,6 @@ export async function GET(req, { params }) {
   const { id } = params;
 
   try {
-    // Fetch games where the provided 'id' matches either 'created_by' or exists in 'additional_judges'
     const gameResult = await pool.query(
       `SELECT DISTINCT ON (g.id) 
         g.id,
@@ -27,11 +26,9 @@ export async function GET(req, { params }) {
       return NextResponse.json({ message: "No games found for the given user" }, { status: 404 });
     }
 
-    // Process each game and fetch related game_enrollments data
     const processedGames = [];
 
     for (const game of games) {
-      // Fetch game_enrollments data for the current game
       const enrollmentsResult = await pool.query(
         `SELECT ge.user_id, ge.status
          FROM game_enrollments ge
@@ -41,7 +38,6 @@ export async function GET(req, { params }) {
 
       const enrollments = enrollmentsResult.rows;
 
-      // Attach the enrollments data to the game data
       game.enrollments = enrollments;
 
       processedGames.push(game);

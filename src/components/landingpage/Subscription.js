@@ -122,7 +122,7 @@ export default function SubscriptionPage({ page }) {
                 <RadioGroup onChange={handlePlanChange} value={selectedPlan} mb={6}>
                     <Stack spacing={4}>
                         {subscriptionOptions.length > 0 && subscriptionOptions.map((option) => (
-                            // option.label !== "Silver" &&
+                            
                             <Radio key={option.id} value={option.label}>
                                 {option.label} - ${option.price}
                             </Radio>
@@ -144,13 +144,13 @@ export default function SubscriptionPage({ page }) {
                     :
                     <Box maxW={'500px'}>
                         {amount !== 0 && UserState.value.data?.email && selectedPlan && (
-                            // <Elements stripe={stripePromise} options={{
-                            //     mode: "payment",
-                            //     amount: convertToSubcurrency(amount),
-                            //     currency: "usd"
-                            // }}>
-                            //     <CheckoutPage amount={amount} userID={UserState.value.data?.id} plan={selectedPlan} />
-                            // </Elements>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
                             <SquareCheckout amount={amount} plan={selectedPlan} user={UserState.value.data} />
                         )}
                     </Box>

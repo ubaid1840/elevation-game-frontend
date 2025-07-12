@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CreditCard, PaymentForm } from "react-square-web-payments-sdk";
 
-const SquareCheckout = ({ amount, plan, gameId, user }) => {
+const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const router = useRouter()
 
     const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
@@ -26,11 +26,15 @@ const SquareCheckout = ({ amount, plan, gameId, user }) => {
             .post("/api/square", { token: token, note: plan, amount: amount })
             .then(async (response) => {
                 const paymentIntentId = response.data.paymentId
-
                 if (plan == "trivia") {
-
                     if (gameId) {
                         await handleUpdateTriviaPayment(paymentIntentId, Number(gameId));
+                    } else {
+                        setErrorMessage("Game not found")
+                    }
+                } else if (plan === 'elevator') {
+                    if (gameId) {
+                        await onElevatorPayment(paymentIntentId);
                     } else {
                         setErrorMessage("Game not found")
                     }

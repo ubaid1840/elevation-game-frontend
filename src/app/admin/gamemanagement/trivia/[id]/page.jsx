@@ -1,55 +1,27 @@
 "use client";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
+import { UserContext } from "@/store/context/UserContext";
 import {
-  Box,
-  Text,
-  Stack,
-  Heading,
-  Button,
-  Grid,
-  GridItem,
-  Divider,
-  VStack,
-  Flex,
-  Link,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  FormControl,
-  FormLabel,
-  Textarea,
-  ModalFooter,
-  HStack,
-  Spacer,
-  Input,
-  useToast,
-  Select,
-  Badge,
-  Center,
-  Spinner,
   Accordion,
   AccordionButton,
-  AccordionPanel,
-  AccordionItem,
   AccordionIcon,
-  Avatar,
+  AccordionItem,
+  AccordionPanel,
+  Badge,
+  Box,
+  Center,
+  Divider,
+  Flex,
+  Heading,
+  Spinner,
+  Stack,
+  Text,
+  useToast,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { GhostButton } from "@/components/ui/Button";
-import { Calendar } from "primereact/calendar";
 import moment from "moment";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/firebase";
-import getDisplayPicture from "@/lib/getDisplayPicture";
-import RenderProfilePicture from "@/components/RenderProfilePicture";
+import { useContext, useEffect, useState } from "react";
 
 export default function Page({ params }) {
   const [gameData, setGameData] = useState(null);

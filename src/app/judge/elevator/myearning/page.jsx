@@ -1,35 +1,30 @@
 "use client";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
-import Sidebar from "@/components/sidebar";
 import Pagination from "@/components/ui/Pagination";
 import TableData from "@/components/ui/TableData";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
-  Heading,
-  Text,
-  VStack,
-  HStack,
   Button,
   Divider,
-  SimpleGrid,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  Input,
+  Spacer,
+  Spinner,
   Stat,
   StatLabel,
   StatNumber,
-  useToast,
-  Checkbox,
-  Input,
-  Flex,
-  Spacer,
   Table,
-  Thead,
-  Tr,
-  Th,
-  Icon,
   Tbody,
   Td,
-  Spinner,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -66,25 +61,7 @@ export default function Page() {
       });
       setTableData([...tempData]);
 
-      // console.log(response.data)
-      // const tempData = response.data.map((item) => {
-      //   let transactionType = item.transaction_type;
-
-      //   if (transactionType === "referral earning") {
-      //     transactionType = "Trivia game referral earning";
-      //   } else if (transactionType === "winning") {
-      //     transactionType = "Trivia game winning";
-      //   }
-
-      //   return {
-      //     id : item.id,
-      //     amount: transactionType.includes("entry") ?  -Math.abs(item.amount) : Math.abs(item.amount),
-      //     transaction_type: transactionType,
-      //     created_at: moment(new Date(item.created_at)).format("DD/MM/YYYY"),
-      //   };
-      // });
-
-      // setTableData([...tempData]);
+     
 
       const transactions = response.data;
       const winnings = [];
@@ -198,7 +175,6 @@ const GameSection = () => {
       .get(`/api/analytics/${id}?type=game`)
       .then((response) => {
         if (response.data.length > 0) {
-          //   console.log(response.data)
           const temp = response.data.map((item, index) => {
             return {
               id: index,

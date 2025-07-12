@@ -47,7 +47,6 @@ export async function GET(req) {
             const priceRes = await query(`SELECT price FROM settings WHERE label = $1`, [userPackage]);
             const purchase = priceRes.rows[0]?.price || null;
 
-            // 5. Tier and Percentage
             let tier = null;
             let percentage = null;
 

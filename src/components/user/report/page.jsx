@@ -1,32 +1,25 @@
 "use client";
-import React, {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { UserContext } from "@/store/context/UserContext";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5xy from "@amcharts/amcharts5/xy";
 import {
   Box,
   Heading,
-  Stack,
-  Text,
-  Button,
-  Flex,
   Table,
-  Thead,
   Tbody,
-  Tr,
-  Th,
   Td,
+  Text,
+  Th,
+  Thead,
+  Tr
 } from "@chakra-ui/react";
-import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import { CSVLink } from "react-csv";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { UserContext } from "@/store/context/UserContext";
 import axios from "axios";
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 
 export default function ReportPage() {
   const chartRef = useRef(null);
@@ -73,7 +66,7 @@ export default function ReportPage() {
       })
     );
 
-    // Create axes
+    
     const xAxis = chart.xAxes.push(
       am5xy.CategoryAxis.new(root, {
         categoryField: "category",
@@ -87,7 +80,7 @@ export default function ReportPage() {
       })
     );
 
-    // Create series
+    
     const series = chart.series.push(
       am5xy.ColumnSeries.new(root, {
         name: "Earnings",
@@ -98,14 +91,14 @@ export default function ReportPage() {
       })
     );
 
-    // series.set("tooltip", am5.Tooltip.new(root, {
-    //   labelText: "{categoryX}: {valueY}"
-    // }));
+    
+    
+    
     
     series.data.setAll(chartData);
     xAxis.data.setAll(chartData);
 
-    // Clean up chart on unmount
+    
     return () => {
       root.dispose();
     };

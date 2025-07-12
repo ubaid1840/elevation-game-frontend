@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Retrieve top 10 pitches with user names and game titles
+    
     const result = await query(
       `SELECT pitches.*, users.name, users.email, games.title AS game_title 
        FROM pitches 
@@ -13,7 +13,7 @@ export async function GET() {
        LIMIT 10`
     );    
 
-    // Return the pitches data, including user name and game title
+    
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     console.error('Error fetching pitches:', error);

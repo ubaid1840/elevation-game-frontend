@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
     try {
-        // Fetch all games
+        
         const gamesResult = await query(`
             SELECT id, title, winner_id, game_percentage, fee, total_spots, prize  
             FROM trivia_game 
@@ -16,14 +16,14 @@ export async function GET() {
 
         const gameIds = gamesResult.rows.map(game => game.id);
 
-        // Fetch all enrollments for these games
+        
         const enrollmentsResult = await query(`
             SELECT user_id, game_id, progress 
             FROM trivia_game_enrollment 
             WHERE game_id = ANY($1)
         `, [gameIds]);
 
-        // Fetch user details (name, email)
+        
         const userIds = [...new Set(enrollmentsResult.rows.map(e => e.user_id))];
 
         const usersResult = userIds.length > 0 ? await query(`
@@ -32,26 +32,26 @@ export async function GET() {
             WHERE id = ANY($1)
         `, [userIds]) : { rows: [] };
 
-        // Create a user mapping { user_id -> { name, email } }
+        
         const usersMap = Object.fromEntries(usersResult.rows.map(user => [
             user.id, { name: user.name || "Unknown User", email: user.email || "No Email" }
         ]));
 
-        // Fetch transactions where game_type = 'trivia'
+        
         const transactionsResult = await query(`
             SELECT user_id, game_id, transaction_type, amount 
             FROM transactions 
             WHERE game_type = 'trivia' AND game_id = ANY($1)
         `, [gameIds]);
 
-        // Process data
+        
         const leaderboard = [];
 
         for (const game of gamesResult.rows) {
-            // Filter enrollments for this game
+            
             const gameEnrollments = enrollmentsResult.rows.filter(e => e.game_id === game.id);
 
-            // Total enrolled players
+            
             const totalEnrollments = gameEnrollments.length;
 
             if (totalEnrollments === 0) {
@@ -66,7 +66,7 @@ export async function GET() {
                 continue;
             }
 
-            // Process user rankings
+            
             const processedUsers = gameEnrollments.map(enrollment => {
                 const progress = enrollment.progress || [];
                 const correctAnswers = progress.filter(p => p.isCorrect).length;
@@ -82,12 +82,12 @@ export async function GET() {
                 };
             });
 
-            // Rank users (max correctAnswers first, min totalTime next)
+            
             const rankedUsers = processedUsers.sort((a, b) =>
                 b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime
             ).map((user, index) => ({ ...user, rank: index + 1 }));
 
-            // Get the top player (Rank 1)
+            
             const topPlayer = rankedUsers[0];
 
             if (!topPlayer) {
@@ -101,23 +101,23 @@ export async function GET() {
                 continue;
             }
 
-            // Get transactions for this game and top user
+            
             const topUserTransactions = transactionsResult.rows.filter(
                 t => t.game_id === game.id && t.user_id === topPlayer.user_id
             );
 
-            // Calculate total referral earnings
+            
             const totalReferrals = topUserTransactions
                 .filter(t => t.transaction_type.includes("referral"))
                 .reduce((sum, t) => sum + Number(t.amount), 0);
 
-            // Determine winner status
+            
             let winnerStatus = "TBD";
             if (game.winner_id) {
                 winnerStatus = (game.winner_id === topPlayer.user_id) ? "Won" : "Lost";
             }
 
-            // Push final structured data
+            
             leaderboard.push({
                 game_id: game.id,
                 game_title: game.title,

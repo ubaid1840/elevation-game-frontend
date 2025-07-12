@@ -9,7 +9,6 @@ export async function GET() {
        FROM games`
     );
 
-    // Add total enrollments count to each game
     const gamesWithEnrollments = await Promise.all(
       games.rows.map(async (game) => {
         const enrollments = await query(

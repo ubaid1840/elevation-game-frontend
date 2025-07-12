@@ -1,22 +1,18 @@
 "use client";
-import Sidebar from "@/components/sidebar";
 import { UserContext } from "@/store/context/UserContext";
 import { debounce } from "@/utils/debounce";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  Grid,
-  GridItem,
   Badge,
-  VStack,
+  Box,
+  Button,
   Divider,
+  Flex,
+  Heading,
   HStack,
   Input,
+  Text,
   useToast,
-  Flex,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";

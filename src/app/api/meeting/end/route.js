@@ -3,10 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function PUT(req) {
   try {
-    // Parse the incoming request body to get the meeting ID
     const { id } = await req.json();
 
-    // Validate the provided meeting ID
     if (!id) {
       return NextResponse.json(
         { message: 'Meeting ID is required' },
@@ -14,7 +12,6 @@ export async function PUT(req) {
       );
     }
 
-    // Query to update the meeting status to false
     const updateStatusQuery = `
       UPDATE meetings
       SET status = false
@@ -22,10 +19,8 @@ export async function PUT(req) {
       RETURNING *;
     `;
 
-    // Execute the update query
     const { rows: updatedMeeting } = await query(updateStatusQuery, [id]);
 
-    // Check if the meeting was found and updated
     if (updatedMeeting.length === 0) {
       return NextResponse.json(
         { message: 'Meeting not found' },
@@ -33,7 +28,6 @@ export async function PUT(req) {
       );
     }
 
-    // Return the updated meeting
     return NextResponse.json(updatedMeeting[0], { status: 200 });
   } catch (error) {
     console.error('Error ending meeting:', error);

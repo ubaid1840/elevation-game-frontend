@@ -22,7 +22,7 @@ export async function GET(req, { params }) {
 
     const game = gameResult.rows[0];
 
-    // Check if the winner is not null, and fetch the winner's name
+    
     if (game.winner !== null) {
       const winnerResult = await query(
         'SELECT name FROM users WHERE id = $1',
@@ -31,7 +31,15 @@ export async function GET(req, { params }) {
       game.winner = winnerResult.rows[0]?.name || null;
     }
 
-    // Fetch the createdBy name
+    if (game.winner_2nd !== null) {
+      const winnerResult = await query(
+        'SELECT name FROM users WHERE id = $1',
+        [game.winner_2nd]
+      );
+      game.winner_2nd = winnerResult.rows[0]?.name || null;
+    }
+
+    
     const createdByResult = await query(
       'SELECT name FROM users WHERE id = $1',
       [game.created_by]
@@ -39,7 +47,7 @@ export async function GET(req, { params }) {
     const createdByName = createdByResult.rows[0]?.name || null;
     game.createdby = createdByName;
 
-    // Fetch additional judges if available
+    
     if (game.additional_judges && Array.isArray(game.additional_judges)) {
       const judgeIds = game.additional_judges;
       const judgesResult = await query(
@@ -50,7 +58,7 @@ export async function GET(req, { params }) {
       game.judges = judgeIds.map(judgeId => judgesMap[judgeId] || judgeId);
     }
 
-    // Fetch pitches and comments
+    
     const pitchesResult = await query(
       'SELECT * FROM pitches WHERE user_id = $1 AND game_id = $2 ORDER BY created_at ASC',
       [id, gid]

@@ -1,46 +1,39 @@
 "use client";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import RenderProfilePicture from "@/components/RenderProfilePicture";
+import { db } from "@/config/firebase";
+import { UserContext } from "@/store/context/UserContext";
 import {
+  Badge,
   Box,
-  Text,
-  Stack,
-  Heading,
   Button,
-  Grid,
-  GridItem,
-  Divider,
-  VStack,
-  Flex,
-  Link,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
   FormControl,
   FormLabel,
-  Textarea,
-  ModalFooter,
+  Heading,
   HStack,
-  Spacer,
   Input,
-  useToast,
+  Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
-  Badge,
+  Spacer,
+  Stack,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { GhostButton } from "@/components/ui/Button";
-import { Calendar } from "primereact/calendar";
-import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/firebase";
-import RenderProfilePicture from "@/components/RenderProfilePicture";
+import moment from "moment";
+import { useRouter } from "next/navigation";
+import { Calendar } from "primereact/calendar";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -121,32 +114,6 @@ export default function Page({ params }) {
       });
   }
 
-  // useEffect(() => {
-  //   if (gameData) {
-  //     const qualifiedPitchesWithAverageScore = gameData.enrollments
-  //       .flatMap((enrollment) =>
-  //         enrollment.pitches
-  //           .filter((pitch) => pitch.pitch_status === "Qualify")
-  //           .map((pitch) => {
-  //             const scores = Object.values(pitch.scores);
-  //             const totalScore = scores.reduce((acc, score) => acc + score, 0);
-  //             const averageScore =
-  //               scores.length > 0 ? totalScore / scores.length : 0;
-
-  //             return {
-  //               ...pitch,
-  //               user_id: enrollment.user_id,
-  //               averageScore,
-  //               totalScore,
-  //             };
-  //           })
-  //       )
-  //       .sort((a, b) => a.round - b.round);
-
-  //     setFinalScore(qualifiedPitchesWithAverageScore);
-  //   }
-
-  // }, [gameData]);
 
   useEffect(() => {
     if (gameData) {
@@ -408,7 +375,14 @@ export default function Page({ params }) {
   return (
     <>
       <Box p={6} minH="100vh" bg="gray.50">
-        <Box p={6} bg="white" borderRadius="lg" boxShadow="md" whiteSpace="pre-wrap" wordBreak="break-word">
+        <Box
+          p={6}
+          bg="white"
+          borderRadius="lg"
+          boxShadow="md"
+          whiteSpace="pre-wrap"
+          wordBreak="break-word"
+        >
           <Heading as="h1" size="xl" mb={4} color="teal.600">
             {gameData?.title}
           </Heading>
@@ -433,7 +407,7 @@ export default function Page({ params }) {
               <strong>Spots Remaining: </strong> {gameData?.spots_remaining}
             </Text>
             <Text>
-              <strong>Winner:</strong>{" "}
+              <strong>Winner 1st:</strong>{" "}
               {gameData?.winner ? (
                 <Badge fontSize={"lg"} color={"green"}>
                   {gameData?.winner_name}
@@ -442,6 +416,20 @@ export default function Page({ params }) {
                 "TBA"
               )}
             </Text>
+
+          
+              <Text>
+                <strong>Winner 2nd:</strong>{" "}
+                {gameData?.winner_2nd ? (
+                  <Badge fontSize={"lg"} color={"green"}>
+                    {gameData?.winner_2nd_name}
+                  </Badge>
+                ) : (
+                  "TBA"
+                )}
+              </Text>
+            
+
             <Text>
               <strong>Additional Judges:</strong>{" "}
               {gameData?.additional_judges_names.join(", ")}

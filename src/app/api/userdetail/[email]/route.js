@@ -77,7 +77,7 @@ export async function GET(req, { params }) {
             }
         }
 
-        return NextResponse.json({ ...user, hasActiveWaiver, monthlySubscriptionStatus, annualSubscriptionStatus, navigationAllowed, residual_income: totalEarnings }, { status: 200 });
+        return NextResponse.json({ ...user, hasActiveWaiver, monthlySubscriptionStatus, annualSubscriptionStatus, navigationAllowed, residual_income: Number(totalEarnings.toFixed(4)) }, { status: 200 });
 
     } catch (error) {
         console.error('Error fetching role:', error);

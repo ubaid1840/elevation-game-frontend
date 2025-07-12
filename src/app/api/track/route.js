@@ -10,7 +10,7 @@ export async function POST(req) {
         if(pathname.includes(".png") || pathname.includes(".jpg") || pathname.includes(".jpeg")){
             return NextResponse.json({ message: "Visit logged successfully" }, { status: 201 });
         }
-        // Insert data into your database
+        
         await query(`
         INSERT INTO traffic_logs (page, user_agent, ip_address, created_at) 
         VALUES ($1, $2, $3, NOW())

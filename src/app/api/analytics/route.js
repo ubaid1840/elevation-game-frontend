@@ -10,9 +10,8 @@ export async function GET(req) {
             return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
         }
 
-        // Fetch all games
         const gamesResult = await query(`
-            SELECT id, title, level, total_spots , winner 
+            SELECT id, title, level, total_spots , winner, winner_2nd 
             FROM games
             ORDER BY id DESC
         `);
@@ -23,21 +22,18 @@ export async function GET(req) {
 
         const gameIds = gamesResult.rows.map(game => game.id);
 
-        // Fetch all enrollments
         const enrollmentsResult = await query(`
             SELECT user_id, game_id 
             FROM game_enrollments 
             WHERE game_id = ANY($1)
         `, [gameIds]);
 
-        // Fetch all pitches
         const pitchesResult = await query(`
             SELECT user_id, game_id, scores 
             FROM pitches 
             WHERE game_id = ANY($1)
         `, [gameIds]);
 
-        // Fetch user details
         const userIds = [...new Set(enrollmentsResult.rows.map(e => e.user_id))];
         const usersResult = userIds.length > 0 ? await query(`
             SELECT id, name, email 
@@ -45,19 +41,16 @@ export async function GET(req) {
             WHERE id = ANY($1)
         `, [userIds]) : { rows: [] };
 
-        // Create a user mapping { user_id -> { name, email } }
         const usersMap = Object.fromEntries(usersResult.rows.map(user => [
             user.id, { name: user.name || "Unknown User", email: user.email || "No Email" }
         ]));
 
-        // Process data
         let responseData = [];
 
         for (const game of gamesResult.rows) {
             const gameEnrollments = enrollmentsResult.rows.filter(e => e.game_id === game.id);
             const totalEnrollments = gameEnrollments.length;
 
-            // Process each enrolled user and calculate their total score
             const userScores = gameEnrollments.map(enrollment => {
                 const userPitches = pitchesResult.rows.filter(p => p.game_id === game.id && p.user_id === enrollment.user_id);
 
@@ -74,7 +67,6 @@ export async function GET(req) {
                 };
             });
 
-            // Rank users (highest totalScore first)
             const rankedUsers = userScores.sort((a, b) => b.totalScore - a.totalScore)
                 .map((user, index) => ({ ...user, rank: index + 1 }));
 
@@ -93,7 +85,10 @@ export async function GET(req) {
                 const userData = rankedUsers.map(async user => {
                     let winnerStatus = "TBD";
                     if (game.winner) {
-                        winnerStatus = (game.winner === user.user_id) ? "Won" : "Lost";
+                        winnerStatus = (game.winner === user.user_id) ? "Won 1st prize" : "Lost";
+                    }
+                    if (game.winner_2nd) {
+                        winnerStatus = (game.winner_2nd === user.user_id) ? "Won 2nd prize" : "Lost";
                     }
 
                     responseData.push({
@@ -116,7 +111,6 @@ export async function GET(req) {
             }
 
             if (type === 'game') {
-                // Select only the top player
                 const topPlayer = rankedUsers[0] || null;
 
                 let winnerStatus = "TBD";

@@ -40,7 +40,6 @@ export default function Page({ params }) {
     axios
       .get(`/api/trivia/game/${params.id}`)
       .then((response) => {
-        // console.log(response.data);
         setGameData(response.data);
       })
       .catch((e) => {

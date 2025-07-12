@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
     }
     const rootUser = rootRows[0];
 
-    // Recursive query to get all referrals below the user
+    
     const referralQuery = `
       WITH RECURSIVE referral_tree AS (
         SELECT 
@@ -54,31 +54,31 @@ export async function GET(req, { params }) {
     `;
     const { rows: referralRows } = await query(referralQuery, [id]);
 
-    // Build tree structure
+    
     const buildReferralTree = (data, rootId, rootInfo) => {
       const nodes = {};
       const tree = {
         name: rootInfo.name || "You",
         attributes: {
           email: rootInfo.email || "",
-          referrals: rootInfo.referrals ?? 0, // default to 0 if null or undefined
+          referrals: rootInfo.referrals ?? 0, 
         },
         children: [],
       };
 
-      // Initialize all nodes
+      
       data.forEach(user => {
         nodes[user.id] = {
           name: user.name,
           attributes: {
             email: user.email,
-            referrals: user.referrals ?? 0, // default to 0 if null or undefined
+            referrals: user.referrals ?? 0, 
           },
           children: [],
         };
       });
 
-      // Build hierarchy
+      
       data.forEach(user => {
         if (user.referrer_id === Number(rootId)) {
           tree.children.push(nodes[user.id]);

@@ -10,7 +10,7 @@ export async function GET(req, { params }) {
         return NextResponse.json({ message: "Game ID and User ID are required" }, { status: 400 });
       }
   
-      // Fetch game details
+      
       const gameResult = await query(
         "SELECT * FROM trivia_game_enrollment WHERE game_id = $1 AND user_id = $2",
         [gid, id]
@@ -22,7 +22,7 @@ export async function GET(req, { params }) {
   
       const gameDetails = gameResult.rows[0];
   
-      // Fetch all questions for the game
+      
       const questionsResult = await query(
         "SELECT * FROM trivia_questions WHERE game_id = $1",
         [gid]

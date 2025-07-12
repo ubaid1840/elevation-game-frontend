@@ -13,7 +13,6 @@ export async function GET() {
       return NextResponse.json([], { status: 200 });
     }
 
-    // Fetch elevator winnings per user
     const elevatorResult = await query(
       `SELECT user_id, SUM(amount) AS elevator_winning
      FROM transactions
@@ -25,7 +24,6 @@ export async function GET() {
       elevatorResult.rows.map(row => [row.user_id, parseFloat(row.elevator_winning) || 0])
     );
 
-    // Fetch trivia winnings per user
     const triviaResult = await query(
       `SELECT user_id, SUM(amount) AS trivia_total
      FROM transactions
@@ -37,7 +35,6 @@ export async function GET() {
       triviaResult.rows.map(row => [row.user_id, parseFloat(row.trivia_total) || 0])
     );
 
-    // Append elevator and trivia winnings to each user
     const enrichedUsers = users.map(user => ({
       ...user,
       elevator_winning: elevatorMap[user.id] || 0,

@@ -5,7 +5,6 @@ export async function GET(req, { params }) {
   const { id } = params;
 
   try {
-    // Fetch the game by its game_id
     const gameResult = await pool.query(
       `SELECT 
         g.id,
@@ -15,7 +14,8 @@ export async function GET(req, { params }) {
         g.level, 
         g.deadline,
         g.prize_amount, 
-        g.winner, 
+        g.winner,
+        g.winner_2nd, 
         g.created_by, 
         g.roundinstruction,
         g.spots_remaining,
@@ -31,25 +31,22 @@ export async function GET(req, { params }) {
       return NextResponse.json({}, { status: 200 });
     }
 
-    // Replace created_by (user_id) with the user's name
     const creatorResult = await pool.query(
       `SELECT name FROM users WHERE id = $1`,
       [game.created_by]
     );
     game.created_by_name = creatorResult.rows[0]?.name || 'Unknown';
 
-    // Replace additional_judges (array of IDs) with names
     const judgeNames = [];
     for (const judgeId of game.additional_judges) {
       const judgeResult = await pool.query(
         `SELECT name FROM users WHERE id = $1`,
-        [parseInt(judgeId)] // Ensure ID is an integer
+        [parseInt(judgeId)] 
       );
       judgeNames.push(judgeResult.rows[0]?.name || 'Unknown');
     }
     game.additional_judges_names = judgeNames;
 
-    // Check if there is a winner and replace winner ID with winner's name
     if (game.winner) {
       const winnerResult = await pool.query(
         `SELECT name FROM users WHERE id = $1`,
@@ -58,7 +55,14 @@ export async function GET(req, { params }) {
       game.winner_name = winnerResult.rows[0]?.name || 'Unknown';
     }
 
-    // Fetch game_enrollments for the current game
+    if(game.winner_2nd){
+       const winnerResult = await pool.query(
+        `SELECT name FROM users WHERE id = $1`,
+        [game.winner_2nd]
+      );
+      game.winner_2nd_name = winnerResult.rows[0]?.name || 'Unknown';
+    }
+
     const enrollmentsResult = await pool.query(
       `SELECT ge.user_id, ge.status
        FROM game_enrollments ge
@@ -68,7 +72,6 @@ export async function GET(req, { params }) {
 
     const enrollments = enrollmentsResult.rows;
 
-    // Replace user_id in enrollments with user names
     for (const enrollment of enrollments) {
       const userResult = await pool.query(
         `SELECT name, email FROM users WHERE id = $1`,
@@ -78,7 +81,6 @@ export async function GET(req, { params }) {
       enrollment.user_name = user?.name || 'Unknown';
       enrollment.user_email = user?.email || "Unknown"
 
-      // Fetch pitches associated with this user
       const pitchResult = await pool.query(
         `SELECT p.id AS pitch_id, p.user_id AS pitch_user_id, p.status AS pitch_status, p.video_link, p.score, p.round, p.scores
          FROM pitches p
@@ -89,7 +91,6 @@ export async function GET(req, { params }) {
 
       const pitches = pitchResult.rows;
 
-      // For each pitch, fetch associated comments
       for (const pitch of pitches) {
         const commentResult = await pool.query(
           `SELECT c.comment_text, c.created_at, c.user_id AS commented_by
@@ -100,7 +101,6 @@ export async function GET(req, { params }) {
 
         const comments = commentResult.rows;
 
-        // Replace user_id in comments with user names
         for (const comment of comments) {
           const userResult = await pool.query(
             `SELECT name FROM users WHERE id = $1`,
@@ -113,11 +113,9 @@ export async function GET(req, { params }) {
         pitch.comments = comments;
       }
 
-      // Attach pitches to the enrollment object
       enrollment.pitches = pitches;
     }
 
-    // Attach the enrollments data to the game object
     game.enrollments = enrollments;
 
     return NextResponse.json(game, { status: 200 });
