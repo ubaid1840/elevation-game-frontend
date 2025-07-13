@@ -17,7 +17,7 @@ import {
   Stack,
   Text,
   useToast,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -38,7 +38,7 @@ export default function Page({ params }) {
 
   async function fetchData() {
     axios
-      .get(`/api/trivia/game/${params.id}`) 
+      .get(`/api/trivia/game/${params.id}`)
       .then((response) => {
         setGameData(response.data);
       })
@@ -67,9 +67,7 @@ export default function Page({ params }) {
         <GameCard gameDetailData={gameData} instructions={instructions} />
         <Leaderboard
           enrollments={gameData?.enrollments || []}
-          totalQuestions={
-            gameData?.questions ? gameData?.questions.length : 0
-          }
+          totalQuestions={gameData?.questions ? gameData?.questions.length : 0}
         />
       </Flex>
       <Divider my={4} />
@@ -89,8 +87,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
       </Heading>
 
       <Box gap={2} display={"flex"} flexDir={"column"}>
-
-      {instructions.length > 0 && (
+        {instructions.length > 0 && (
           <>
             <Text fontSize="md">
               <strong>Game Instructions:</strong>
@@ -104,7 +101,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
             </VStack>
           </>
         )}
-        
+
         <Text fontWeight="bold">
           Prize:{" "}
           <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
@@ -112,14 +109,18 @@ const GameCard = ({ gameDetailData, instructions }) => {
         <Text fontWeight="bold">
           Winner:{" "}
           {gameDetailData?.game?.winner_id ? (
-            <Badge colorScheme="purple">{gameDetailData?.game?.winner_name}</Badge>
+            <Badge colorScheme="purple">
+              {gameDetailData?.game?.winner_name}
+            </Badge>
           ) : (
             "TBA"
           )}
         </Text>
         <Text fontWeight="bold">
           Created By:{" "}
-          <Badge colorScheme="blue">{gameDetailData?.game?.created_by_name}</Badge>
+          <Badge colorScheme="blue">
+            {gameDetailData?.game?.created_by_name}
+          </Badge>
         </Text>
         <Text fontWeight="bold">
           Category: {gameDetailData?.game?.category}
@@ -142,15 +143,12 @@ const GameCard = ({ gameDetailData, instructions }) => {
         <Text fontWeight="bold">
           Total Participants: {gameDetailData?.game?.total_participants}
         </Text>
-
-      
       </Box>
     </Box>
   );
 };
 
 const UserResultsAccordion = ({ enrollments, questions }) => {
-
   return (
     <>
       <Text fontWeight={"bold"} fontSize={"2xl"} color="purple.500" my={2}>
@@ -159,13 +157,13 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
       <Accordion allowMultiple>
         {enrollments.map((enrollment) => {
           const { user_name, progress, user_email } = enrollment;
-        
+
           return (
             <AccordionItem key={enrollment.id}>
               <h2>
                 <AccordionButton m={2}>
                   <Flex flex="1" textAlign="left" alignItems={"center"}>
-                    <RenderProfilePicture email={user_email} name={user_name}/>
+                    <RenderProfilePicture email={user_email} name={user_name} />
                     <Text ml={2}>{user_name || "Unknown User"}</Text>
                   </Flex>
                   <AccordionIcon />
@@ -245,20 +243,21 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
 const Leaderboard = ({ enrollments, totalQuestions }) => {
   const sortedUsers = enrollments
     .map((enrollment) => {
-      const correctAnswers = enrollment?.progress?.filter(
-        (p) => p.isCorrect
-      ).length;
-      const totalTime = enrollment?.progress?.reduce(
+      const progress = Array.isArray(enrollment.progress)
+        ? enrollment.progress
+        : [];
+
+      const correctAnswers = progress.filter((p) => p.isCorrect).length;
+      const totalTime = progress.reduce(
         (acc, curr) => acc + Number(curr.time_taken || 0),
         0
       );
-    
 
       return {
         user_name: enrollment.user_name || "Unknown User",
         correctAnswers,
         totalQuestions,
-        totalTime,
+        totalTime : totalTime.toFixed(4),
       };
     })
     .sort(
@@ -305,7 +304,7 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
                 </Badge>
 
                 <Badge colorScheme="blue" px={3} py={1} borderRadius="md">
-                  ⏱ {user.totalTime && user.totalTime.toFixed(4)} sec
+                  ⏱ {user.totalTime && user.totalTime} sec
                 </Badge>
               </Flex>
             )

@@ -45,7 +45,7 @@ export default function PublicGameTrivia({ game }) {
 
 
     return (
-game &&
+        game &&
         <Box p={8} minH="100vh">
             <Flex flexWrap={"wrap"} justify={"space-between"}>
                 <GameCard gameDetailData={game} instructions={instructions} />
@@ -74,7 +74,7 @@ game &&
 
 
 const GameCard = ({ gameDetailData, instructions }) => {
-  
+
     return (
         <Box p={6} borderRadius="md" mb={2}>
             <Heading mb={4} color="purple.400">
@@ -142,20 +142,21 @@ const GameCard = ({ gameDetailData, instructions }) => {
 const Leaderboard = ({ enrollments, totalQuestions }) => {
     const sortedUsers = enrollments
         .map((enrollment) => {
-            const correctAnswers = enrollment?.progress?.filter(
-                (p) => p.isCorrect
-            ).length;
-            const totalTime = enrollment?.progress?.reduce(
+            const progress = Array.isArray(enrollment.progress)
+                ? enrollment.progress
+                : [];
+
+            const correctAnswers = progress.filter((p) => p.isCorrect).length;
+            const totalTime = progress.reduce(
                 (acc, curr) => acc + Number(curr.time_taken || 0),
                 0
             );
-
 
             return {
                 user_name: enrollment.user_name || "Unknown User",
                 correctAnswers,
                 totalQuestions,
-                totalTime,
+                totalTime: totalTime.toFixed(4),
             };
         })
         .sort(

@@ -241,22 +241,23 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
 };
 
 const Leaderboard = ({ enrollments, totalQuestions }) => {
-  const sortedUsers = enrollments
+ const sortedUsers = enrollments
     .map((enrollment) => {
-      const correctAnswers = enrollment?.progress?.filter(
-        (p) => p.isCorrect
-      ).length;
-      const totalTimeTaken = enrollment?.progress?.reduce(
-        (acc, p) => acc + (Number(p.timeTaken) || 0),
+      const progress = Array.isArray(enrollment.progress)
+        ? enrollment.progress
+        : [];
+
+      const correctAnswers = progress.filter((p) => p.isCorrect).length;
+      const totalTime = progress.reduce(
+        (acc, curr) => acc + Number(curr.time_taken || 0),
         0
       );
-      const totalTime = (totalTimeTaken / 1000).toFixed(2);
 
       return {
         user_name: enrollment.user_name || "Unknown User",
         correctAnswers,
         totalQuestions,
-        totalTime,
+        totalTime : totalTime.toFixed(4),
       };
     })
     .sort(
@@ -303,7 +304,7 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
                 </Badge>
 
                 <Badge colorScheme="blue" px={3} py={1} borderRadius="md">
-                  ⏱ {user.totalTime && user.totalTime.toFixed(4)} sec
+                  ⏱ {user.totalTime && user.totalTime} sec
                 </Badge>
               </Flex>
             )

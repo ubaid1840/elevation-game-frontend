@@ -1,26 +1,52 @@
 const { VStack, Image, Box, Text } = require("@chakra-ui/react")
 
 
-const CategoryCard = ({title, spots, grandPrize}) => {
+const CategoryCard = ({ title, spots, grandPrize }) => {
+  return (
+    <VStack
+      align="center"
+      spacing={0}
+      w={{base : "100%", lg : "400px"}}
+      borderRadius="md"
+      boxShadow="lg"
+    >
+      <Box
+        w="100%"
+        h={{ base: "80px", md: "100px" }}
+        bg="purple.800"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Text
+          color="white"
+          fontSize={{ base: "lg", md: "xl" }}
+          fontWeight="600"
+          textAlign="center"
+        >
+          {title}
+        </Text>
+      </Box>
 
-    return (
-        <VStack align={'center'} mx={10} w={'300px'} gap={0}>
-       <Box w={'100%'} h={'100px'} bg={'purple.800'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
-       <Text color={'white'} fontSize={'xl'} fontWeight={'600'}>
-                {title}
-            </Text>
-       </Box>
-
-        <Box w={'100%'} h={'80px'} bg={'white'} display={'flex'} flexDir={'column'} alignItems={'center'} justifyContent={'center'}>
-            <Text fontSize={'md'} fontWeight={'700'}>
-                Spots Remaining: {spots}
-            </Text>
-            <Text fontSize={'md'} fontWeight={'700'}>
-                Grand Prize: {grandPrize}
-            </Text>
-        </Box>
-</VStack>
-    )
-}
-
+      <Box
+        w="100%"
+        h={{ base: "80px", md: "100px" }}
+        bg="white"
+        display="flex"
+        flexDir="column"
+        alignItems="center"
+        justifyContent="center"
+        px={4}
+        textAlign="center"
+      >
+        <Text fontSize={{ base: "sm", md: "md" }} fontWeight="700">
+          Spots Remaining: {spots}
+        </Text>
+        <Text fontSize={{ base: "sm", md: "md" }} fontWeight="700">
+          Grand Prize: {grandPrize}
+        </Text>
+      </Box>
+    </VStack>
+  );
+};
 export default CategoryCard

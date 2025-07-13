@@ -1,34 +1,28 @@
 "use client";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
-import Sidebar from "@/components/sidebar";
 import Pagination from "@/components/ui/Pagination";
 import { UserContext } from "@/store/context/UserContext";
-import GetLinkItems from "@/utils/SideBarItems";
 import {
   Box,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Divider,
-  Badge,
-  useBreakpointValue,
-  Tooltip,
   Button,
+  Heading,
+  HStack,
+  Icon,
   Input,
   Spinner,
   Switch,
-  Icon,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
+import { IoIosArrowRoundDown, IoIosArrowRoundUp } from "react-icons/io";
 
 export default function Page() {
   const { state: UserState } = useContext(UserContext);

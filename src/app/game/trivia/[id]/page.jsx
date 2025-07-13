@@ -4,24 +4,23 @@ import { headers } from "next/headers";
 
 export async function generateMetadata({ params, searchParams }, parent) {
   const headerList = headers();
-  const {time, correct, question, referral} = searchParams
+  const { time, correct, question, referral } = searchParams;
   let pathname = headerList.get("x-current-path-elevation");
- 
 
   const response = await axios.get(`${pathname}/api/trivia/game/${params.id}`);
   const game = response.data;
 
-  let description
+  let description;
 
-  if(referral){
-    description = `Gave correct answers ${correct} out of ${question} in ${time} sec. Join now using my referral code - ${referral} and win exciting prizes.`
+  if (referral) {
+    description = `Gave correct answers ${correct} out of ${question} in ${time} sec. Join now using my referral code - ${referral} and win exciting prizes.`;
   } else {
-    description = `Join and win exciting prizes`
+    description = `Join and win exciting prizes`;
   }
 
   return {
     title: `${game?.game?.title || "Game Details"}`,
-    description:  description,
+    description: description,
     openGraph: {
       images: [
         {
@@ -37,14 +36,9 @@ export async function generateMetadata({ params, searchParams }, parent) {
 export default async function Page({ params }) {
   const headerList = headers();
   const pathname = headerList.get("x-current-path-elevation");
- 
+
   const response = await axios.get(`${pathname}/api/trivia/game/${params.id}`);
   const game = response.data;
 
-  
-
-  return (
-    <PublicGameTrivia game={game} />
-  )
-
+  return <PublicGameTrivia game={game} />;
 }
