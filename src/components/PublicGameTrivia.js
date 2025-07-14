@@ -42,32 +42,42 @@ export default function PublicGameTrivia({ game }) {
         return unsubscribe;
     }, [])
 
+    console.log(Object.keys(game).length)
+
 
 
     return (
-        game &&
-        <Box p={8} minH="100vh">
-            <Flex flexWrap={"wrap"} justify={"space-between"}>
-                <GameCard gameDetailData={game} instructions={instructions} />
-                <Leaderboard
-                    enrollments={game?.enrollments || []}
-                    totalQuestions={
-                        game?.questions ? game?.questions.length : 0
-                    }
-                />
-            </Flex>
-            <Button
-                _hover={{ textDecoration: "none", opacity: 0.7 }}
-                href={!user ? "/signup" : "/login"}
-                as={Link}
-                colorScheme="teal"
-                isDisabled={!game}
-                mt={6}
-                width="100%"
-            >
-                {!user ? "Sign up" : "Dashboard"}
-            </Button>
-        </Box>
+        game.hasOwnProperty('game') && Object.keys(game?.game).length !== 0 ?
+            <Box p={8} minH="100vh">
+                <Flex flexWrap={"wrap"} justify={"space-between"}>
+                    <GameCard gameDetailData={game} instructions={instructions} />
+                    <Leaderboard
+                        enrollments={game?.enrollments || []}
+                        totalQuestions={
+                            game?.questions ? game?.questions.length : 0
+                        }
+                    />
+                </Flex>
+                <Button
+                    _hover={{ textDecoration: "none", opacity: 0.7 }}
+                    href={!user ? "/signup" : "/login"}
+                    as={Link}
+                    colorScheme="teal"
+                    mt={6}
+                    width="100%"
+                >
+                    {!user ? "Sign up" : "Dashboard"}
+                </Button>
+            </Box>
+            :
+
+            <Box p={8} minH="100vh" minW={'100vw'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                <Heading mb={4} color="purple.400">
+                    This game is no longer available or has been removed by the administrator.
+                </Heading>
+
+            </Box>
+
 
     )
 }
