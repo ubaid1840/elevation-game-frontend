@@ -20,7 +20,7 @@ export async function POST(req) {
             sourceId: token,
             amountMoney: {
                 currency: 'USD',
-                amount: BigInt(localAmount)
+                amount: BigInt(localAmount * 100)
             },
             note: note,
         })
