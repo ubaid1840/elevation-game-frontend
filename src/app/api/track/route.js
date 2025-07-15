@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 
 export async function POST(req) {
-    return NextResponse.json({ message: "Visit logged successfully" }, { status: 201 });
+    // return NextResponse.json({ message: "Visit logged successfully" }, { status: 201 });
     try {
         const { pathname, userAgent, ipAddress } = await req.json();
         if(pathname.includes(".png") || pathname.includes(".jpg") || pathname.includes(".jpeg")){
