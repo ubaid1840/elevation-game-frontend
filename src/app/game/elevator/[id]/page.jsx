@@ -41,6 +41,7 @@ export default async function Page({ params }) {
     const response = await axios.get(`${pathname}/api/games/${params.id}`);
     game = response.data;
   } catch (error) {
+    console.log(error)
     console.log("Game not found or has been removed");
   }
 

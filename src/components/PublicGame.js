@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/app/loading";
 import { auth } from "@/config/firebase";
 import {
     Box,
@@ -11,6 +12,7 @@ import {
     Badge,
     Link,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 
@@ -30,6 +32,8 @@ export default function PublicGame({ game }) {
 
         return unsubscribe;
     }, [])
+
+
 
     function formatYouTubeURL(url) {
         if (url.includes("youtu.be")) {

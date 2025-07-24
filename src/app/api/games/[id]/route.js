@@ -60,8 +60,9 @@ export async function GET(req, { params }) {
 
     const prize_amount = pricePerSpot * Number(game.total_spots);
     game.prize_amount = prize_amount;
-    game.first_prize = Number((prize_amount  * 0.3).toFixed(2))
+    game.first_prize = Number((prize_amount  * 0.3).toFixed(2)) 
     game.second_prize = Number((prize_amount * 0.1).toFixed(2))
+    game.prize_amount = game.first_prize
 
     return NextResponse.json(game, { status: 200 });
   } catch (error) {
