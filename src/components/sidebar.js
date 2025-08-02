@@ -2,6 +2,7 @@
 
 import { theme } from "@/data/data";
 import {
+    Badge,
     Box,
     Button,
     Center,
@@ -193,13 +194,6 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
             <Flex
                 w={'100%'}
                 flexDir={'column'}>
-                {/* <NavItem
-                    icon={IoIosNotificationsOutline}
-                    path={`/notifications`}
-                >
-                    {t('notifications')}
-                </NavItem>
-                */}
 
                 <Divider color={'#EAECF0'} width={'250px'} alignSelf={'center'} />
                 {UserState.value.data?.email &&
@@ -356,9 +350,11 @@ const NavItem = ({ icon, children, path, isActive, haveNotifications, onClose, .
                         )}
                         {children}
                         {haveNotifications !== 0 &&
-                            <Center ml={2} bg={'red'} borderRadius={'full'} w={'20px'} h={'20px'}>
-                                <Text color={'white'} fontSize={'12px'}>{haveNotifications}</Text>
-                            </Center>}
+                            <Badge colorScheme="red" borderRadius={8} ml={1}>{haveNotifications}</Badge>
+                            // <Center ml={2} bg={'red'} borderRadius={'full'} w={'20px'} h={'20px'}>
+                            //     <Text color={'white'} fontSize={'12px'}>{}</Text>
+                            // </Center>
+                        }
                     </Flex>
 
                 </>

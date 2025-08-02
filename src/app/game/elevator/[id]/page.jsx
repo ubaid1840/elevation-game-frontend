@@ -12,7 +12,7 @@ export async function generateMetadata({ params }) {
     const game = response.data;
 
     return {
-      title: game.title || "Game Details",
+      title: game?.title ? `Search for ${game.title}` : "Game Details",
       description: `Win a grand prize of $${game.prize_amount}. Deadline: ${moment(game.deadline).format("MM/DD/YYYY")}`,
       openGraph: {
         images: [

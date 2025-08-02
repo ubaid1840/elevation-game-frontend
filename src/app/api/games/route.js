@@ -1,4 +1,5 @@
 import pool, { query } from '@/lib/db';
+import { sendSingleEmail } from '@/lib/notificationService';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -72,11 +73,38 @@ export async function POST(req) {
       ]
     );
 
+    if (additional_judges && Array.isArray(additional_judges) && additional_judges.length > 0) {
+      additional_judges.map((id) =>
+        sendSingleEmail(
+          `
+          Hello,
+
+          You have been assigned as a *Critique Judge* in the Elevator Game: "${title}".
+          Please log in to your dashboard to view the entries and begin your evaluation.
+          Make sure to follow the judging guidelines and complete your reviews before the deadline.
+
+          Thank you for your contribution.
+
+          Best regards,  
+          The Elevator Game Team
+          `.trim(),
+          "You've been assigned as a Critique Judge",
+          id
+        )
+      );
+    }
+
+
+
+
+
     return NextResponse.json(newGame.rows[0], { status: 201 });
   } catch (error) {
     console.error('Error creating game:', error);
     return NextResponse.json({ message: 'Error creating game', error: error.message }, { status: 500 });
   }
 }
+
+
 
 export const revalidate = 0;

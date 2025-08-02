@@ -15,14 +15,14 @@ const transporter = nodemailer.createTransport({
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
 export const sendBulkNotifications = async (message, subject, type) => {
-  
+
   try {
-    
+
     const users = await query('SELECT email, phone FROM users');
 
-    
+
     if (type === 'email') {
-      
+
       const emailPromises = users.rows.map(user => {
         return transporter.sendMail({
           from: process.env.BULK_EMAIL_USER,
@@ -37,7 +37,7 @@ export const sendBulkNotifications = async (message, subject, type) => {
       await Promise.all(emailPromises);
       console.log('All emails sent successfully');
     } else if (type === 'sms') {
-      
+
       const smsPromises = users.rows.map(user => {
         if (user.phone) {
           return twilioClient.messages.create({
@@ -57,6 +57,29 @@ export const sendBulkNotifications = async (message, subject, type) => {
     }
   } catch (error) {
     console.error('Error in sending bulk notifications:', error);
+  }
+};
+
+
+export const sendSingleEmail = async (message, subject, id) => {
+  try {
+    const usersQuery = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [id]);
+    const user = usersQuery.rows[0];
+
+    if (user?.email) {
+      await transporter.sendMail({
+        from: process.env.BULK_EMAIL_USER,
+        to: user.email,
+        subject,
+        text: message,
+      });
+
+      console.log(`Email sent successfully to ${user.email}`);
+    } else {
+      console.log(`User with id ${id} not found or missing email.`);
+    }
+  } catch (error) {
+    console.log('Error in sending email:', error);
   }
 };
 

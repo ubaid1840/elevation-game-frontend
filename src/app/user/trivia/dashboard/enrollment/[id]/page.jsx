@@ -25,6 +25,8 @@ import {
   ModalBody,
   ModalFooter,
   Spinner,
+  useDisclosure,
+  Checkbox,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { UserContext } from "@/store/context/UserContext";
@@ -38,18 +40,11 @@ export default function Page({ params }) {
   const toast = useToast();
 
   const [gameDetailData, setGameDetailData] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [progress, setProgress] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [checked, setChecked] = useState(false);
   const [instructions, setInstructions] = useState([]);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -195,8 +190,7 @@ export default function Page({ params }) {
         <Divider my={4} />
         {gameDetailData?.game && (
           <Button
-            isLoading={loading}
-            onClick={() => handleEnroll()}
+            onClick={() => onOpen()}
             colorScheme="blue"
             disabled={
               gameDetailData.game.spots_remaining === 0 ||
@@ -207,6 +201,64 @@ export default function Page({ params }) {
           </Button>
         )}
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Pre-Start Confirmation</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack
+              spacing={5}
+              p={6}
+            >
+              <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+                Please confirm you understand:
+              </Text>
+
+              <Stack spacing={3} pl={4}>
+                <Text color="gray.700">
+                  1. ✔️ Winner is based on accuracy (most correct answers)
+                </Text>
+                <Text color="gray.700">
+                  2. ⏱️ Time matters — fastest time breaks ties
+                </Text>
+                <Text color="gray.700">3. 🚫 You only get one attempt</Text>
+                <Text color="gray.700">
+                  4. 🏁 Game ends when spots = 0, not the deadline
+                </Text>
+                <Text color="gray.700">
+                  5. 📊 Results are revealed only when the game officially ends
+                </Text>
+              </Stack>
+
+              <Checkbox
+                isChecked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+                colorScheme="blue"
+                size="md"
+              >
+                <Text color="gray.800">
+                  I understand and agree to the rules.
+                </Text>
+              </Checkbox>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              isLoading={loading}
+              isDisabled={!checked}
+              colorScheme="blue"
+              onClick={handleEnroll}
+            >
+              Continue
+            </Button>
+            <Button ml={3} onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

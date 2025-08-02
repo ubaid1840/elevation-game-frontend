@@ -7,11 +7,10 @@ import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CreditCard, PaymentForm } from "react-square-web-payments-sdk";
+import { CreditCard, PaymentForm, ApplePay, GooglePay, CashAppPay } from "react-square-web-payments-sdk";
 
 const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const router = useRouter()
-
     const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
     const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
     const [errorMessage, setErrorMessage] = useState()
@@ -158,12 +157,31 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                 cardTokenizeResponseReceived={async (token) => {
                     handlePayment(token.token);
                 }}
+                createPaymentRequest={() => ({
+                    countryCode: "US",
+                    currencyCode: "USD",
+                    total: {
+                        amount: amount.toString(),
+                        label: "Total",
+                    },
+                })}
             >
-                <CreditCard >
-                    <Box display={'flex'} flexDir={"row"} gap={2} alignItems={'center'} justifyContent={'center'}>
-                        {loading && <Spinner />}   <Text>{`${message ? message : `Pay $${amount}`}`}</Text>
-                    </Box>
-                </CreditCard>
+                <Flex flexDir={"column"} gap={2}>
+                    <CashAppPay />
+                    <ApplePay />
+                    <GooglePay />
+                    <CreditCard >
+                        <Box
+                            display={'flex'}
+                            flexDir={"row"}
+                            gap={2}
+                            alignItems={'center'}
+                            justifyContent={'center'}
+                        >
+                            {loading && <Spinner />}<Text>{`${message ? message : `Pay $${amount}`}`}</Text>
+                        </Box>
+                    </CreditCard>
+                </Flex>
             </PaymentForm>
             {errorMessage && <div>{errorMessage}</div>}
         </Box>

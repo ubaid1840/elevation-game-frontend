@@ -1,10 +1,11 @@
 import { useState } from "react"
 import Pagination from "./Pagination"
-import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch, Spinner, Icon, Text } from '@chakra-ui/react'
+import { Box, Table, Thead, Tr, Tbody, Th, Td, Button, HStack, Checkbox, Switch, Spinner, Icon, Text, IconButton } from '@chakra-ui/react'
 import { IoIosArrowRoundUp, IoIosArrowRoundDown } from "react-icons/io";
+import { EditIcon } from "@chakra-ui/icons";
 
 
-const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false, currentPage, setCurrentPage, loading=false }) => {
+const TableData = ({ data, columns, button = false, buttonText, onButtonClick, onSwitchClick, button2 = false, buttonText2, onButtonClick2, special = false, onClickRow, rowClickable = false, currentPage, setCurrentPage, loading = false, editButton = false, onEditClick = (val) => { } }) => {
 
     const [localData, setLocalData] = useState(data || [])
     const [sortOrder, setSortOrder] = useState("asc");
@@ -101,17 +102,33 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
                                             }}
                                             rowClickable={rowClickable}
                                         />
-                                    ))} 
+                                    ))}
 
-                                    {button && (
+
+
+                                    {(button || editButton || special || button2) && (
                                         <Td>
                                             <HStack>
-                                                <Button
-                                                    colorScheme="blue"
-                                                    onClick={() => onButtonClick(user.id)}
-                                                >
-                                                    {buttonText}
-                                                </Button>
+
+                                                {editButton && onEditClick &&
+
+                                                    <Button
+                                                        colorScheme="gray"
+                                                        onClick={() => onEditClick(user)}
+                                                    >
+                                                        Edit Referral
+                                                    </Button>
+                                                }
+
+                                                {button &&
+
+                                                    <Button
+                                                        colorScheme="blue"
+                                                        onClick={() => onButtonClick(user.id)}
+                                                    >
+                                                        {buttonText}
+                                                    </Button>
+                                                }
                                                 {special ? button2 && user?.role === 'user' &&
                                                     <Button
                                                         colorScheme="teal"
@@ -131,6 +148,7 @@ const TableData = ({ data, columns, button = false, buttonText, onButtonClick, o
 
                                         </Td>
                                     )}
+
                                 </Tr>
                             ))
                         ) : (

@@ -101,7 +101,7 @@ export default function Page() {
       axios
         .post("/api/games", data)
         .then(async () => {
-          await addDoc(collection(db, "notifications"), {
+          addDoc(collection(db, "notifications"), {
             to: "admin@gmail.com",
             title: "Game created",
             message: `${
@@ -392,7 +392,6 @@ export default function Page() {
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        {/* <ModalOverlay /> */}
         <ModalContent>
           <ModalHeader>Add New Category</ModalHeader>
           <ModalCloseButton />

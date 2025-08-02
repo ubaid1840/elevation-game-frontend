@@ -1,33 +1,31 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import TableData from "@/components/ui/TableData";
 import {
   Box,
-  Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Input,
   Button,
+  Center,
+  FormLabel,
+  Heading,
+  Input,
+  ListItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
+  Spinner,
   Stack,
-  VStack,
   Text,
   UnorderedList,
-  ListItem,
-  Flex,
-  Icon,
-  Center,
-  Spinner,
+  useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
 import moment from "moment";
-import TableData from "@/components/ui/TableData";
-import Loading from "@/app/loading";
+import { useCallback, useEffect, useState } from "react";
 
 const UserManagement = () => {
   const [filter, setFilter] = useState("");
@@ -36,6 +34,10 @@ const UserManagement = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newReferral, setNewReferral] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -112,9 +114,15 @@ const UserManagement = () => {
       });
   }
 
+  function handleRowClick(val) {
+    setNewReferral(val.referral_code);
+    setSelectedUser(val);
+  }
+
   const RenderTable = useCallback(() => {
     return (
       <TableData
+      
         special={true}
         data={filteredUsers.map((item) => {
           return {
@@ -122,6 +130,7 @@ const UserManagement = () => {
             name: item.name,
             email: item.email,
             role: item.role,
+            referral_code: item.referral_code,
             last_active: item.last_active
               ? moment(new Date(item.last_active)).format("MM/DD/YYYY hh:mm A")
               : "",
@@ -132,9 +141,9 @@ const UserManagement = () => {
           { key: "name", value: "Name" },
           { key: "email", value: "Email" },
           { key: "role", value: "Role" },
+          { key: "referral_code", value: "Referral Code" },
           { key: "last_active", value: "Last Active" },
           { key: "active", value: "Active" },
-          
         ]}
         button={true}
         buttonText={"View Logs"}
@@ -153,6 +162,8 @@ const UserManagement = () => {
         }}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
+        editButton={true}
+        onEditClick={handleRowClick}
       />
     );
   }, [filteredUsers]);
@@ -164,6 +175,27 @@ const UserManagement = () => {
       </Center>
     );
   };
+
+  async function handleSaveNewReferral() {
+    const id = selectedUser?.id;
+    if (!id) return;
+    setReferralLoading(true);
+    axios
+      .put(`/api/users/${selectedUser?.id}`, {
+        referral_code: newReferral,
+      })
+      .then(() => {
+        setUsers((prevState) =>
+          prevState.map((item) =>
+            item.id === id ? { ...item, referral_code: newReferral } : item
+          )
+        );
+        setSelectedUser(null);
+      })
+      .finally(() => {
+        setReferralLoading(false);
+      });
+  }
 
   return (
     <>
@@ -207,6 +239,39 @@ const UserManagement = () => {
 
           {/* Activity Logs Section (optional) */}
           <LogsSection logs={logs} />
+
+          <Modal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Edit Referral</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Stack spacing={2}>
+                  <FormLabel mb={0}>Name</FormLabel>
+                  <Input value={selectedUser?.name || ""} disabled />
+
+                  <FormLabel mb={0}>Email</FormLabel>
+                  <Input value={selectedUser?.email || ""} disabled />
+                  <FormLabel mb={0}>Referral Code</FormLabel>
+                  <Input
+                    placeholder="Enter referral code"
+                    value={newReferral}
+                    onChange={(e) =>
+                      setNewReferral(e.target.value?.toUpperCase())
+                    }
+                  />
+                </Stack>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="blue" onClick={handleSaveNewReferral}>
+                  {referralLoading && <Spinner size={'sm'} mr={1} />} Save
+                </Button>
+                <Button ml={3} onClick={() => setSelectedUser(null)}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </Box>
       )}
     </>
@@ -229,6 +294,6 @@ const LogsSection = ({ logs }) => {
       </UnorderedList>
     </VStack>
   );
-}
+};
 
 export default UserManagement;

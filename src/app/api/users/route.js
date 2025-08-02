@@ -11,7 +11,7 @@ export async function GET(req) {
   const role = searchParams.get('role');
 
   try {
-    const users = await query('SELECT id, name, email, role, last_active, schedule, active, waiver_start FROM users WHERE role = $1', [role]);
+    const users = await query('SELECT id, name, email, referral_code, role, last_active, schedule, active, waiver_start FROM users WHERE role = $1', [role]);
 
     const usersWithWaiverStatus = users.rows.map((eachUser) => {
       let hasActiveWaiver = false;

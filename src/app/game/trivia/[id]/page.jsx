@@ -19,7 +19,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
   }
 
   return {
-    title: `${game?.game?.title || "Game Details"}`,
+    title: game?.game?.title ? `Search for ${game.game.title}` : "Game Details",
     description: description,
     openGraph: {
       images: [

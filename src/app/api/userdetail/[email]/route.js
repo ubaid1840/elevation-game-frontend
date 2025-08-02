@@ -4,6 +4,7 @@ import moment from 'moment';
 
 export async function GET(req, { params }) {
     try {
+
         const { email } = await params;
 
         if (!email) {

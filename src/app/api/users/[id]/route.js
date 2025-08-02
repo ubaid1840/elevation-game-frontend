@@ -15,7 +15,7 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   const { id } = await params;
-  const { name, phone, status, role } = await req.json();
+  const { name, phone, status, role, referral_code } = await req.json();
   const searchParams = req.nextUrl.searchParams
   const checkwaiver = searchParams.get('checkwaiver')
 
@@ -80,6 +80,19 @@ export async function PUT(req, { params }) {
       );
 
       return NextResponse.json(updatedUser.rows[0], { status: 200 });
+    }
+
+    if (referral_code) {
+      await query(
+        'UPDATE users SET referral_code = $1, last_active = $2 WHERE id = $3',
+        [referral_code, new Date(), id]
+      );
+
+      await query(
+        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+        [id, 'User referral code updated']
+      );
+         return NextResponse.json({}, { status: 200 });
     }
 
 
