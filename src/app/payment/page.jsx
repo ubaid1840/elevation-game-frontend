@@ -10,11 +10,10 @@ import {
   Heading,
   Spinner,
   Text,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
-
 
 export default function Page() {
   const [packages, setPackages] = useState([]);
@@ -62,7 +61,6 @@ export default function Page() {
     });
   }
 
- 
   async function handlePackageSelect(pkg) {
     setSelectedPlan(pkg.label);
     setAmount(pkg.price);
@@ -70,7 +68,7 @@ export default function Page() {
 
   const RenderCheckout = useCallback(() => {
     return (
-      <Box maxW={"500px"} mt={10}>
+      <Center mt={10}>
         {amount && UserState.value.data?.email && selectedPlan && (
           <SquareCheckout
             amount={amount}
@@ -78,7 +76,7 @@ export default function Page() {
             plan={selectedPlan}
           />
         )}
-      </Box>
+      </Center>
     );
   }, [amount]);
 
@@ -102,7 +100,6 @@ export default function Page() {
             gap={6}
           >
             {packages.map((pkg) => (
-            
               <Box
                 key={pkg.label}
                 borderWidth="1px"

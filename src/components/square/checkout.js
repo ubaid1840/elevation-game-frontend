@@ -1,7 +1,7 @@
 "use client"
 
 import { db } from "@/config/firebase";
-import { Box, Spinner, Text, useToast } from "@chakra-ui/react";
+import { Box, Flex, Spinner, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
@@ -149,43 +149,77 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
         }, 3000);
     }
 
-    return (
-        <Box display={'flex'} flexDir={'column'} gap={2}>
-            <PaymentForm
-                applicationId={appId}
-                locationId={locationId}
-                cardTokenizeResponseReceived={async (token) => {
-                    handlePayment(token.token);
-                }}
-                createPaymentRequest={() => ({
-                    countryCode: "US",
-                    currencyCode: "USD",
-                    total: {
-                        amount: amount.toString(),
-                        label: "Total",
-                    },
-                })}
+  return (
+  <Flex
+  w={'100%'}
+    align="center"
+    justify="center"
+    px={2}
+  >
+    <Box
+      w="full"
+      maxW="md"
+      bg="white"
+      p={6}
+      borderRadius="lg"
+    >
+      <PaymentForm
+        applicationId={appId}
+        locationId={locationId}
+        cardTokenizeResponseReceived={async (token) => {
+          handlePayment(token.token);
+        }}
+        createPaymentRequest={() => ({
+          countryCode: "US",
+          currencyCode: "USD",
+          total: {
+            amount: amount.toString(),
+            label: "Total",
+          },
+        })}
+      >
+        <Flex flexDir="column" gap={4}>
+          <Box
+            bg="yellow.100"
+            color="gray.800"
+            p={2}
+            borderRadius="md"
+            textAlign="center"
+            fontSize="sm"
+          >
+            ⚠️ Apple Pay works only on Apple devices
+          </Box>
+
+          <CashAppPay width="full" />
+          <ApplePay />
+          <GooglePay />
+
+          <CreditCard>
+            <Flex
+              flexDir="row"
+              gap={2}
+              align="center"
+              justify="center"
+              mt={2}
             >
-                <Flex flexDir={"column"} gap={2}>
-                    <CashAppPay />
-                    <ApplePay />
-                    <GooglePay />
-                    <CreditCard >
-                        <Box
-                            display={'flex'}
-                            flexDir={"row"}
-                            gap={2}
-                            alignItems={'center'}
-                            justifyContent={'center'}
-                        >
-                            {loading && <Spinner />}<Text>{`${message ? message : `Pay $${amount}`}`}</Text>
-                        </Box>
-                    </CreditCard>
-                </Flex>
-            </PaymentForm>
-            {errorMessage && <div>{errorMessage}</div>}
-        </Box>
-    )
+              {loading && <Spinner />}
+              <Text fontWeight="medium">
+                {message ? message : `Pay $${amount}`}
+              </Text>
+            </Flex>
+          </CreditCard>
+        </Flex>
+      </PaymentForm>
+
+      {errorMessage && (
+        <Text color="red.500" mt={4} textAlign="center">
+          {errorMessage}
+        </Text>
+      )}
+    </Box>
+  </Flex>
+);
+
 }
 
 export default SquareCheckout

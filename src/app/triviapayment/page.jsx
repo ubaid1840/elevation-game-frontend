@@ -2,17 +2,16 @@
 import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
-import { Box, Heading, Spinner } from "@chakra-ui/react";
-import { redirect, useRouter } from "next/navigation";
+import { Box, Center, Heading, Spinner } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
-
 
 export default function Page() {
   const checkSession = useCheckSession();
   const { state: UserState, setUser } = useContext(UserContext);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     let unsubscribe;
@@ -50,21 +49,21 @@ export default function Page() {
   }, [UserState.value.data]);
 
   const RenderCheckout = useCallback(() => {
-    return loading ? (
-      <Box maxW={"500px"} mt={10}>
-        <Spinner />
-      </Box>
-    ) : (
-      <Box maxW={"500px"} mt={10}>
-        {UserState.value.data?.email && (
-          <SquareCheckout
-          user={UserState.value.data}
-            amount={data?.fee}
-            gameId={data?.gid}
-            plan={"trivia"}
-          />
+    return (
+      <Center mt={10}>
+        {loading ? (
+          <Spinner />
+        ) : (
+          UserState.value.data?.email && (
+            <SquareCheckout
+              user={UserState.value.data}
+              amount={data?.fee}
+              gameId={data?.gid}
+              plan={"trivia"}
+            />
+          )
         )}
-      </Box>
+      </Center>
     );
   }, [data]);
 

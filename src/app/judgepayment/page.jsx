@@ -2,9 +2,8 @@
 import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
-import { Box, Heading } from "@chakra-ui/react";
+import { Box, Center, Heading } from "@chakra-ui/react";
 import { useCallback, useContext, useEffect } from "react";
-
 
 export default function Page() {
   const checkSession = useCheckSession();
@@ -33,17 +32,15 @@ export default function Page() {
 
   const RenderCheckout = useCallback(() => {
     return (
-      <Box maxW={"500px"} mt={10}>
+      <Center mt={10}>
         {UserState.value.data?.email && (
-          
-            <SquareCheckout
-              amount={750}
-              user={UserState.value.data}
-              plan={"Promotion"}
-            />
-        
+          <SquareCheckout
+            amount={750}
+            user={UserState.value.data}
+            plan={"Promotion"}
+          />
         )}
-      </Box>
+      </Center>
     );
   }, [UserState.value.data]);
 

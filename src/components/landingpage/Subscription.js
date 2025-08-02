@@ -27,6 +27,7 @@ export default function SubscriptionPage({ page }) {
     const [subscriptionOptions, setSubscriptionOptions] = useState([]);
     const [currentPlan, setCurrentPlan] = useState("");
     const [annualFee, setAnnualFee] = useState(0)
+    const [judgePromoteLoading, setJudgePromoteLoading] = useState(false)
     const toast = useToast()
 
     useEffect(() => {
@@ -56,6 +57,7 @@ export default function SubscriptionPage({ page }) {
     };
 
     async function handlePromoteToJudge() {
+        setJudgePromoteLoading(true)
         setSelectedPlan("")
         axios.get(`/api/users/${UserState.value.data?.id}/promote`).then((response) => {
             if (response.data.error) {
@@ -69,6 +71,8 @@ export default function SubscriptionPage({ page }) {
             } else {
                 setAnnualFee(750)
             }
+        }).finally(() => {
+            setJudgePromoteLoading(false)
         })
     }
 
@@ -111,7 +115,7 @@ export default function SubscriptionPage({ page }) {
                             </UnorderedList>
                         </Box>
                     } >
-                        <Button my={6} colorScheme="purple" onClick={() => handlePromoteToJudge()}>Become a Judge</Button>
+                        <Button isLoading={judgePromoteLoading} isDisabled={judgePromoteLoading} my={6} colorScheme="purple" onClick={() => handlePromoteToJudge()}>Become a Judge</Button>
                     </Tooltip>
                 }
 
@@ -122,7 +126,7 @@ export default function SubscriptionPage({ page }) {
                 <RadioGroup onChange={handlePlanChange} value={selectedPlan} mb={6}>
                     <Stack spacing={4}>
                         {subscriptionOptions.length > 0 && subscriptionOptions.map((option) => (
-                            
+
                             <Radio key={option.id} value={option.label}>
                                 {option.label} - ${option.price}
                             </Radio>
@@ -144,13 +148,13 @@ export default function SubscriptionPage({ page }) {
                     :
                     <Box maxW={'500px'}>
                         {amount !== 0 && UserState.value.data?.email && selectedPlan && (
-                            
-                            
-                            
-                            
-                            
-                            
-                            
+
+
+
+
+
+
+
                             <SquareCheckout amount={amount} plan={selectedPlan} user={UserState.value.data} />
                         )}
                     </Box>
