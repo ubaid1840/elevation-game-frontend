@@ -83,6 +83,17 @@ export async function PUT(req, { params }) {
     }
 
     if (referral_code) {
+
+      const alreadyQuery = await query(
+        "SELECT id FROM users WHERE referral_code = $1 LIMIT 1",
+        [referral_code]
+      );
+
+      if (alreadyQuery.rows.length > 0) {
+        if(id != alreadyQuery.rows[0].id)
+        throw new Error("Referral code already exists in the system");
+      }
+
       await query(
         'UPDATE users SET referral_code = $1, last_active = $2 WHERE id = $3',
         [referral_code, new Date(), id]
@@ -92,12 +103,12 @@ export async function PUT(req, { params }) {
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [id, 'User referral code updated']
       );
-         return NextResponse.json({}, { status: 200 });
+      return NextResponse.json({}, { status: 200 });
     }
 
 
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.log('Error updating user:', error);
     return NextResponse.json({ message: 'Error updating user', error: error.message }, { status: 500 });
   }
 }

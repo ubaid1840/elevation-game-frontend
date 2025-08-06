@@ -1,4 +1,3 @@
-import { theme } from "@/data/data"
 import { Button as ChakraButton } from "@chakra-ui/react"
 
 const Button = ({ children, ...props }) => {

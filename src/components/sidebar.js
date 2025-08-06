@@ -1,11 +1,9 @@
 "use client"
 
-import { theme } from "@/data/data";
 import {
     Badge,
     Box,
     Button,
-    Center,
     CloseButton,
     Divider,
     Drawer,
@@ -162,7 +160,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
             minHeight={"full"}
             flexDirection={"column"}
             justifyContent={"space-between"}
-            bg={theme.color.background}
+            bg={'#F5F8FF'}
             borderRightWidth={1}
             borderRightColor="#EAECF0"
             {...rest}
@@ -267,7 +265,7 @@ const SidebarContent = ({ LinkItems, settingsLink, onClose, haveNotifications, .
                         }
 
                         <HStack width={'100%'} align={'center'} justify={'space-between'} p={5}>
-                            <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: theme.color.primary, cursor: 'pointer' }} onClick={() => {
+                            <Icon as={FiLogOut} boxSize={6} color={'#667085'} _hover={{ color: '#008080', cursor: 'pointer' }} onClick={() => {
                                 signOut(auth)
                                 setUser(null)
                             }} />

@@ -21,6 +21,7 @@ import {
   Text,
   UnorderedList,
   useDisclosure,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
@@ -34,10 +35,10 @@ const UserManagement = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [referralLoading, setReferralLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newReferral, setNewReferral] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     fetchData();
@@ -122,7 +123,6 @@ const UserManagement = () => {
   const RenderTable = useCallback(() => {
     return (
       <TableData
-      
         special={true}
         data={filteredUsers.map((item) => {
           return {
@@ -178,6 +178,7 @@ const UserManagement = () => {
 
   async function handleSaveNewReferral() {
     const id = selectedUser?.id;
+
     if (!id) return;
     setReferralLoading(true);
     axios
@@ -191,6 +192,15 @@ const UserManagement = () => {
           )
         );
         setSelectedUser(null);
+      })
+      .catch((e) => {
+        toast({
+          title: "Error",
+          description: e.response.data?.error || e.response.data?.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       })
       .finally(() => {
         setReferralLoading(false);
@@ -263,8 +273,12 @@ const UserManagement = () => {
                 </Stack>
               </ModalBody>
               <ModalFooter>
-                <Button colorScheme="blue" onClick={handleSaveNewReferral}>
-                  {referralLoading && <Spinner size={'sm'} mr={1} />} Save
+                <Button
+                  isDisabled={referralLoading || !newReferral}
+                  colorScheme="blue"
+                  onClick={handleSaveNewReferral}
+                >
+                  {referralLoading && <Spinner size={"sm"} mr={1} />} Save
                 </Button>
                 <Button ml={3} onClick={() => setSelectedUser(null)}>
                   Cancel
