@@ -13,6 +13,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const router = useRouter()
     const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
     const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
+    console.log(locationId)
     const [errorMessage, setErrorMessage] = useState()
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
@@ -169,6 +170,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
         cardTokenizeResponseReceived={async (token) => {
           handlePayment(token.token);
         }}
+        
         createPaymentRequest={() => ({
           countryCode: "US",
           currencyCode: "USD",
@@ -200,7 +202,6 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
               gap={2}
               align="center"
               justify="center"
-              mt={2}
             >
               {loading && <Spinner />}
               <Text fontWeight="medium">
