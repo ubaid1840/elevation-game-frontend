@@ -189,7 +189,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
             textAlign="center"
             fontSize="sm"
           >
-            ⚠️ Apple Pay works only on Apple devices
+            ⚠️ Apple Pay works on Safari browsers that support Apple Pay
           </Box>
 
           <CashAppPay width="full" />
