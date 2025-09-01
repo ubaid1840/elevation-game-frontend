@@ -13,7 +13,6 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const router = useRouter()
     const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
     const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
-    console.log(locationId)
     const [errorMessage, setErrorMessage] = useState()
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
@@ -150,76 +149,78 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
         }, 3000);
     }
 
-  return (
-  <Flex
-  w={'100%'}
-    align="center"
-    justify="center"
-    px={2}
-  >
-    <Box
-      w="full"
-      maxW="md"
-      bg="white"
-      p={6}
-      borderRadius="lg"
-    >
-      <PaymentForm
-        applicationId={appId}
-        locationId={locationId}
-        cardTokenizeResponseReceived={async (token) => {
-          handlePayment(token.token);
-        }}
-        
-        createPaymentRequest={() => ({
-          countryCode: "US",
-          currencyCode: "USD",
-          total: {
-            amount: amount.toString(),
-            label: "Total",
-          },
-        })}
-      >
-        <Flex flexDir="column" gap={4}>
-          <Box
-            bg="yellow.100"
-            color="gray.800"
-            p={2}
-            borderRadius="md"
-            textAlign="center"
-            fontSize="sm"
-          >
-            ⚠️ Apple Pay works on Safari browsers that support Apple Pay
-          </Box>
+    if (!locationId || !appId) return null
 
-          <CashAppPay width="full" />
-          <ApplePay />
-          <GooglePay />
-
-          <CreditCard>
-            <Flex
-              flexDir="row"
-              gap={2}
-              align="center"
-              justify="center"
+    return (
+        <Flex
+            w={'100%'}
+            align="center"
+            justify="center"
+            px={2}
+        >
+            <Box
+                w="full"
+                maxW="md"
+                bg="white"
+                p={6}
+                borderRadius="lg"
             >
-              {loading && <Spinner />}
-              <Text fontWeight="medium">
-                {message ? message : `Pay $${amount}`}
-              </Text>
-            </Flex>
-          </CreditCard>
-        </Flex>
-      </PaymentForm>
+                <PaymentForm
+                    applicationId={appId}
+                    locationId={locationId}
+                    cardTokenizeResponseReceived={async (token) => {
+                        handlePayment(token.token);
+                    }}
 
-      {errorMessage && (
-        <Text color="red.500" mt={4} textAlign="center">
-          {errorMessage}
-        </Text>
-      )}
-    </Box>
-  </Flex>
-);
+                    createPaymentRequest={() => ({
+                        countryCode: "US",
+                        currencyCode: "USD",
+                        total: {
+                            amount: amount.toString(),
+                            label: "Total",
+                        },
+                    })}
+                >
+                    <Flex flexDir="column" gap={4}>
+                        <Box
+                            bg="yellow.100"
+                            color="gray.800"
+                            p={2}
+                            borderRadius="md"
+                            textAlign="center"
+                            fontSize="sm"
+                        >
+                            ⚠️ Apple Pay works on Safari browsers that support Apple Pay
+                        </Box>
+
+                        <CashAppPay width="full" />
+                        <ApplePay />
+                        <GooglePay />
+
+                        <CreditCard>
+                            <Flex
+                                flexDir="row"
+                                gap={2}
+                                align="center"
+                                justify="center"
+                            >
+                                {loading && <Spinner />}
+                                <Text fontWeight="medium">
+                                    {message ? message : `Pay $${amount}`}
+                                </Text>
+                            </Flex>
+                        </CreditCard>
+                    </Flex>
+                </PaymentForm>
+
+                {errorMessage && (
+                    <Text color="red.500" mt={4} textAlign="center">
+                        {errorMessage}
+                    </Text>
+                )}
+            </Box>
+        </Flex>
+    );
 
 }
 

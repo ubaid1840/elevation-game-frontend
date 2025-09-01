@@ -83,3 +83,23 @@ export const sendSingleEmail = async (message, subject, id) => {
   }
 };
 
+
+export const sendSingleSMS = async (message, id) => {
+  try {
+    const usersQuery = await query('SELECT phone FROM users WHERE id = $1 LIMIT 1', [id]);
+    const user = usersQuery.rows[0];
+
+    if (user.phone) {
+      await twilioClient.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: user.phone,
+      })
+    } else {
+      console.log(`User with id ${id} not found or missing phone.`);
+    }
+  } catch (error) {
+    console.log('Error in sending sms:', error);
+  }
+};
+

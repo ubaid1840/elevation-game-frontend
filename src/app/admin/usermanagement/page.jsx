@@ -20,9 +20,8 @@ import {
   Stack,
   Text,
   UnorderedList,
-  useDisclosure,
   useToast,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -116,7 +115,7 @@ const UserManagement = () => {
   }
 
   function handleRowClick(val) {
-    setNewReferral(val.referral_code);
+    setNewReferral(val.referral_from || "");
     setSelectedUser(val);
   }
 
@@ -131,6 +130,7 @@ const UserManagement = () => {
             email: item.email,
             role: item.role,
             referral_code: item.referral_code,
+            referral_from: item?.referral_from || "",
             last_active: item.last_active
               ? moment(new Date(item.last_active)).format("MM/DD/YYYY hh:mm A")
               : "",
@@ -142,6 +142,7 @@ const UserManagement = () => {
           { key: "email", value: "Email" },
           { key: "role", value: "Role" },
           { key: "referral_code", value: "Referral Code" },
+          { key: "referral_from", value: "Referral From" },
           { key: "last_active", value: "Last Active" },
           { key: "active", value: "Active" },
         ]}
@@ -182,13 +183,13 @@ const UserManagement = () => {
     if (!id) return;
     setReferralLoading(true);
     axios
-      .put(`/api/users/${selectedUser?.id}`, {
+      .put(`/api/users/${selectedUser?.id}/update-referral`, {
         referral_code: newReferral,
       })
       .then(() => {
         setUsers((prevState) =>
           prevState.map((item) =>
-            item.id === id ? { ...item, referral_code: newReferral } : item
+            item.id === id ? { ...item, referral_from: newReferral } : item
           )
         );
         setSelectedUser(null);

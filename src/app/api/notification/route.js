@@ -1,16 +1,32 @@
-import { sendBulkNotifications } from "@/lib/notificationService";
+import { sendBulkNotifications, sendSingleEmail, sendSingleSMS } from "@/lib/notificationService";
 import { NextResponse } from "next/server";
 
 
 export async function POST(req) {
-    const { msg, type } = await req.json();
+    const { msg, type, ids } = await req.json();
+    const searchParams = req.nextUrl.searchParams
+    const filter = searchParams.get('filter')
     if (!msg) {
         return NextResponse.json({ message: 'Cannot send empty notification' }, { status: 404 });
     }
-
     try {
-        await sendBulkNotifications(msg, "Notification", type)
+        if (filter) {
+            Array.isArray(ids) && ids.forEach((id) => {
+                if (type === 'email') {
+                    sendSingleEmail(msg, "Notification", id)
+                } else {
+                    sendSingleSMS(msg, id)
+                }
+
+            })
+
+        } else {
+            sendBulkNotifications(msg, "Notification", type)
+
+        }
+
         return NextResponse.json({ message: "Notifications sent" }, { status: 200 });
+
     } catch (error) {
         return NextResponse.json({ message: 'Error occured', error: error.message }, { status: 500 });
     }

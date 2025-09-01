@@ -10,6 +10,8 @@ import { SiGotomeeting, SiNintendogamecube } from "react-icons/si";
 import { SlGameController } from "react-icons/sl";
 import { TbReport } from "react-icons/tb";
 import { VscGame } from "react-icons/vsc";
+import { FaMoneyBillWave } from "react-icons/fa";
+
 
 const GetLinkItems = (role, type) => {
     switch (role) {
@@ -45,12 +47,18 @@ const GetLinkItems = (role, type) => {
                     icon: MdMultilineChart,
                     path: `/admin/traffic`,
                 },
+                 {
+                    name: "Withdrawal Request",
+                    icon: FaMoneyBillWave,
+                    path: `/admin/withdraw`,
+                },
+
             ];
-            case 'judge':
+        case 'judge':
             return [
                 {
                     name: "Dashboard",
-                    icon: SlGameController ,
+                    icon: SlGameController,
                     path: `/judge/${type}/gamedetails`,
                 },
                 {
@@ -60,12 +68,12 @@ const GetLinkItems = (role, type) => {
                 },
                 {
                     name: "Availability",
-                    icon: MdOutlineSchedule ,
+                    icon: MdOutlineSchedule,
                     path: `/judge/${type}/schedule`,
                 },
                 {
                     name: "Meeting",
-                    icon: SiGotomeeting ,
+                    icon: SiGotomeeting,
                     path: `/judge/${type}/meeting`,
                 },
                 {
@@ -75,51 +83,63 @@ const GetLinkItems = (role, type) => {
                 },
                 {
                     name: "Network",
-                    icon: PiNetworkDuotone ,
+                    icon: PiNetworkDuotone,
                     path: `/judge/${type}/network`,
                 },
-                
+                  {
+                    name: "Withdraw",
+                    icon: FaMoneyBillWave,
+                    path: `/user/${type}/withdraw`,
+                },
+
+
             ];
-            case 'user':
-                return [
-                    {
-                        name: "Dashboard",
-                        icon: RiDashboard3Line,
-                        path: `/user/${type}/dashboard`,
-                    },
-                    {
-                        name: "Enrolled Games",
-                        icon: VscGame,
-                        path: `/user/${type}/enrolledgames`,
-                    },
-                    {
-                        name: "Leaderboard",
-                        icon: MdOutlineLeaderboard,
-                        path: `/user/${type}/leaderboard`,
-                    },
-                    {
-                        name: "My Earning",
-                        icon: GiTakeMyMoney,
-                        path: `/user/${type}/myearning`,
-                    },
-                   
-                    {
-                        name: "Judges Interaction",
-                        icon: IoCalendarNumberOutline,
-                        path: `/user/${type}/judgesinteraction`,
-                    },
-                    {
-                        name: "Report",
-                        icon: TbReport,
-                        path: `/user/${type}/report`,
-                    },
-                    {
-                        name: "Network",
-                        icon: PiNetworkDuotone ,
-                        path: `/user/${type}/network`,
-                    },
-                    
-                ];
+        case 'user':
+            return [
+                {
+                    name: "Dashboard",
+                    icon: RiDashboard3Line,
+                    path: `/user/${type}/dashboard`,
+                },
+                {
+                    name: "Enrolled Games",
+                    icon: VscGame,
+                    path: `/user/${type}/enrolledgames`,
+                },
+                {
+                    name: "Leaderboard",
+                    icon: MdOutlineLeaderboard,
+                    path: `/user/${type}/leaderboard`,
+                },
+                {
+                    name: "My Earning",
+                    icon: GiTakeMyMoney,
+                    path: `/user/${type}/myearning`,
+                },
+
+                {
+                    name: "Judges Interaction",
+                    icon: IoCalendarNumberOutline,
+                    path: `/user/${type}/judgesinteraction`,
+                },
+                {
+                    name: "Report",
+                    icon: TbReport,
+                    path: `/user/${type}/report`,
+                },
+                {
+                    name: "Network",
+                    icon: PiNetworkDuotone,
+                    path: `/user/${type}/network`,
+                },
+
+                {
+                    name: "Withdraw",
+                    icon: FaMoneyBillWave,
+                    path: `/user/${type}/withdraw`,
+                },
+
+            ];
         default:
             return [];
     }

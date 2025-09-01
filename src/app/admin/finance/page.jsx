@@ -5,11 +5,18 @@ import TableData from "@/components/ui/TableData";
 import {
   Box,
   Button,
+  Checkbox,
   Flex,
   Heading,
   HStack,
   Icon,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
   Select,
   Spacer,
   Spinner,
@@ -21,6 +28,7 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -37,6 +45,7 @@ const FinancialOverview = () => {
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
     fetchData();
@@ -140,14 +149,12 @@ const FinancialOverview = () => {
         </Flex>
       )}
 
-      {/* Payments Table */}
+
       <RenderTable />
 
-      {/* Export Reports */}
 
       <UserSection />
 
-      {/* Email Notifications */}
       <Heading size="md" my={4}>
         Send Notifications
       </Heading>
@@ -166,27 +173,184 @@ const FinancialOverview = () => {
         <option value="email">Email</option>
         <option value="sms">SMS</option>
       </Select>
-      <Button
-        isDisabled={!emailContent || !notificationType}
-        colorScheme="green"
-        onClick={() => {
-          toast({
-            title: "Sending",
-            description: "Notifications in progress...",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-          const msg = emailContent;
-          handleSendNotifications(msg);
-          setEmailContent("");
-        }}
-      >
-        Send Notifications
-      </Button>
+      <Flex gap={2}>
+        <Button
+          isDisabled={!emailContent || !notificationType}
+          colorScheme="green"
+          onClick={() => {
+            toast({
+              title: "Sending",
+              description: "Notifications in progress...",
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+            });
+            const msg = emailContent;
+            handleSendNotifications(msg);
+            setEmailContent("");
+          }}
+        >
+          Send Notifications To All
+        </Button>
+
+        <Button
+          colorScheme="green"
+          onClick={() => {
+
+            onOpen()
+          }}
+        >
+          Send Notification To Selected
+        </Button>
+      </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose} >
+        <ModalOverlay />
+
+        <ModalContent maxW={'fit-content'}>
+          <ModalHeader>Filter users</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <UserTable data={payments} onClose={onClose} />
+          </ModalBody>
+
+        </ModalContent>
+
+      </Modal>
     </Box>
   );
 };
+
+function UserTable({ data, onClose }) {
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [search, setSearch] = useState('')
+  const [msg, setMsg] = useState("")
+  const [type, setType] = useState("email")
+  const toast = useToast();
+  const [loading, setLoading] = useState(false)
+
+  const handleSelectAll = () => {
+    if (selectedUsers.length === data.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(data.map((user) => user.id));
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedUsers((prev) =>
+      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+    );
+  };
+
+  const filteredData = data.filter((user) => {
+    return Object.values(user).some((val) =>
+      String(val).toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
+  async function handleSendNotifications() {
+    setLoading(true)
+    axios
+      .post("/api/notification?filter=true", {
+        msg: msg,
+        ids: selectedUsers,
+        type: type
+      })
+      .then(() => {
+        toast({
+          title: "Notifications Sent",
+          description: "Notifications sent to participants.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        onClose()
+      }).finally(() => {
+        setLoading(false)
+      })
+  }
+
+  return (
+    <Box
+      maxH={{ base: "70vh", md: "80vh" }}
+      maxW={{ base: "90vw", md: "900px", }}
+      overflowY="auto"
+      overflowX="auto"
+      pb={2}
+      px={2}>
+
+      <Textarea mb={4} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type your message...." />
+      <Input mb={4} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter users" />
+      <Select
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        placeholder="Select Notification Type"
+        mb={4}
+      >
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+      </Select>
+      <Flex wrap={'wrap'} gap={2} justify={'space-between'}>
+        <Button
+          onClick={handleSelectAll}
+          mb={4}
+          colorScheme="purple"
+          variant="solid"
+        >
+          {selectedUsers.length === data.length ? "Deselect All" : "Select All"}
+        </Button>
+
+        <Button isLoading={loading} isDisabled={selectedUsers.length === 0 || loading} colorScheme="purple" onClick={handleSendNotifications}>
+          Send Notification
+        </Button>
+      </Flex>
+
+      <Box borderWidth="1px" borderRadius="md" overflow="hidden">
+        <Table variant="striped" colorScheme="gray">
+          <Thead position="sticky" top={0} zIndex={1}>
+            <Tr>
+              <Th w="60px">
+                <Checkbox
+                  isChecked={selectedUsers.length === data.length}
+                  isIndeterminate={
+                    selectedUsers.length > 0 &&
+                    selectedUsers.length < data.length
+                  }
+                  onChange={handleSelectAll}
+                />
+              </Th>
+              <Th>Name</Th>
+              <Th>Role</Th>
+            </Tr>
+          </Thead>
+
+          <Tbody>
+            {filteredData.map((user) => (
+              <Tr
+                key={user.id}
+                _hover={{ bg: "purple.50" }}
+                bg={selectedUsers.includes(user.id) ? "purple.50" : "transparent"}
+              >
+                <Td>
+                  <Checkbox
+                    isChecked={selectedUsers.includes(user.id)}
+                    onChange={() => handleSelectOne(user.id)}
+                    colorScheme="purple"
+                  />
+                </Td>
+                <Td fontWeight="medium">{user.name}</Td>
+                <Td>{user.role}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
+
+
+    </Box>
+  );
+}
 
 const UserSection = () => {
   const [data, setData] = useState([]);

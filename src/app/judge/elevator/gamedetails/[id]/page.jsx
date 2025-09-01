@@ -325,9 +325,34 @@ export default function Page({ params }) {
   }
 
   async function handleStartGame() {
-    setRoundLoading();
+    setRoundLoading(true);
     onCloseStart();
-    handleMoveToNextRound();
+    // handleMoveToNextRound();
+
+    const formData = {
+      game_id: gameData.id,
+      judge_id: UserState.value.data?.id,
+    }
+
+    if (deadline) {
+      formData.deadline = deadline
+    }
+
+    axios.post(`/api/startgame`, formData)
+      .then(() => {
+        fetchData();
+        setDeadline(null)
+      })
+      .catch((e) => {
+        console.log(e);
+      })
+      .finally(() => {
+        setRoundLoading(false);
+      });
+
+
+
+
   }
 
   function handleEditInstruction() {
@@ -417,18 +442,18 @@ export default function Page({ params }) {
               )}
             </Text>
 
-          
-              <Text>
-                <strong>Winner 2nd:</strong>{" "}
-                {gameData?.winner_2nd ? (
-                  <Badge fontSize={"lg"} color={"green"}>
-                    {gameData?.winner_2nd_name}
-                  </Badge>
-                ) : (
-                  "TBA"
-                )}
-              </Text>
-            
+
+            <Text>
+              <strong>Winner 2nd:</strong>{" "}
+              {gameData?.winner_2nd ? (
+                <Badge fontSize={"lg"} color={"green"}>
+                  {gameData?.winner_2nd_name}
+                </Badge>
+              ) : (
+                "TBA"
+              )}
+            </Text>
+
 
             <Text>
               <strong>Additional Judges:</strong>{" "}
@@ -460,22 +485,41 @@ export default function Page({ params }) {
         </Box>
         {gameData && (
           <>
-            {gameData.currentround === 0 ? (
-              <Button
-                isDisabled={
-                  Number(gameData?.spots_remaining ?? -1) !== 0 ||
-                  !UserState.value.data?.navigationAllowed
-                }
-                isLoading={roundLoading}
-                colorScheme="purple"
-                mt={5}
-                onClick={() => {
-                  onOpenStart();
-                }}
+            {gameData.currentround === 0 ? gameData?.judges_count?.includes(UserState.value.data?.id) ?
+
+              <Text
+                fontSize="lg"
+                fontWeight="semibold"
+                color="orange.400"
+                px={4}
+                py={2}
+              
+                textAlign="center"
+                animation="pulse 2s infinite"
               >
-                Start Game
-              </Button>
-            ) : (
+                Waiting for other judges to start the game
+              </Text>
+              : (
+                <Button
+                  isDisabled={
+                    Number(gameData?.spots_remaining ?? -1) !== 0 ||
+                    !UserState.value.data?.navigationAllowed
+                  }
+                  isLoading={roundLoading}
+                  colorScheme="purple"
+                  mt={5}
+                  onClick={() => {
+                    if (UserState.value.data?.id === Number(gameData?.created_by)) {
+                      onOpenStart();
+                    } else {
+                      handleStartGame()
+                    }
+
+                  }}
+                >
+                  Start Game
+                </Button>
+              ) : (
               <Box display="flex" justifyContent="space-between" my={4}>
                 <Button
                   colorScheme="purple"
@@ -548,12 +592,12 @@ export default function Page({ params }) {
                                     <VStack>
                                       {pitch.scores &&
                                         pitch.scores[
-                                          UserState.value.data?.id
+                                        UserState.value.data?.id
                                         ] !== undefined && (
                                           <Text>
                                             {
                                               pitch.scores[
-                                                UserState.value.data?.id
+                                              UserState.value.data?.id
                                               ]
                                             }
                                           </Text>
@@ -579,28 +623,28 @@ export default function Page({ params }) {
                                   {!pitch.scores ||
                                     (pitch.scores[UserState.value.data?.id] ==
                                       undefined && (
-                                      <Button
-                                        isDisabled={
-                                          !UserState.value.data
-                                            ?.navigationAllowed
-                                        }
-                                        size={"sm"}
-                                        colorScheme="purple"
-                                        onClick={() => {
-                                          setSelectedPitch({
-                                            pitch: pitch,
-                                            pitchIndex: index,
-                                            enrollmentIndex: enrolIndex,
-                                          });
-                                          onOpenScore();
-                                        }}
-                                      >
-                                        Add Score
-                                      </Button>
-                                    ))}
+                                        <Button
+                                          isDisabled={
+                                            !UserState.value.data
+                                              ?.navigationAllowed
+                                          }
+                                          size={"sm"}
+                                          colorScheme="purple"
+                                          onClick={() => {
+                                            setSelectedPitch({
+                                              pitch: pitch,
+                                              pitchIndex: index,
+                                              enrollmentIndex: enrolIndex,
+                                            });
+                                            onOpenScore();
+                                          }}
+                                        >
+                                          Add Score
+                                        </Button>
+                                      ))}
                                   {!pitch.pitch_status &&
                                     UserState.value.data?.id ===
-                                      Number(gameData?.created_by || 0) && (
+                                    Number(gameData?.created_by || 0) && (
                                       <>
                                         <Button
                                           isDisabled={

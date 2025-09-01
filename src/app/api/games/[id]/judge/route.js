@@ -19,7 +19,8 @@ export async function GET(req, { params }) {
         g.created_by, 
         g.roundinstruction,
         g.spots_remaining,
-        g.additional_judges
+        g.additional_judges,
+        g.judges_count
        FROM games g 
        WHERE g.id = $1`,
       [id]
