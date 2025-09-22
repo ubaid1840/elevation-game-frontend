@@ -49,9 +49,10 @@ export async function PUT(req, { params }) {
 
         await query(`UPDATE withdraw SET status = $1, admin_note = $2 WHERE id = $3`, [status, admin_note || "", id])
 
+
         if (status === 'Rejected') {
             const rowData = await query(`SELECT requested_amount FROM withdraw WHERE id = $1`, [id])
-            await query(`UPDATE users SET residual_income = residual_income + $1 WHERE id = $2`, [rowData[0]?.residual_income || 0, user_id])
+            await query(`UPDATE users SET residual_income = residual_income + $1 WHERE id = $2`, [rowData.rows[0]?.requested_amount || 0, user_id])
         }
 
         sendSingleEmail(`Your withdrawal request is ${status}`, `Request ${status}`, user_id)

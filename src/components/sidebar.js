@@ -29,11 +29,12 @@ import { auth, db } from "@/config/firebase";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
 import { signOut } from "firebase/auth";
-import { and, collection, onSnapshot, query, where } from "firebase/firestore";
+import { and, collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { CgProfile } from "react-icons/cg";
 import { LuArrowRightLeft } from "react-icons/lu";
 import { MdAttachMoney, MdNotificationsActive, MdSettings } from "react-icons/md";
 import Logo from "./logo";
+import triggerRefreshUserData from "@/lib/triggerRefresh";
 
 export default function Sidebar({ children, LinkItems, settingsLink, currentPage, id }) {
 
@@ -106,6 +107,21 @@ export default function Sidebar({ children, LinkItems, settingsLink, currentPage
         }
 
     }, [UserState.value.data])
+
+    useEffect(() => {
+        if (!UserState.value.data?.id) return;
+
+        const unsub = onSnapshot(doc(db, "triggers", `${UserState.value.data?.id}-trigger`), async (snapshot) => {
+            if (snapshot.exists()) {
+                const res = await triggerRefreshUserData(UserState.value.data?.email)
+                
+                setUser({...UserState.value.data, ...res})
+                await deleteDoc(doc(db, "triggers", `${UserState.value.data?.id}-trigger`));
+                unsub();
+            }
+        });
+        return () => unsub();
+    }, [UserState]);
 
 
 

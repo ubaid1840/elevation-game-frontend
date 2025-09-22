@@ -34,6 +34,24 @@ export async function PUT(req, { params }) {
             );
         }
 
+        await query(`
+            UPDATE users u
+            SET referral_count = (
+            SELECT COUNT(*)
+            FROM referrals r
+            WHERE r.referrer_id = u.id
+            )
+            WHERE u.id = $1`, [referrerId])
+
+        await query(`
+            UPDATE users u
+            SET referral_count = (
+            SELECT COUNT(*)
+            FROM referrals r
+            WHERE r.referrer_id = u.id
+            )
+            WHERE u.id = $1`, [id])
+
         const actionMsg = `Referral code updated to ${referral_code} `
         await query(
             'INSERT INTO logs (user_id, action) VALUES ($1, $2)',

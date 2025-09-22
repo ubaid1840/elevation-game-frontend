@@ -29,7 +29,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import { useContext, useEffect, useState } from "react";
 
@@ -94,6 +94,11 @@ export default function WithdrawPage({ params }) {
                     duration: 3000,
                 });
                 await fetchData(UserState.value.data?.id);
+
+                setDoc(doc(db, "triggers", `${data?.user_id}-trigger`), {
+                    timestamp: moment().valueOf(),
+                })
+
 
                 addDoc(collection(db, "notifications"), {
                     to: data?.user_id,
@@ -212,10 +217,29 @@ export default function WithdrawPage({ params }) {
                         </Text>
                     </Box>
 
+                    <Box>
+                        <Text fontSize="sm" color="gray.500">
+                            Request method
+                        </Text>
+                        <Text fontWeight="semibold">
+                            {data?.method}
+                        </Text>
+                    </Box>
+
+                    {data?.cash_app_info &&
+                        <Box>
+                            <Text fontSize="sm" color="gray.500">
+                                CashApp detail
+                            </Text>
+                            <Text fontWeight="semibold">
+                                {data?.cash_app_info}
+                            </Text>
+                        </Box>}
+
                     {/* Dates */}
                     <Box>
                         <Text fontSize="sm" color="gray.500">
-                            Requested Date
+                            Requested Date and Time
                         </Text>
                         <Text fontWeight="semibold">
                             {data?.created_at &&

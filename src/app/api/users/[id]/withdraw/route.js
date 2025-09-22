@@ -5,7 +5,7 @@ export async function POST(req, { params }) {
 
     const { id } = await params
     try {
-        const { requested_amount, method, note } = await req.json();
+        const { requested_amount, method, note, cash_app_info } = await req.json();
 
         if (!requested_amount || !method) {
             return NextResponse.json(
@@ -38,14 +38,14 @@ export async function POST(req, { params }) {
 
         // Insert request
         await query(
-            `INSERT INTO withdraw (user_id, requested_amount, method, note)
-       VALUES ($1, $2, $3, $4)`,
-            [id, requested_amount, method, note || null]
+            `INSERT INTO withdraw (user_id, requested_amount, method, note, cash_app_info)
+       VALUES ($1, $2, $3, $4, $5)`,
+            [id, requested_amount, method, note || null, cash_app_info]
         );
 
         await query(
             `UPDATE users SET residual_income = residual_income - $1 WHERE id = $2`,
-            [requested_amount, id]
+            [Number(requested_amount), id]
         );
 
         const actionMsg = `Withdrawal request submitted for $${requested_amount}`

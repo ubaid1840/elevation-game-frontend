@@ -1,31 +1,26 @@
 "use client";
-import React, { useState, useEffect, useContext } from "react";
+import { db } from "@/config/firebase";
+import { UserContext } from "@/store/context/UserContext";
+import { TimeIcon } from "@chakra-ui/icons";
 import {
     Box,
-    Heading,
-    VStack,
-    Text,
-    Stack,
-    Select,
-    Input,
     Button,
+    Heading,
     HStack,
-    Badge,
-    Divider,
+    Input,
+    Stack,
+    Text,
+    VStack
 } from "@chakra-ui/react";
-import { TimeIcon } from "@chakra-ui/icons";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import useCheckSession from "@/lib/checkSession";
-import { UserContext } from "@/store/context/UserContext";
-import { and, collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { and, collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import axios from "@/lib/axiosInstance";
 
 
 const NotificationManagement = ({ page }) => {
     const [notifications, setNotifications] = useState([]);
     const [filter, setFilter] = useState("");
-    const { state: UserState } = useContext(UserContext)
+    const { state: UserState, } = useContext(UserContext)
 
     useEffect(() => {
         if (UserState.value.data?.email) {
@@ -52,6 +47,7 @@ const NotificationManagement = ({ page }) => {
                     list.push({ ...doc.data(), id: doc.id })
                 });
                 list.sort((a, b) => b.timestamp - a.timestamp)
+
                 setNotifications([...list]);
             });
 
@@ -157,5 +153,7 @@ const NotificationManagement = ({ page }) => {
         </>
     );
 };
+
+
 
 export default NotificationManagement;
