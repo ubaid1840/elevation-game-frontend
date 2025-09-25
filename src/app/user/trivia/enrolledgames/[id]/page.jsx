@@ -40,19 +40,14 @@ export default function Page({ params }) {
 
   const [gameDetailData, setGameDetailData] = useState(null);
   const [questions, setQuestions] = useState({});
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
-  const [progress, setProgress] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [correctAnswer, setCorrectAnswer] = useState("");
-  const [startTime, setStartTime] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [questionLoading, setQuestionLoading] = useState(true);
   const [myGameResult, setMyGameResult] = useState();
   const [instructions, setInstructions] = useState([]);
   const [hasAnswered, setHasAnswered] = useState(false);
@@ -72,7 +67,7 @@ export default function Page({ params }) {
 
   async function fetchQuestion(id) {
     try {
-      const response = await axios.get(
+      const response = await axios.get( 
         `/api/trivia/users/${id}/games/${params.id}/question`
       );
       if (!response.data?.message) {
@@ -102,8 +97,6 @@ export default function Page({ params }) {
       if (response.data?.enrollment?.payment_intent_id) {
         setInstructions(response.data?.game?.description.split("\n"));
         setGameDetailData(response.data);
-        const userProgress = response.data.enrollment.progress || [];
-        setTotalQuestions(response.data.total_questions - userProgress.length);
         fetchQuestion(id);
       } else {
         router.push(

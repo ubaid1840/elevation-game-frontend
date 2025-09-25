@@ -23,7 +23,7 @@ export async function GET(req, { params }) {
     const games = gameResult.rows;
 
     if (games.length === 0) {
-      return NextResponse.json({ message: "No games found for the given user" }, { status: 404 });
+      return NextResponse.json([], { status: 200 });
     }
 
     const processedGames = [];
@@ -39,7 +39,7 @@ export async function GET(req, { params }) {
       const enrollments = enrollmentsResult.rows;
 
       game.enrollments = enrollments;
-
+ 
       processedGames.push(game);
     }
 

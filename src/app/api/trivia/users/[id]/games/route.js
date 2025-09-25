@@ -16,8 +16,13 @@ export async function GET(req, { params }) {
        [id]
     );
 
+    const userInfo = await query(
+      `SELECT referral_code, referral_count, residual_income FROM users WHERE id = $1`, [id]
+    )
 
-    return NextResponse.json({ myGames: games.rows, availableGames: availableGames.rows }, { status: 200 });
+    const userData = userInfo.rows[0] || {}
+
+    return NextResponse.json({ myGames: games.rows, availableGames: availableGames.rows, userInfo : userData }, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching game:', error);

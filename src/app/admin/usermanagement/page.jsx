@@ -193,6 +193,13 @@ const UserManagement = () => {
           )
         );
         setSelectedUser(null);
+        toast({
+
+          description: "Referral from updated",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       })
       .catch((e) => {
         toast({

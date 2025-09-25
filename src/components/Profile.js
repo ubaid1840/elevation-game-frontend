@@ -1,39 +1,34 @@
 "use client";
+import { auth, storage } from "@/config/firebase";
+import getDisplayPicture from "@/lib/getDisplayPicture";
+import { UserContext } from "@/store/context/UserContext";
 import {
+    Avatar,
     Box,
-    Heading,
+    Button,
+    Divider,
+    Flex,
     FormControl,
     FormLabel,
-    Input,
-    Button,
-    VStack,
-    useToast,
-    Flex,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    Text,
-    Skeleton,
-    Avatar,
-    SkeletonCircle,
-    Divider,
     HStack,
+    Heading,
+    Input,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    SkeletonCircle,
+    Text,
+    VStack,
+    useToast
 } from "@chakra-ui/react";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import Sidebar from "./sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { UserContext } from "@/store/context/UserContext";
-import { app, auth, storage } from "@/config/firebase";
-import { updatePassword, getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import { initializeApp } from "firebase/app";
-import getDisplayPicture from "@/lib/getDisplayPicture";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export default function ProfilePage({ page }) {
     const { state: UserState, setUser } = useContext(UserContext);
@@ -50,16 +45,13 @@ export default function ProfilePage({ page }) {
     const [image, setImage] = useState(null)
     const inputRef = useRef()
     const [imageLoading, setImageLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [userData, setUserData] = useState({})
 
     useEffect(() => {
         if (UserState.value.data?.id) {
-            setFormData({
-                name: UserState.value.data?.name || "",
-                phone: UserState.value.data?.phone || "",
-                password: "",
-                confirmPassword: "",
-                currentPassword: "",
-            });
+            fetchData()
+
             getDisplayPicture(UserState?.value?.data?.email).then((url) => {
                 setImage(url)
             }).finally(() => {
@@ -67,6 +59,20 @@ export default function ProfilePage({ page }) {
             })
         }
     }, [UserState.value.data]);
+
+    async function fetchData() {
+        axios.get(`/api/userdetail/${UserState.value.data?.email}`)
+            .then((response) => {
+                setUserData(response.data)
+                setFormData({
+                    name: response.data?.name || "",
+                    phone: response.data?.phone || "",
+                    password: "",
+                    confirmPassword: "",
+                    currentPassword: "",
+                });
+            })
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -130,7 +136,7 @@ export default function ProfilePage({ page }) {
     };
 
     const handleNamePhoneUpdate = async () => {
-        handleEditModalClose();
+        setLoading(true)
         axios
             .put(`/api/users/${UserState.value.data?.id}`, {
                 name: formData.name,
@@ -140,13 +146,15 @@ export default function ProfilePage({ page }) {
                 let temp = UserState.value.data;
                 temp.name = formData.name;
                 temp.phone = formData.phone;
-                setUser(temp);
+                setUser({ ...UserState.value.data, name: formData.name, phone: formData.phone });
+                setUserData({ ...userData, name: formData.name, phone: formData.phone })
                 toast({
                     title: "Profile updated successfully.",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
+                  handleEditModalClose();
             })
             .catch((error) => {
                 toast({
@@ -156,7 +164,9 @@ export default function ProfilePage({ page }) {
                     duration: 3000,
                     isClosable: true,
                 });
-            });
+            }).finally(()=>{
+                setLoading(false)
+            })
     };
 
 
@@ -226,7 +236,7 @@ export default function ProfilePage({ page }) {
     const RenderImage = useCallback(() => {
         return (
             <>
-                <Avatar _hover={{ cursor: 'pointer' }} height={200} width={200} src={image} name={UserState.value.data?.name} onClick={() => {
+                <Avatar _hover={{ cursor: 'pointer' }} height={200} width={200} src={image} name={userData?.name} onClick={() => {
                     if (inputRef.current) inputRef.current.click();
                 }} />
                 <input
@@ -276,7 +286,7 @@ export default function ProfilePage({ page }) {
                                     Name:
                                 </Text>
                                 <Text fontSize="md" color="gray.800">
-                                    {UserState.value.data?.name || "Not provided"}
+                                    {userData?.name || "Not provided"}
                                 </Text>
                             </Box>
                             <Box>
@@ -284,7 +294,7 @@ export default function ProfilePage({ page }) {
                                     Phone:
                                 </Text>
                                 <Text fontSize="md" color="gray.800">
-                                    {UserState.value.data?.phone || "Not provided"}
+                                    {userData?.phone || "Not provided"}
                                 </Text>
                             </Box>
                         </VStack>
@@ -366,7 +376,7 @@ export default function ProfilePage({ page }) {
                                     </Text>
                                     <Input
                                         onChange={() => { }}
-                                        value={UserState.value.data?.referral_code || ""}
+                                        value={userData?.referral_code || ""}
                                         readOnly
                                         size="md"
                                         width="auto"
@@ -374,11 +384,11 @@ export default function ProfilePage({ page }) {
                                     />
                                 </HStack>
                                 <Text fontSize="lg">
-                                    Number of Referrals: {UserState.value.data?.referral_count || 0}
+                                    Number of Referrals: {userData?.referral_count || 0}
                                 </Text>
                                 <Text fontSize="lg">
                                     Residual Income Earned: $
-                                    {UserState.value.data?.residual_income || 0}
+                                    {userData?.residual_income || 0}
                                 </Text>
                             </VStack>
                         </>
@@ -410,13 +420,13 @@ export default function ProfilePage({ page }) {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    placeholder="Enter your new phone number"
+                                    placeholder="+1xxxxxxxx"
                                     focusBorderColor="green.500"
                                 />
                             </FormControl>
                         </ModalBody>
                         <ModalFooter>
-                            <Button colorScheme="purple" mr={3} onClick={handleNamePhoneUpdate}>
+                            <Button isLoading={loading} disabled={loading} colorScheme="purple" mr={3} onClick={handleNamePhoneUpdate}>
                                 Save Changes
                             </Button>
                             <Button variant="ghost" onClick={handleEditModalClose}>

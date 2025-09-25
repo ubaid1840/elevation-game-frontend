@@ -24,9 +24,8 @@ export default function Page() {
   const { state: UserState } = useContext(UserContext);
   const [myGames, setMyGames] = useState([]);
   const [availableGames, setAvailableGames] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const toast = useToast();
-  const router = useRouter();
+
+  const [userData, setUserData] = useState({})
   const [searchTerm, setSearchTerm] = useState("");
   const [searchTermMyGame, setSearchTermMyGame] = useState("");
 
@@ -47,6 +46,7 @@ export default function Page() {
     axios.get(`/api/trivia/users/${id}/games`).then((response) => {
       setMyGames(response.data.myGames);
       setAvailableGames(response.data.availableGames);
+      setUserData(response.data?.userInfo)
     });
   }
 
@@ -216,8 +216,8 @@ export default function Page() {
               Referral Code:
             </Text>
             <Input
-              onChange={() => {}}
-              value={UserState.value.data?.referral_code || ""}
+              onChange={() => { }}
+              value={userData?.referral_code || ""}
               readOnly
               size="md"
               width="auto"
@@ -225,11 +225,11 @@ export default function Page() {
             />
           </HStack>
           <Text fontSize="lg">
-            Number of Referrals: {UserState.value.data?.referral_count || 0}
+            Number of Referrals: {userData?.referral_count || 0}
           </Text>
           <Text fontSize="lg">
             Residual Income Earned: $
-            {Number(UserState.value.data?.residual_income || 0)}
+            {Number(userData?.residual_income || 0)}
           </Text>
         </VStack>
       </Box>

@@ -22,6 +22,10 @@ export async function PUT(req, { params }) {
 
   try {
 
+    if (!id) {
+      return NextResponse.json({ message: "Parameters missing" }, { status: 400 })
+    }
+
     if (role) {
       const updatedUser = await query(
         'UPDATE users SET role = $1, last_active = $2 WHERE id = $3 RETURNING *',
@@ -39,8 +43,13 @@ export async function PUT(req, { params }) {
         )
         if (checkwaiverQuery.rows.length > 0) {
           if (checkwaiverQuery.rows[0].waiver_start === null) {
+            const now = new Date();
+
+            // 1 year from now
+            const oneYearLater = new Date();
+            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
             await query(
-              `UPDATE users SET waiver_start = $1 WHERE id = $2`, [new Date(), id]
+              `UPDATE users SET waiver_start = $1, package = 'Platinum', package_expiry = $2, annual_package = 'Promotion', annual_package_expiry = $3 WHERE id = $4`, [now, oneYearLater, oneYearLater, id]
             )
           }
         }

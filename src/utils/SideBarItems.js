@@ -89,7 +89,7 @@ const GetLinkItems = (role, type) => {
                   {
                     name: "Withdraw",
                     icon: FaMoneyBillWave,
-                    path: `/user/${type}/withdraw`,
+                    path: `/judge/${type}/withdraw`,
                 },
 
 

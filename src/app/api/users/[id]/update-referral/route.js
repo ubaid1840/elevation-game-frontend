@@ -20,7 +20,36 @@ export async function PUT(req, { params }) {
 
         const referrerId = userQuery.rows[0].id;
 
-        const checkAvailable = await query(`SELECT id FROM referrals WHERE referred_id = $1`, [id])
+        if(Number(referrerId) === Number(id)){
+             return NextResponse.json({ message: "Cannot enter same referral code as user" }, { status: 400 })
+        }
+
+        const treeCheck = await query(
+            `
+      WITH RECURSIVE downline AS (
+        SELECT referred_id
+        FROM referrals
+        WHERE referrer_id = $1
+        UNION
+        SELECT r.referred_id
+        FROM referrals r
+        INNER JOIN downline d ON r.referrer_id = d.referred_id
+      )
+      SELECT 1 FROM downline WHERE referred_id = $2 LIMIT 1;
+      `,
+            [id, referrerId] // id = current user, referrerId = new referrer
+        );
+
+        if (treeCheck.rows.length > 0) {
+            return NextResponse.json(
+                { message: "Invalid referral: circular referral not allowed" },
+                { status: 400 }
+            );
+        }
+
+        const checkAvailable = await query(`SELECT id, referrer_id FROM referrals WHERE referred_id = $1`, [id])
+
+        let previousReferrerId = null;
 
         if (checkAvailable.rows.length === 0) {
             await query(
@@ -28,6 +57,7 @@ export async function PUT(req, { params }) {
                 [referrerId, id]
             );
         } else {
+            previousReferrerId = checkAvailable.rows[0].referrer_id;
             await query(
                 `UPDATE referrals SET referrer_id = $1 WHERE referred_id = $2`,
                 [referrerId, id]
@@ -43,16 +73,22 @@ export async function PUT(req, { params }) {
             )
             WHERE u.id = $1`, [referrerId])
 
-        await query(`
-            UPDATE users u
-            SET referral_count = (
-            SELECT COUNT(*)
-            FROM referrals r
-            WHERE r.referrer_id = u.id
-            )
-            WHERE u.id = $1`, [id])
+        if (previousReferrerId) {
+            await query(
+                `
+    UPDATE users u
+    SET referral_count = (
+      SELECT COUNT(*) FROM referrals r WHERE r.referrer_id = u.id
+    )
+    WHERE u.id = $1
+    `,
+                [previousReferrerId]
+            );
+        }
 
-        const actionMsg = `Referral code updated to ${referral_code} `
+
+
+        const actionMsg = `Referral from updated to ${referral_code} `
         await query(
             'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
             [id, actionMsg]

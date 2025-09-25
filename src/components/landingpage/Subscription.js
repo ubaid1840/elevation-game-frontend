@@ -148,13 +148,6 @@ export default function SubscriptionPage({ page }) {
                     :
                     <Box maxW={'500px'}>
                         {amount !== 0 && UserState.value.data?.email && selectedPlan && (
-
-
-
-
-
-
-
                             <SquareCheckout amount={amount} plan={selectedPlan} user={UserState.value.data} />
                         )}
                     </Box>
