@@ -42,9 +42,6 @@ export default function PublicGameTrivia({ game }) {
         return unsubscribe;
     }, [])
 
-    console.log(Object.keys(game).length)
-
-
 
     return (
         game.hasOwnProperty('game') && Object.keys(game?.game).length !== 0 ?
@@ -94,7 +91,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
             <Box gap={2} display={"flex"} flexDir={"column"}>
                 <Text fontWeight="bold">
                     Prize:{" "}
-                    <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
+                    <Badge colorScheme="green">${gameDetailData?.game?.calculated_prize}</Badge>
                 </Text>
                 <Text fontWeight="bold">
                     Winner:{" "}

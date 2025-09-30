@@ -104,7 +104,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
 
         <Text fontWeight="bold">
           Prize:{" "}
-          <Badge colorScheme="green">${gameDetailData?.game?.prize}</Badge>
+          <Badge colorScheme="green">${gameDetailData?.game?.calculated_prize}</Badge>
         </Text>
         <Text fontWeight="bold">
           Winner:{" "}

@@ -69,7 +69,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: "Enrollment successful" }, { status: 200 });
 
     } else {
-      
+
       return NextResponse.json({ message: 'No spots remaining' }, { status: 400 });
     }
 
@@ -84,13 +84,14 @@ export async function GET(req, { params }) {
   const { id } = await params;
 
   try {
-    
+
     const gameData = await query(
       `
       SELECT 
           tg.*, 
           COALESCE(u1.name, NULL) AS created_by_name,
-          COALESCE(u3.name, NULL) AS winner_name
+          COALESCE(u3.name, NULL) AS winner_name,
+          ROUND(tg.total_spots * tg.game_percentage * tg.fee / 100, 2) AS calculated_prize
       FROM trivia_game tg
       LEFT JOIN users u1 ON tg.created_by = u1.id
       LEFT JOIN users u3 ON tg.winner_id = u3.id
@@ -98,8 +99,8 @@ export async function GET(req, { params }) {
       `,
       [id]
     );
-  
-    
+
+
     const enrollments = await query(
       `
       SELECT 
@@ -112,17 +113,17 @@ export async function GET(req, { params }) {
       `,
       [id]
     );
-    
 
-    const questions = await query (
+
+    const questions = await query(
       `SELECT * from trivia_questions WHERE game_id = $1`, [id]
     )
-  
+
     return NextResponse.json(
       {
         game: gameData.rows[0] || {},
         enrollments: enrollments.rows || [],
-        questions : questions.rows || []
+        questions: questions.rows || []
       },
       { status: 200 }
     );
