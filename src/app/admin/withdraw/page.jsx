@@ -1,6 +1,7 @@
 
 "use client";
 
+import Pagination from "@/components/ui/Pagination";
 import { UserContext } from "@/store/context/UserContext";
 import {
     Table,
@@ -15,13 +16,17 @@ import {
     useToast, Heading, Stack, Box,
     Input,
     Flex,
-    Spacer
+    Spacer,
+    HStack,
+    Icon,
+    Text
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
+import { IoIosArrowRoundDown, IoIosArrowRoundUp } from "react-icons/io";
 
 export default function WithdrawPage() {
 
@@ -137,6 +142,37 @@ export default function WithdrawPage() {
 
 function WithdrawTable({ data, loading }) {
 
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const [localData, setLocalData] = useState([])
+    const [sortOrder, setSortOrder] = useState("asc");
+    const rowsPerPage = 10;
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentRows = localData.slice(indexOfFirstRow, indexOfLastRow);
+    const [columnIndex, setColumnIndex] = useState(Array.from({ length: columns && columns.length }, () => ({ active: false })))
+
+    useEffect(() => {
+        setLocalData(data)
+    }, [data])
+
+    const handleSort = (key, index) => {
+        setColumnIndex((prevState) =>
+            prevState.map((eachState, i) => ({
+                active: i === index
+            }))
+        );
+        const sortedData = [...localData].sort((a, b) => {
+            if (sortOrder === "asc") {
+                return a[key] > b[key] ? 1 : -1;
+            } else {
+                return a[key] < b[key] ? 1 : -1;
+            }
+        });
+        setLocalData(sortedData);
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    };
+
     const statusColor = (status) => {
         switch (status) {
             case "Approved":
@@ -152,59 +188,84 @@ function WithdrawTable({ data, loading }) {
 
 
     return (
-        <TableContainer bg="white" p={4}>
-            <Table variant="simple">
-                <Thead bg="gray.100">
-                    <Tr>
-                        <Th>User</Th>
-                        <Th>Email</Th>
-                        <Th>Role</Th>
-                        <Th>Package</Th>
-                        <Th>Amount</Th>
-                        <Th>Income Balance</Th>
-                        <Th>Status</Th>
-                        <Th>Requested Date</Th>
-                        <Th>Referrer</Th>
-                        <Th>Action</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {data?.map((item, index) => (
-                        <Tr key={index}>
-                            <Td>{item.user_name}</Td>
-                            <Td>{item.user_email}</Td>
-                            <Td>{item.user_role}</Td>
-                            <Td>{item.user_package || "-"}</Td>
-                            <Td>
-                                <Badge colorScheme="purple" px={2} py={1} borderRadius="md">
-                                    ${item.requested_amount}
-                                </Badge>
-                            </Td>
-                            <Td>
-                                {item.user_residual_income}
-                            </Td>
-                            <Td>
-                                <Badge colorScheme={statusColor(item.status)}>
-                                    {item.status}
-                                </Badge>
-                            </Td>
-                            <Td>{moment(item.created_at).format("DD-MM-YYYY HH:mm A")}</Td>
-                            <Td>{item.referrer_name || "No referrer"}</Td>
-                            <Td>
-                                <Button
-                                    as={Link}
-                                    href={`/admin/withdraw/${item.id}`}
-                                    size="sm"
-                                    colorScheme="purple"
-                                    isLoading={loading}
+        <>
+            <Pagination currentPage={currentPage} data={localData} onChange={setCurrentPage} />
+            <TableContainer bg="white" p={4}>
+                <Table variant="simple">
+                    <Thead bg="gray.100">
+                        <Tr>
+                            {columns.map((item, index) => (
+                                <Th
+                                    key={index}
+                                    onClick={() => {
+                                        if (item.key) {
+                                            handleSort(item.key, index)
+                                        }
+                                    }}
+                                    _hover={{ cursor: "pointer" }}
                                 >
-                                    Open Detail
-                                </Button>
-                            </Td>
+                                    <HStack gap={0}>
+                                        <Text>{item.label}</Text>
+                                        {columnIndex && columnIndex.length > 0 && columnIndex[index]?.active &&
+                                            <Icon as={sortOrder === 'desc' ? IoIosArrowRoundDown : IoIosArrowRoundUp} boxSize={5} />}
+                                    </HStack>
+
+
+                                </Th>
+                            ))}
+                            <Th>Action</Th>
                         </Tr>
-                    ))}
-                </Tbody>
-            </Table>
-        </TableContainer>
+                    </Thead>
+                    <Tbody>
+                        {currentRows?.map((item, index) => (
+                            <Tr key={index}>
+                                <Td>{item.user_name}</Td>
+                                <Td>{item.user_email}</Td>
+                                <Td>{item.user_role}</Td>
+                                <Td>{item.user_package || "-"}</Td>
+                                <Td>
+                                    <Badge colorScheme="purple" px={2} py={1} borderRadius="md">
+                                        ${item.requested_amount}
+                                    </Badge>
+                                </Td>
+                                <Td>
+                                    {item.user_residual_income}
+                                </Td>
+                                <Td>
+                                    <Badge colorScheme={statusColor(item.status)}>
+                                        {item.status}
+                                    </Badge>
+                                </Td>
+                                <Td>{moment(item.created_at).format("DD-MM-YYYY HH:mm A")}</Td>
+                                <Td>{item.referrer_name || "No referrer"}</Td>
+                                <Td>
+                                    <Button
+                                        as={Link}
+                                        href={`/admin/withdraw/${item.id}`}
+                                        size="sm"
+                                        colorScheme="purple"
+                                        isLoading={loading}
+                                    >
+                                        Open Detail
+                                    </Button>
+                                </Td>
+                            </Tr>
+                        ))}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        </>
     );
 }
+
+const columns = [
+    { label: "User", key: "user_name" },
+    { label: "Email", key: "user_email" },
+    { label: "Role", key: "user_role" },
+    { label: "Package", key: "user_package" },
+    { label: "Amount", key: "requested_amount" },
+    { label: "Income Balance", key: "user_residual_income" },
+    { label: "Status", key: "status" },
+    { label: "Requested Date", key: "created_at" },
+    { label: "Referrer", key: "referrer_name" },
+]
