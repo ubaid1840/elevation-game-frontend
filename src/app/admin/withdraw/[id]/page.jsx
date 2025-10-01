@@ -57,6 +57,8 @@ export default function WithdrawPage({ params }) {
         try {
             const response = await axios.get(`/api/withdraw/${params.id}`);
             setData(response.data);
+            setNote(response.data?.admin_note || "")
+            setStatus(response.data?.status || "")
         } catch (e) {
             toast({
                 title: "Error",
@@ -136,6 +138,12 @@ export default function WithdrawPage({ params }) {
                 return "gray";
         }
     };
+
+    function handleClose(val){
+        setNote("")
+        setStatus("")
+        onClose(val)
+    }
 
     return (
         <Box p={8} bg="gray.50" minH="100vh">
@@ -273,8 +281,6 @@ export default function WithdrawPage({ params }) {
                 <Flex justify="center" mt={8}>
                     <Button
                         onClick={() => {
-                            setNote("")
-                            setStatus("")
                             onOpen()
                         }}
                         colorScheme="purple"
@@ -289,7 +295,7 @@ export default function WithdrawPage({ params }) {
             }
 
             {/* Action Modal */}
-            <Modal isOpen={isOpen} onClose={onClose} size="lg">
+            <Modal isOpen={isOpen} onClose={handleClose} size="lg">
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Update Withdrawal Status</ModalHeader>

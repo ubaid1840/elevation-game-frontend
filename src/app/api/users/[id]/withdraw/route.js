@@ -14,8 +14,15 @@ export async function POST(req, { params }) {
             );
         }
 
+         if (isNaN(requested_amount) ) {
+            return NextResponse.json(
+                { message: "Wrong amount" },
+                { status: 400 }
+            );
+        }
+
         // Minimum $10 check
-        if (Number(requested_amount) < 10) {
+        if (isNaN(requested_amount) || Number(requested_amount) < 10) {
             return NextResponse.json(
                 { message: "Minimum withdraw is $10" },
                 { status: 400 }
