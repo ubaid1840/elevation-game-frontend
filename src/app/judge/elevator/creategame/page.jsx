@@ -3,6 +3,11 @@ import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
 import { CloseIcon } from "@chakra-ui/icons";
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
   Box,
   Button,
   FormControl,
@@ -19,7 +24,8 @@ import {
   Stack,
   Text,
   Textarea,
-  useDisclosure
+  useDisclosure,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
@@ -46,6 +52,12 @@ export default function Page() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newCategory, setNewCategory] = useState("");
   const [pitchInstruction, setPitchInstruction] = useState("");
+  const [missingFields, setMissingFields] = useState([]);
+  const {
+    isOpen: isMissingOpen,
+    onOpen: onMissingOpen,
+    onClose: onMissingClose,
+  } = useDisclosure();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -80,7 +92,48 @@ export default function Page() {
     }
   };
 
+  function isValidUrl(url) {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const validateForm = () => {
+    let missing = [];
+
+    if (!title.trim()) missing.push("Game Title");
+    if (!videoLink.trim()) {
+      missing.push("Video Link")
+
+    } else if (!isValidUrl(videoLink)) {
+      missing.push("Broken Video Link")
+    }
+    if (!gameDescription.trim()) missing.push("Game Description");
+    if (!pitchInstruction.trim()) missing.push("Pitch Instructions");
+    if (!level) missing.push("Tier");
+    if (!rounds || Number(rounds) <= 0) missing.push("Number of Rounds");
+    if (!totalSpots || Number(totalSpots) <= 0)
+      missing.push("Total Spots cannot be zero or empty");
+    if (!category) missing.push("Game Category");
+    if (!deadline) missing.push("Deadline");
+
+    return missing;
+  };
+
   const handleInitiateGame = async () => {
+
+    const missing = validateForm();
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      onMissingOpen();
+      return;
+    }
+
+    setLoading(true)
+
     const data = {
       title,
       description: gameDescription,
@@ -97,27 +150,22 @@ export default function Page() {
       pitch_instruction: pitchInstruction,
     };
 
+
     try {
-      axios
-        .post("/api/games", data)
-        .then(async () => {
-          addDoc(collection(db, "notifications"), {
-            to: "admin@gmail.com",
-            title: "Game created",
-            message: `${
-              UserState.value.data?.name || UserState.value.data?.email
-            } initiated new game - ${title} `,
-            timestamp: moment().valueOf(),
-            status: "pending",
-          });
-          router.push("/judge/elevator");
-        })
-        .catch((e) => {
-          console.log(e);
-          setLoading(false);
-        });
+      await axios.post("/api/games", data)
+      addDoc(collection(db, "notifications"), {
+        to: "admin@gmail.com",
+        title: "Game created",
+        message: `${UserState.value.data?.name || UserState.value.data?.email
+          } initiated new game - ${title} `,
+        timestamp: moment().valueOf(),
+        status: "pending",
+      });
+      router.push("/judge/elevator");
     } catch (error) {
       console.error("Error initiating game:", error);
+
+    } finally {
       setLoading(false);
     }
   };
@@ -171,7 +219,7 @@ export default function Page() {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
     }
-  return url;
+    return url;
   }
 
   return (
@@ -258,7 +306,7 @@ export default function Page() {
         <FormControl mb={6}>
           <FormLabel htmlFor="rounds">Number of Rounds</FormLabel>
           <Input
-          min={1}
+            min={1}
             id="rounds"
             type="number"
             value={rounds}
@@ -285,7 +333,7 @@ export default function Page() {
               const value = e.target.value;
               if (!isNaN(value) && value.trim() !== "") {
                 setTotalSpots(parseInt(value));
-              }else{
+              } else {
                 setTotalSpots("")
               }
             }}
@@ -318,7 +366,7 @@ export default function Page() {
           </Box>
         </FormControl>
 
-       
+
 
         <FormControl mb={6}>
           <FormLabel htmlFor="category">Game Category</FormLabel>
@@ -371,25 +419,42 @@ export default function Page() {
 
         <Button
           isDisabled={
-            !title ||
-            !gameDescription ||
-            !rounds ||
-            !totalSpots ||
-            Number(totalSpots) === 0 ||
-            !level ||
-            !category ||
-            !deadline
+            loading
           }
           isLoading={loading}
           colorScheme="purple"
           onClick={() => {
-            setLoading(true);
             handleInitiateGame();
           }}
         >
           Initiate Game
         </Button>
       </Box>
+
+
+      <AlertDialog isOpen={isMissingOpen} onClose={onMissingClose}>
+        {/* <AlertDialogOverlay /> */}
+        <AlertDialogContent borderWidth={2} borderColor={'#cccccc'}>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            Missing Fields
+          </AlertDialogHeader>
+
+          <AlertDialogBody>
+            <Text>Please fill in the following fields:</Text>
+            <VStack align="start" mt={3} maxH={"60vh"} overflowY={"auto"}>
+              {missingFields.map((field, index) => (
+                <Text key={index} color="red.500">
+                  - {field}
+                </Text>
+              ))}
+            </VStack>
+          </AlertDialogBody>
+
+          <AlertDialogFooter>
+            <Button onClick={onMissingClose}>OK</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>

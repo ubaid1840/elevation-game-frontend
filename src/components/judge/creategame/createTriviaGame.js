@@ -457,7 +457,7 @@ export default function CreateTriviaGame({ page }) {
 
       <AlertDialog isOpen={isOpen} onClose={onClose}>
         {/* <AlertDialogOverlay> */}
-        <AlertDialogContent>
+        <AlertDialogContent borderWidth={2} borderColor={'#cccccc'}>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
             Missing Fields
           </AlertDialogHeader>

@@ -1,32 +1,35 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
+import { CloseIcon } from "@chakra-ui/icons";
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
   Box,
-  Heading,
-  Textarea,
   Button,
-  Input,
-  Stack,
   FormControl,
   FormLabel,
-  Text,
-  Select,
+  Heading,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
   ModalBody,
-  useDisclosure,
+  ModalCloseButton,
+  ModalContent,
   ModalFooter,
+  ModalHeader,
+  Select,
+  Stack,
+  Text,
+  Textarea,
+  useDisclosure,
+  VStack
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
 import { useRouter } from "next/navigation";
 import { Calendar } from "primereact/calendar";
-import { CloseIcon } from "@chakra-ui/icons";
+import { useContext, useEffect, useState } from "react";
 
 export default function Page() {
   const [title, setTitle] = useState("");
@@ -45,6 +48,13 @@ export default function Page() {
   const [allCategories, setAllCategories] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newCategory, setNewCategory] = useState("");
+  const [pitchInstruction, setPitchInstruction] = useState("");
+  const [missingFields, setMissingFields] = useState([]);
+  const {
+    isOpen: isMissingOpen,
+    onOpen: onMissingOpen,
+    onClose: onMissingClose,
+  } = useDisclosure();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -76,7 +86,48 @@ export default function Page() {
     }
   };
 
+  function isValidUrl(url) {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const validateForm = () => {
+    let missing = [];
+
+    if (!title.trim()) missing.push("Game Title");
+    if (!videoLink.trim()) {
+      missing.push("Video Link")
+
+    } else if (!isValidUrl(videoLink)) {
+      missing.push("Broken Video Link")
+    }
+    if (!gameDescription.trim()) missing.push("Game Description");
+    if (!pitchInstruction.trim()) missing.push("Pitch Instructions");
+    if (!level) missing.push("Tier");
+    if (!rounds || Number(rounds) <= 0) missing.push("Number of Rounds");
+    if (!totalSpots || Number(totalSpots) <= 0)
+      missing.push("Total Spots cannot be zero or empty");
+    if (!category) missing.push("Game Category");
+    if (!deadline) missing.push("Deadline");
+    if (selectedJudges.length === 0) missing.push("Additional Judges")
+    return missing;
+  };
+
   const handleInitiateGame = async () => {
+
+    const missing = validateForm();
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      onMissingOpen();
+      return;
+    }
+
+    setLoading(true)
+
     const data = {
       title,
       description: gameDescription,
@@ -87,10 +138,10 @@ export default function Page() {
       total_spots: Number(totalSpots),
       video_link: videoLink,
       creator_id: UserState.value.data?.id,
-    
       deadline,
       currentround: 0,
       level,
+      pitch_instruction: pitchInstruction,
     };
 
     try {
@@ -144,23 +195,23 @@ export default function Page() {
     if (url.includes("youtu.be")) {
       const videoId = url.split("youtu.be/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
+
     } else if (url.includes("youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
-    
+
     } else if (url.includes("youtube.com/shorts/")) {
       const videoId = url.split("youtube.com/shorts/")[1];
       return `https://www.youtube.com/embed/${videoId}`;
-    
+
     } else if (url.includes("m.youtube.com/watch?v=")) {
       const videoId = new URL(url).searchParams.get("v");
       return `https://www.youtube.com/embed/${videoId}`;
     }
-  
+
     return url;
   }
-  
+
   return (
     <>
       <Box p={8} bg="white" opacity={isOpen ? 0.3 : 1}>
@@ -200,6 +251,17 @@ export default function Page() {
           />
         </FormControl>
 
+        <FormControl mb={6}>
+          <FormLabel htmlFor="pitchInstruction">Pitch Instructions</FormLabel>
+          <Textarea
+            id="pitchInstruction"
+            placeholder="Describe pitch instructions."
+            value={pitchInstruction}
+            onChange={(e) => setPitchInstruction(e.target.value)}
+            minHeight="200px"
+          />
+        </FormControl>
+
         {videoLink && (
           <Box mb={6}>
             <Text fontWeight="bold" mb={2}>
@@ -234,11 +296,18 @@ export default function Page() {
         <FormControl mb={6}>
           <FormLabel htmlFor="rounds">Number of Rounds</FormLabel>
           <Input
+            min={1}
             id="rounds"
             type="number"
-            min={1}
             value={rounds}
-            onChange={(e) => setRounds(parseInt(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!isNaN(value) && value.trim() !== "") {
+                setRounds(parseInt(value));
+              } else {
+                setRounds("")
+              }
+            }}
             placeholder="Enter number of rounds"
           />
         </FormControl>
@@ -246,11 +315,18 @@ export default function Page() {
         <FormControl mb={6}>
           <FormLabel htmlFor="totalSpots">Total Spots</FormLabel>
           <Input
+            min={1}
             id="totalSpots"
             type="number"
-            min={1}
             value={totalSpots}
-            onChange={(e) => setTotalSpots(parseInt(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!isNaN(value) && value.trim() !== "") {
+                setTotalSpots(parseInt(value));
+              } else {
+                setTotalSpots("")
+              }
+            }}
             placeholder="Enter total spots available"
           />
         </FormControl>
@@ -268,7 +344,7 @@ export default function Page() {
             px={4}
           >
             <Calendar
-             minDate={new Date()}
+              minDate={new Date()}
               id="deadline"
               value={deadline}
               onChange={(e) => setDeadline(e.value)}
@@ -280,7 +356,7 @@ export default function Page() {
           </Box>
         </FormControl>
 
-       
+
 
         <FormControl mb={6}>
           <FormLabel htmlFor="category">Game Category</FormLabel>
@@ -289,7 +365,7 @@ export default function Page() {
             placeholder="Select category"
             value={category}
             onChange={(e) => {
-             
+
               if (e.target.value === "Add New Category") onOpen();
               else setCategory(e.target.value);
             }}
@@ -334,26 +410,42 @@ export default function Page() {
 
         <Button
           isDisabled={
-            !title ||
-            !videoLink ||
-            !gameDescription ||
-            !level ||
-            !rounds ||
-            !totalSpots ||
-            !deadline ||
-            !category ||
-            selectedJudges.length == 0
+            loading
           }
           isLoading={loading}
           colorScheme="purple"
           onClick={() => {
-            setLoading(true);
             handleInitiateGame();
           }}
         >
           Initiate Game
         </Button>
       </Box>
+
+
+      <AlertDialog isOpen={isMissingOpen} onClose={onMissingClose}>
+        {/* <AlertDialogOverlay /> */}
+        <AlertDialogContent borderWidth={2} borderColor={'#cccccc'}>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            Missing Fields
+          </AlertDialogHeader>
+
+          <AlertDialogBody>
+            <Text>Please fill in the following fields:</Text>
+            <VStack align="start" mt={3} maxH={"60vh"} overflowY={"auto"}>
+              {missingFields.map((field, index) => (
+                <Text key={index} color="red.500">
+                  - {field}
+                </Text>
+              ))}
+            </VStack>
+          </AlertDialogBody>
+
+          <AlertDialogFooter>
+            <Button onClick={onMissingClose}>OK</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         {/* <ModalOverlay /> */}
