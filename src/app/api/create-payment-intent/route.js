@@ -25,3 +25,5 @@ export async function POST(req) {
     }
 
 } 
+
+export const revalidate = 0

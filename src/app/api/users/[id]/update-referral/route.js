@@ -99,3 +99,5 @@ export async function PUT(req, { params }) {
         return NextResponse.json({ message: error?.message || "Server error" }, { status: 500 })
     }
 }
+
+export const revalidate = 0

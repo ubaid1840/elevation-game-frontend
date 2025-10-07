@@ -20,3 +20,5 @@ export async function GET(req) {
 
 
 }
+
+export const revalidate = 0

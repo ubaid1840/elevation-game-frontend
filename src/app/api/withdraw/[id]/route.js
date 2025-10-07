@@ -68,3 +68,5 @@ export async function PUT(req, { params }) {
 
 
 }
+
+export const revalidate = 0

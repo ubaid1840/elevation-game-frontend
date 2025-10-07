@@ -32,3 +32,5 @@ export async function GET() {
         return NextResponse.json({ message: error?.message || "Error occues" }, { status: 500 })
     }
 }
+
+export const revalidate = 0

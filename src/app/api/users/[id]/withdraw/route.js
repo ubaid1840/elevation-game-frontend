@@ -89,3 +89,5 @@ export async function GET(req, { params }) {
 
 
 }
+
+export const revalidate = 0
