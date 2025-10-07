@@ -240,11 +240,22 @@ async function ProcessTriviaGameResult(gid) {
 
     const expiredGames = expiredGamesResult.rows;
     if (expiredGames.length === 0) {
-      return; // no game to process
+      return; 
     }
 
     const game = expiredGames[0];
     const { id: gameId, game_percentage, fee, title, prize } = game;
+
+      const questionCountResult = await query(
+      `SELECT COUNT(*) AS total_questions FROM trivia_questions WHERE game_id = $1`,
+      [gameId]
+    );
+    const totalQuestions = Number(questionCountResult.rows[0].total_questions || 0);
+
+    if (totalQuestions === 0) {
+      console.log(`No questions found for game ID ${gameId}. Skipping.`);
+      return;
+    }
 
     const enrollmentsResult = await query(
       `SELECT user_id, progress FROM trivia_game_enrollment WHERE game_id = $1`,
@@ -254,6 +265,18 @@ async function ProcessTriviaGameResult(gid) {
     if (enrollmentsResult.rows.length === 0) {
       console.log(`No participants found for game ID ${gameId}. Skipping.`);
       return;
+    }
+
+     for (const enrollment of enrollmentsResult.rows) {
+      const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
+      const answeredQuestions = progress.length;
+
+      if (answeredQuestions < totalQuestions) {
+        console.log(
+          `User ${enrollment.user_id} has not answered all questions. Stopping winner selection.`
+        );
+        return;
+      }
     }
 
     // Compute user scores
@@ -298,7 +321,7 @@ async function ProcessTriviaGameResult(gid) {
     console.log(`Winner updated: User ${winner.user_id} for game ID ${gameId}`);
 
   } catch (error) {
-    console.error("Critical error in trivia game processing:", error);
+    console.log("Critical error in trivia game processing:", error);
     await query("ROLLBACK");
   }
 }
