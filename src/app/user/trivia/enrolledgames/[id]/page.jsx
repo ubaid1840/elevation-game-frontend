@@ -75,7 +75,9 @@ export default function Page({ params }) {
         setTimeLeft(response.data.time * 1000);
       } else {
         setQuestions({});
+         fetchData(id)
         fetchMyGameResult(id);
+       
       }
     } catch (e) {
       console.log("Error fetching questions:", e.message);

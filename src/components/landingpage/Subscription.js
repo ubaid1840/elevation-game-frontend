@@ -19,6 +19,7 @@ import moment from "moment";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import SquareCheckout from "../square/checkout";
+import { useSearchParams } from "next/navigation";
 
 export default function SubscriptionPage({ page }) {
     const [selectedPlan, setSelectedPlan] = useState("");
@@ -28,7 +29,24 @@ export default function SubscriptionPage({ page }) {
     const [currentPlan, setCurrentPlan] = useState("");
     const [annualFee, setAnnualFee] = useState(0)
     const [judgePromoteLoading, setJudgePromoteLoading] = useState(false)
+    const search = useSearchParams()
     const toast = useToast()
+
+    useEffect(() => {
+        const a = search.get("a")
+        const plan = search.get('plan')
+        const annual = search.get("annual")
+        if (a && !isNaN(Number(a))) {
+            setAmount(a)
+        }
+         if (annual && !isNaN(Number(annual))) {
+            setAnnualFee(annual)
+        }
+        if (plan) {
+            setSelectedPlan(plan)
+        }
+
+    }, [search])
 
     useEffect(() => {
 
@@ -51,9 +69,11 @@ export default function SubscriptionPage({ page }) {
         if (annualFee !== 0) {
             setAnnualFee(0)
         }
-        setSelectedPlan(value);
+        
+        // setSelectedPlan(value);
         const temp = subscriptionOptions.filter((item) => item.label === value);
-        setAmount(temp[0].price);
+        // setAmount(temp[0].price);
+        window.history.pushState({}, "", `${window.location.pathname}?a=${temp[0].price}&plan=${value}`);
     };
 
     async function handlePromoteToJudge() {
@@ -69,7 +89,8 @@ export default function SubscriptionPage({ page }) {
                     status: "error"
                 })
             } else {
-                setAnnualFee(750)
+                  window.history.pushState({}, "", `${window.location.pathname}?annual=${750}`);
+                // setAnnualFee(750)
             }
         }).finally(() => {
             setJudgePromoteLoading(false)

@@ -13,6 +13,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 
 export default function Page() {
@@ -22,6 +23,21 @@ export default function Page() {
   const checkSession = useCheckSession();
   const { state: UserState, setUser } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
+  const search = useSearchParams()
+
+
+  useEffect(() => {
+    const a = search.get("a")
+    const plan = search.get('plan')
+    const annual = search.get("annual")
+    if (a && !isNaN(Number(a))) {
+      setAmount(a)
+    }
+    if (plan) {
+      setSelectedPlan(plan)
+    }
+
+  }, [search])
 
   useEffect(() => {
     let unsubscribe;
@@ -62,8 +78,7 @@ export default function Page() {
   }
 
   async function handlePackageSelect(pkg) {
-    setSelectedPlan(pkg.label);
-    setAmount(pkg.price);
+    window.history.pushState({}, "", `${window.location.pathname}?a=${pkg.price}&plan=${pkg.label}`);
   }
 
   const RenderCheckout = useCallback(() => {

@@ -1,12 +1,13 @@
 "use client"
 
 import { db } from "@/config/firebase";
+import { debounce } from "@/utils/debounce";
 import { Box, Flex, Spinner, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { CreditCard, PaymentForm, ApplePay, GooglePay, CashAppPay } from "react-square-web-payments-sdk";
 
 const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
@@ -17,6 +18,26 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
     const toast = useToast()
+    const [cashRequest, setCashRequest] = useState("")
+    const search = useSearchParams()
+
+    useEffect(() => {
+        const cashReq = search.get("cash_request_id")
+        if (cashReq) {
+            setLoading(true)
+            setMessage("Awaiting CashApp Response")
+        }
+
+
+    }, [search])
+
+
+    const handlePaymentCashApp = useCallback(
+        debounce((token) => {
+            handlePayment(token);
+        }, 1000),
+        []
+    );
 
     async function handlePayment(token) {
         setLoading(true)
@@ -149,7 +170,10 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
         }, 3000);
     }
 
+
     if (!locationId || !appId) return null
+
+
 
     return (
         <Flex
@@ -170,6 +194,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     locationId={locationId}
                     cardTokenizeResponseReceived={async (token) => {
                         handlePayment(token.token);
+
                     }}
 
                     createPaymentRequest={() => ({
@@ -179,9 +204,13 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                             amount: amount.toString(),
                             label: "Total",
                         },
+
                     })}
                 >
                     <Flex flexDir="column" gap={4}>
+
+
+
                         <Box
                             bg="yellow.100"
                             color="gray.800"
@@ -193,7 +222,22 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                             ⚠️ Apple Pay works on Safari browsers that support Apple Pay
                         </Box>
 
-                        <CashAppPay width="full" />
+                        <CashAppPay width="full" callbacks={{
+                            onTokenization: (event) => {
+                                if (event.detail.tokenResult.status === 'OK') {
+                                    setLoading(true)
+                                    setMessage("Processing payment ")
+                                    handlePaymentCashApp(event.detail.tokenResult.token)
+                                } else {
+                                    setLoading(false)
+                                    setMessage("")
+                                    setErrorMessage("CashApp Payment failed")
+                                    const url = new URL(window.location.href);
+                                    url.searchParams.delete("cash_request_id");
+                                    window.history.replaceState({}, "", url);
+                                }
+                            },
+                        }} />
                         <ApplePay />
                         <GooglePay />
 

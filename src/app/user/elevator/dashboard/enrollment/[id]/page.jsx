@@ -20,7 +20,7 @@ import {
   useToast
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 
 export default function GameEnrollmentPage({ params }) {
@@ -33,6 +33,30 @@ export default function GameEnrollmentPage({ params }) {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [proceed, setProceed] = useState(false);
   const toast = useToast();
+  const search = useSearchParams()
+
+  useEffect(() => {
+
+    const p = search.get("p")
+    const o = search.get("o")
+    const g = search.get("g")
+    const type = search.get("type")
+
+    if(type === "proceed"){
+      setProceed(true)
+    } else {
+      setProceed(false)
+    }
+
+
+
+    setPaymentData({ price: Number(p), game: Number(g) });
+    if (o && o === 'true') {
+      onOpen()
+    } else {
+      onClose()
+    }
+  }, [search])
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -57,11 +81,9 @@ export default function GameEnrollmentPage({ params }) {
       })
       .then((response) => {
         if (response.data?.alreadyEnrolled) {
-          setPaymentData({ price: response.data?.price, game: params.id });
-          setProceed(false);
-          onOpen();
+          window.history.pushState({}, "", `${window.location.pathname}?p=${response.data?.price}&g=${params.id}&o=true`);
         } else {
-          router.push("/user/elevator/dashboard");
+          router.push(`/user/elevator/enrolledgames/${params.id}`);
         }
       })
       .catch((e) => {
@@ -98,6 +120,16 @@ export default function GameEnrollmentPage({ params }) {
     }
 
     return url;
+  }
+
+  function handleClose() {
+    const url = new URL(window.location.href)
+    url.searchParams.delete("g");
+    url.searchParams.delete("p");
+    url.searchParams.delete("o");
+    url.searchParams.delete("cash_request_id");
+    url.searchParams.delete("type")
+    window.history.replaceState({}, "", url);
   }
 
   return (
@@ -187,7 +219,7 @@ export default function GameEnrollmentPage({ params }) {
         </Button>
       </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Payment</ModalHeader>
@@ -203,7 +235,7 @@ export default function GameEnrollmentPage({ params }) {
 
                 <Button
                   onClick={() => {
-                    setProceed(true);
+                      window.history.pushState({}, "", `${window.location.pathname}?p=${paymentData.price}&g=${paymentData?.game}&o=true&type=proceed`);
                   }}
                   colorScheme="purple"
                   my={2}

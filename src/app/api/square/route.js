@@ -15,6 +15,7 @@ export async function POST(req) {
 
         const localAmount = Number(amount)
 
+
         const result = await client.payments.create({
             idempotencyKey: randomUUID(),
             sourceId: token,

@@ -36,7 +36,8 @@ export default function useCheckSession() {
                     !pathname.includes("/payment") &&
                     !pathname.includes("/judgepayment") &&
                     !pathname.includes("/triviapayment") &&
-                    !pathname.includes("/payment-success")
+                    !pathname.includes("/payment-success") &&
+                     !pathname.includes("/cashapp-payment")
                 ) {
                     router.replace(`/${userData.role}`);
                 }

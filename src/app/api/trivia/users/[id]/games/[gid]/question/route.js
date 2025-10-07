@@ -1,6 +1,5 @@
 import { query } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { GET as processTrivia } from "@/app/api/process-trivia/route"
 
 
 
@@ -77,7 +76,6 @@ export async function GET(req, { params }) {
     );
 
     if (questionsResult.rows.length === 0) {
-      await processTrivia();
       return NextResponse.json(
         { message: "No questions found for this game." },
         { status: 404 }
@@ -90,6 +88,7 @@ export async function GET(req, { params }) {
     );
 
     if (remainingQuestions.length === 0) {
+      await ProcessTriviaGameResult(gid)
       return NextResponse.json(
         { message: "All questions have been attempted." },
         { status: 200 }
@@ -225,6 +224,85 @@ export async function POST(req, { params }) {
     );
   }
 }
+
+async function ProcessTriviaGameResult(gid) {
+  if (!gid) return;
+
+  try {
+    const expiredGamesResult = await query(
+      `SELECT id, title, fee, game_percentage, prize, spots_remaining, winner_id 
+       FROM trivia_game 
+       WHERE spots_remaining = 0 
+       AND winner_id IS NULL 
+       AND id = $1`,
+      [gid]
+    );
+
+    const expiredGames = expiredGamesResult.rows;
+    if (expiredGames.length === 0) {
+      return; // no game to process
+    }
+
+    const game = expiredGames[0];
+    const { id: gameId, game_percentage, fee, title, prize } = game;
+
+    const enrollmentsResult = await query(
+      `SELECT user_id, progress FROM trivia_game_enrollment WHERE game_id = $1`,
+      [gameId]
+    );
+
+    if (enrollmentsResult.rows.length === 0) {
+      console.log(`No participants found for game ID ${gameId}. Skipping.`);
+      return;
+    }
+
+    // Compute user scores
+    const userScores = enrollmentsResult.rows.map((enrollment) => {
+      const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
+      const correctAnswers = progress.filter((p) => p.isCorrect).length;
+      const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
+      return { user_id: enrollment.user_id, correctAnswers, totalTime };
+    });
+
+    // Determine winner
+    const winner = userScores.sort(
+      (a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime
+    )[0];
+
+    if (!winner || !winner.user_id) {
+      console.log(`No valid winner found for game ID ${gameId}.`);
+      return;
+    }
+
+    await query("BEGIN");
+
+    await query(`UPDATE trivia_game SET winner_id = $1 WHERE id = $2`, [
+      winner.user_id,
+      gameId,
+    ]);
+
+    await query(
+      `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
+       VALUES ($1, $2, 'Trivia game winning', $3, 'Completed', 'trivia')`,
+      [winner.user_id, prize, gameId]
+    );
+
+    const tempStr = `Won game Trivia game - ${title}`;
+    await query(`INSERT INTO logs (user_id, action) VALUES ($1, $2)`, [
+      winner.user_id,
+      tempStr,
+    ]);
+
+    await query("COMMIT");
+
+    console.log(`Winner updated: User ${winner.user_id} for game ID ${gameId}`);
+
+  } catch (error) {
+    console.error("Critical error in trivia game processing:", error);
+    await query("ROLLBACK");
+  }
+}
+
 
 
 
