@@ -145,80 +145,129 @@ export default function GameDetail({ params }) {
                     {gameDetailData?.game?.title}
                 </Heading>
 
-                <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={4}>
+                <Grid
+                    templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }}
+                    gap={6}
+                    mb={4}
+                    overflow="hidden"
+                >
                     <GridItem>
-                        <Text fontWeight="bold" color="purple.600">
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
                             Category: <span>{gameDetailData?.game?.category}</span>
                         </Text>
                     </GridItem>
+
                     <GridItem>
-                        <Text fontWeight="bold" color="purple.600">
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
                             Tier: <span>{gameDetailData?.game?.level}</span>
                         </Text>
                     </GridItem>
-                    {/* <GridItem>
-                        <Text fontWeight="bold" color="purple.600">
-                            Prize Amount: <span>${gameDetailData?.game?.prize_amount}</span>
-                        </Text>
-                    </GridItem> */}
+
                     <GridItem>
-                        <Text fontWeight="bold" color="purple.600">
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
                             Challenge:{" "}
                             <Link
                                 href={gameDetailData?.game?.video_link}
                                 color="blue.500"
                                 isExternal
+                                wordBreak="break-all"
                             >
                                 Watch
                             </Link>
                         </Text>
                     </GridItem>
-                    <GridItem >
-                        <Text fontWeight="bold" color="purple.600">
+
+                    <GridItem>
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
                             Created By: <span>{gameDetailData?.game?.createdby}</span>
                         </Text>
                     </GridItem>
-                    <GridItem >
-                        <Text fontWeight="bold" color="purple.600">
-                            Winner 1st: <span>{gameDetailData?.game?.winner ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner}</Badge> : "TBA"}</span>
+
+                    <GridItem>
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
+                            Winner 1st:{" "}
+                            {gameDetailData?.game?.winner ? (
+                                <Badge
+                                    colorScheme="green"
+                                    fontSize="sm"
+                                    whiteSpace="normal"
+                                    wordBreak="break-word"
+                                    maxW="full"
+                                >
+                                    {gameDetailData?.game?.winner}
+                                </Badge>
+                            ) : (
+                                "TBA"
+                            )}
                         </Text>
                     </GridItem>
 
-                    <GridItem >
-                        <Text fontWeight="bold" color="purple.600">
-                            Winner 2nd: <span>{gameDetailData?.game?.winner_2nd ? <Badge fontSize={'lg'} color={'green'}>{gameDetailData?.game?.winner_2nd}</Badge> : "TBA"}</span>
+                    <GridItem>
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
+                            Winner 2nd:{" "}
+                            {gameDetailData?.game?.winner_2nd ? (
+                                <Badge
+                                    colorScheme="green"
+                                    fontSize="sm"
+                                    whiteSpace="normal"
+                                    wordBreak="break-word"
+                                    maxW="full"
+                                >
+                                    {gameDetailData?.game?.winner_2nd}
+                                </Badge>
+                            ) : (
+                                "TBA"
+                            )}
                         </Text>
                     </GridItem>
 
-                    <GridItem >
+                    <GridItem>
                         <Text fontWeight="bold" color="purple.600">
-                            Deadline: <span>{gameDetailData?.game?.deadline ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY") : ""}</span>
+                            Deadline:{" "}
+                            <span>
+                                {gameDetailData?.game?.deadline
+                                    ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+                                    : ""}
+                            </span>
                         </Text>
                     </GridItem>
-                    <GridItem >
-                        <Text fontWeight="bold" color="purple.600">
-                            Current Round: {gameDetailData?.game?.currentround == 0 ? <Badge colorScheme="yellow">Waiting for game to start</Badge> : <span>{gameDetailData?.game?.currentround}</span>}
+
+                    <GridItem>
+                        <Text fontWeight="bold" color="purple.600" wordBreak="break-word">
+                            Current Round:{" "}
+                            {gameDetailData?.game?.currentround == 0 ? (
+                                <Badge colorScheme="yellow" whiteSpace="normal" wordBreak="break-word">
+                                    Waiting for game to start
+                                </Badge>
+                            ) : (
+                                <span>{gameDetailData?.game?.currentround}</span>
+                            )}
                         </Text>
                     </GridItem>
-                    <GridItem >
+
+                    <GridItem>
                         <Text fontWeight="bold" color="purple.600">
                             Additional Judges:
                         </Text>
                         <Stack spacing={1} mt={2}>
                             {gameDetailData?.game?.judges.map((judge, index) => (
-                                <Text key={index}>{judge}</Text>
+                                <Text key={index} fontSize="sm" wordBreak="break-word">
+                                    {judge}
+                                </Text>
                             ))}
                         </Stack>
                     </GridItem>
+
                     <GridItem>
                         <Text fontWeight="bold" color="purple.600">
                             Round Instructions:
                         </Text>
-                        <Box whiteSpace="pre-wrap" mt={2}>
+                        <Box whiteSpace="pre-wrap" mt={2} wordBreak="break-word">
                             {gameDetailData?.game?.roundinstruction?.[currentRound]}
                         </Box>
                     </GridItem>
                 </Grid>
+
 
                 {gameDetailData && gameDetailData.game.currentround !== 0 &&
                     <>

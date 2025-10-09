@@ -8,7 +8,7 @@ import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { CreditCard, PaymentForm, ApplePay, GooglePay, CashAppPay } from "react-square-web-payments-sdk";
+import { ApplePay, CashAppPay, CreditCard, GooglePay, PaymentForm } from "react-square-web-payments-sdk";
 
 const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const router = useRouter()
@@ -69,6 +69,9 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     duration: 3000,
                     isClosable: true,
                 });
+                const url = new URL(window.location.href);
+                url.searchParams.delete("cash_request_id");
+                window.history.replaceState({}, "", url);
             }).finally(() => {
                 setLoading(false)
             })
@@ -109,6 +112,9 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                         duration: 3000,
                         isClosable: true,
                     });
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("cash_request_id");
+                    window.history.replaceState({}, "", url);
                 }).finally(() => {
                     res(true)
                 })
@@ -156,6 +162,9 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                         duration: 3000,
                         isClosable: true,
                     });
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("cash_request_id");
+                    window.history.replaceState({}, "", url);
                 }).finally(() => {
                     res(true)
                 })
@@ -227,7 +236,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                                 } else {
                                     setLoading(false)
                                     setMessage("")
-                                    setErrorMessage("CashApp Payment failed")
+                                    setErrorMessage("CashApp Payment failedz try again with other method!")
                                     const url = new URL(window.location.href);
                                     url.searchParams.delete("cash_request_id");
                                     window.history.replaceState({}, "", url);

@@ -34,15 +34,19 @@ export default function GameEnrollmentPage({ params }) {
   const [proceed, setProceed] = useState(false);
   const toast = useToast();
   const search = useSearchParams()
+  const cashReq = search.get("cash_request_id")
 
   useEffect(() => {
+
+    if (!game) return
 
     const p = search.get("p")
     const o = search.get("o")
     const g = search.get("g")
     const type = search.get("type")
 
-    if(type === "proceed"){
+
+    if (type === "proceed") {
       setProceed(true)
     } else {
       setProceed(false)
@@ -56,7 +60,7 @@ export default function GameEnrollmentPage({ params }) {
     } else {
       onClose()
     }
-  }, [search])
+  }, [search, game])
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -95,6 +99,9 @@ export default function GameEnrollmentPage({ params }) {
           isClosable: true,
         });
         console.error("Error fetching data:", e);
+        const url = new URL(window.location.href);
+        url.searchParams.delete("cash_request_id");
+        window.history.replaceState({}, "", url);
       })
       .finally(() => {
         setLoading(false);
@@ -123,13 +130,15 @@ export default function GameEnrollmentPage({ params }) {
   }
 
   function handleClose() {
-    const url = new URL(window.location.href)
-    url.searchParams.delete("g");
-    url.searchParams.delete("p");
-    url.searchParams.delete("o");
-    url.searchParams.delete("cash_request_id");
-    url.searchParams.delete("type")
-    window.history.replaceState({}, "", url);
+    if (!cashReq) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete("g");
+      url.searchParams.delete("p");
+      url.searchParams.delete("o");
+      url.searchParams.delete("type")
+      window.history.replaceState({}, "", url);
+    }
+
   }
 
   return (
@@ -141,34 +150,56 @@ export default function GameEnrollmentPage({ params }) {
         </Heading>
 
         {/* Game Details Section */}
-        <Box bg="gray.50" p={6} borderRadius="lg" boxShadow="md" mb={8}>
-          <Grid templateColumns="repeat(2, 1fr)" gap={4} mb={4}>
+        <Box
+          bg="gray.50"
+          p={6}
+          borderRadius="lg"
+          boxShadow="md"
+          mb={8}
+          overflow="hidden"
+        >
+          <Grid
+            templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }}
+            gap={4}
+            mb={4}
+          >
             <GridItem>
               <Text fontWeight="bold">Description:</Text>
-              <Text fontSize="sm">{game?.description}</Text>
+              <Text fontSize="sm" wordBreak="break-word">
+                {game?.description}
+              </Text>
             </GridItem>
+
             <GridItem>
               <Text fontWeight="bold">Category:</Text>
-              <Badge colorScheme="purple" fontSize="sm">
+              <Badge
+                colorScheme="purple"
+                fontSize="sm"
+                whiteSpace="normal"
+                wordBreak="break-word"
+                maxW="full"
+                px={2}
+                py={1}
+              >
                 {game?.category}
               </Badge>
             </GridItem>
+
             <GridItem>
               <Text fontWeight="bold">Total Spots:</Text>
               <Text fontSize="sm">{game?.total_spots}</Text>
             </GridItem>
+
             <GridItem>
               <Text fontWeight="bold">Spots Remaining:</Text>
               <Text fontSize="sm">{game?.spots_remaining}</Text>
             </GridItem>
+
             <GridItem>
               <Text fontWeight="bold">Total Rounds:</Text>
               <Text fontSize="sm">{game?.totalrounds}</Text>
             </GridItem>
-            {/* <GridItem>
-              <Text fontWeight="bold">Prize Amount:</Text>
-              <Text fontSize="sm">${game?.prize_amount}</Text>
-            </GridItem> */}
+
             <GridItem>
               <Text fontWeight="bold">Tier:</Text>
               <Text fontSize="sm">{game?.level}</Text>
@@ -185,6 +216,7 @@ export default function GameEnrollmentPage({ params }) {
             </GridItem>
           </Grid>
         </Box>
+
 
         {/* Challenge Video Section */}
         {game?.video_link && (
@@ -235,7 +267,7 @@ export default function GameEnrollmentPage({ params }) {
 
                 <Button
                   onClick={() => {
-                      window.history.pushState({}, "", `${window.location.pathname}?p=${paymentData.price}&g=${paymentData?.game}&o=true&type=proceed`);
+                    window.history.pushState({}, "", `${window.location.pathname}?p=${paymentData.price}&g=${paymentData?.game}&o=true&type=proceed`);
                   }}
                   colorScheme="purple"
                   my={2}
@@ -251,7 +283,7 @@ export default function GameEnrollmentPage({ params }) {
                   plan={"elevator"}
                   gameId={paymentData?.game}
                   onElevatorPayment={(intentId) => {
-                    onClose();
+                    handleClose();
                     setLoading(true);
                     handleSubmit(intentId, paymentData.price);
                   }}
