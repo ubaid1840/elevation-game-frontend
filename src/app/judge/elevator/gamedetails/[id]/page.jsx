@@ -36,8 +36,7 @@ import { Calendar } from "primereact/calendar";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 export default function Page({ params }) {
-  const router = useRouter();
-
+ 
   const [gameData, setGameData] = useState(null);
   const { state: UserState } = useContext(UserContext);
   const [currentRound, setCurrentRound] = useState(1);
@@ -956,7 +955,7 @@ export default function Page({ params }) {
                           Cumulative Total Score: {eachWinner.cumulativeTotal}
                         </Text>
                         <Text>
-                          Cumulative Average Score:{" "}
+                          Cumulative Average Score:{" "} 
                           {eachWinner.cumulativeAverage.toFixed(2)}
                         </Text>
                       </Box>

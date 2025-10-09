@@ -83,7 +83,7 @@ export default function GameEnrollmentPage({ params }) {
         if (response.data?.alreadyEnrolled) {
           window.history.pushState({}, "", `${window.location.pathname}?p=${response.data?.price}&g=${params.id}&o=true`);
         } else {
-          router.push(`/user/elevator/enrolledgames/${params.id}`);
+          router.replace(`/user/elevator/enrolledgames/${params.id}`);
         }
       })
       .catch((e) => {

@@ -43,8 +43,7 @@ import { db } from "@/config/firebase";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 
 export default function Page({ params }) {
-  const router = useRouter();
-
+  
   const [gameData, setGameData] = useState(null);
   const { state: UserState } = useContext(UserContext);
   const [currentRound, setCurrentRound] = useState(1);
@@ -89,6 +88,7 @@ export default function Page({ params }) {
   const [finalScore, setFinalScore] = useState([]);
   const [editInstruction, setEditInstruction] = useState("");
   const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
+   const [winnerLoading, setWinnerLoading] = useState(false);
 
   const toast = useToast();
 
@@ -279,7 +279,7 @@ export default function Page({ params }) {
   }
 
   async function handleWinner() {
-    onCloseWinner();
+     setWinnerLoading(true);
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
@@ -303,13 +303,6 @@ export default function Page({ params }) {
           timestamp: moment().valueOf(),
           status: "pending",
         });
-        addDoc(collection(db, "notifications"), {
-          to: "admin@gmail.com",
-          title: "Winner Announced",
-          message: `${temp[0].user_name} have won ${gameData.title}`,
-          timestamp: moment().valueOf(),
-          status: "pending",
-        });
         fetchData();
       })
       .catch((e) => {
@@ -321,11 +314,15 @@ export default function Page({ params }) {
           duration: 3000,
           isClosable: true,
         });
+      })
+       .finally(() => {
+        setWinnerLoading(false);
+        onCloseWinner();
       });
   }
 
   async function handleStartGame() {
-    setRoundLoading();
+    setRoundLoading(true);
     onCloseStart();
     handleMoveToNextRound();
   }
@@ -686,7 +683,7 @@ export default function Page({ params }) {
       {gameData &&
         gameData.currentround === gameData.totalrounds &&
         !gameData.winner &&
-        UserState.value.data?.id === Number(gameData?.created_by || 0) && (
+         (
           <Button
             m={4}
             colorScheme="teal"
@@ -703,6 +700,8 @@ export default function Page({ params }) {
                   user_name: enrollment.user_name,
                 }));
               setWinnersList(validUsers);
+              setSelectedUserId("")
+              setSelectedUserId2nd("")
               onOpenWinner();
             }}
           >
@@ -806,9 +805,9 @@ export default function Page({ params }) {
             >
               <Box flex={1}>
                 <FormControl id="user_id" mb={4}>
-                  <FormLabel>Select Winner</FormLabel>
+                  <FormLabel>Select 1st Winner</FormLabel>
                   <Select
-                    placeholder="Select a winner"
+                    placeholder="Select 1st winner"
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
                   >
@@ -820,6 +819,7 @@ export default function Page({ params }) {
                   </Select>
                 </FormControl>
               </Box>
+
               <Box flex={1}>
                 <FormControl id="user_id_2nd" mb={4}>
                   <FormLabel>Select 2nd Winner</FormLabel>
@@ -836,6 +836,7 @@ export default function Page({ params }) {
                   </Select>
                 </FormControl>
               </Box>
+
               <Box
                 flex={1}
                 overflowY="auto"
@@ -843,8 +844,9 @@ export default function Page({ params }) {
                 w="100%"
               >
                 <Text mb={2} fontSize="xl" fontWeight="bold">
-                  Final Scores
+                  Final Scores per round
                 </Text>
+
                 <>
                   {sortedPlayers.map((eachWinner, ind) => {
                     const playerScores = finalScore.filter(
@@ -878,7 +880,7 @@ export default function Page({ params }) {
                           Cumulative Total Score: {eachWinner.cumulativeTotal}
                         </Text>
                         <Text>
-                          Cumulative Average Score:{" "}
+                          Cumulative Average Score:{" "} 
                           {eachWinner.cumulativeAverage.toFixed(2)}
                         </Text>
                       </Box>
@@ -894,7 +896,12 @@ export default function Page({ params }) {
               Cancel
             </Button>
             <Button
-              isDisabled={!selectedUserId}
+             isLoading={winnerLoading}
+              isDisabled={
+                !selectedUserId ||
+                !selectedUserId2nd ||
+                winnerLoading
+              }
               colorScheme="blue"
               ml={3}
               onClick={handleWinner}

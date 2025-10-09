@@ -18,7 +18,6 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
     const toast = useToast()
-    const [cashRequest, setCashRequest] = useState("")
     const search = useSearchParams()
 
     useEffect(() => {
@@ -99,7 +98,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                         console.log(e)
                     })
                     router.push(
-                        `/${user.role}/trivia/enrolledgames/${gid}`
+                        `/user/trivia/enrolledgames/${gid}`
                     );
                 })
                 .catch((e) => {
@@ -208,9 +207,6 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     })}
                 >
                     <Flex flexDir="column" gap={4}>
-
-
-
                         <Box
                             bg="yellow.100"
                             color="gray.800"
