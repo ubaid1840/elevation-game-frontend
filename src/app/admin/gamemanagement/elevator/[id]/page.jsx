@@ -41,9 +41,10 @@ import moment from "moment";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 
 export default function Page({ params }) {
-  
+
   const [gameData, setGameData] = useState(null);
   const { state: UserState } = useContext(UserContext);
   const [currentRound, setCurrentRound] = useState(1);
@@ -88,7 +89,7 @@ export default function Page({ params }) {
   const [finalScore, setFinalScore] = useState([]);
   const [editInstruction, setEditInstruction] = useState("");
   const [editDescriptionLoading, setEditDescriptionLoading] = useState(false);
-   const [winnerLoading, setWinnerLoading] = useState(false);
+  const [winnerLoading, setWinnerLoading] = useState(false);
 
   const toast = useToast();
 
@@ -97,6 +98,7 @@ export default function Page({ params }) {
       fetchData();
     }
   }, [UserState.value.data]);
+
 
   async function fetchData() {
     axios
@@ -279,7 +281,7 @@ export default function Page({ params }) {
   }
 
   async function handleWinner() {
-     setWinnerLoading(true);
+    setWinnerLoading(true);
     axios
       .put(`/api/games/${gameData.id}`, {
         winnerid: selectedUserId,
@@ -315,7 +317,7 @@ export default function Page({ params }) {
           isClosable: true,
         });
       })
-       .finally(() => {
+      .finally(() => {
         setWinnerLoading(false);
         onCloseWinner();
       });
@@ -413,28 +415,33 @@ export default function Page({ params }) {
                 "TBA"
               )}
             </Text>
-            
-              <Text>
-                <strong>Winner 2nd:</strong>{" "}
-                {gameData?.winner_2nd ? (
-                  <Badge fontSize={"lg"} color={"green"}>
-                    {gameData?.winner_2nd_name}
-                  </Badge>
-                ) : (
-                  "TBA"
-                )}
-              </Text>
-            
+
+            <Text>
+              <strong>Winner 2nd:</strong>{" "}
+              {gameData?.winner_2nd ? (
+                <Badge fontSize={"lg"} color={"green"}>
+                  {gameData?.winner_2nd_name}
+                </Badge>
+              ) : (
+                "TBA"
+              )}
+            </Text>
+
             <Text>
               <strong>Additional Judges:</strong>{" "}
               {gameData?.additional_judges_names.join(", ")}
             </Text>
-            <Text>
-              <strong>Deadline: </strong>
-              {gameData?.deadline
-                ? moment(gameData?.deadline).format("MM/DD/YYYY")
-                : "NA"}
-            </Text>
+
+            <DeadlineTooltip>
+              <Text>
+                <strong>Target Close Date: </strong>
+                {gameData?.deadline
+                  ? moment(gameData?.deadline).format("MM/DD/YYYY")
+                  : "NA"}
+              </Text>
+            </DeadlineTooltip>
+
+
 
             <Text>
               <strong>Round Instructions:</strong>{" "}
@@ -540,12 +547,12 @@ export default function Page({ params }) {
                                     <VStack>
                                       {pitch.scores &&
                                         pitch.scores[
-                                          UserState.value.data?.id
+                                        UserState.value.data?.id
                                         ] !== undefined && (
                                           <Text>
                                             {
                                               pitch.scores[
-                                                UserState.value.data?.id
+                                              UserState.value.data?.id
                                               ]
                                             }
                                           </Text>
@@ -571,21 +578,21 @@ export default function Page({ params }) {
                                   {!pitch.scores ||
                                     (pitch.scores[UserState.value.data?.id] ==
                                       undefined && (
-                                      <Button
-                                        size={"sm"}
-                                        colorScheme="purple"
-                                        onClick={() => {
-                                          setSelectedPitch({
-                                            pitch: pitch,
-                                            pitchIndex: index,
-                                            enrollmentIndex: enrolIndex,
-                                          });
-                                          onOpenScore();
-                                        }}
-                                      >
-                                        Add Score
-                                      </Button>
-                                    ))}
+                                        <Button
+                                          size={"sm"}
+                                          colorScheme="purple"
+                                          onClick={() => {
+                                            setSelectedPitch({
+                                              pitch: pitch,
+                                              pitchIndex: index,
+                                              enrollmentIndex: enrolIndex,
+                                            });
+                                            onOpenScore();
+                                          }}
+                                        >
+                                          Add Score
+                                        </Button>
+                                      ))}
                                   {!pitch.pitch_status && (
                                     <>
                                       <Button
@@ -683,7 +690,7 @@ export default function Page({ params }) {
       {gameData &&
         gameData.currentround === gameData.totalrounds &&
         !gameData.winner &&
-         (
+        (
           <Button
             m={4}
             colorScheme="teal"
@@ -880,7 +887,7 @@ export default function Page({ params }) {
                           Cumulative Total Score: {eachWinner.cumulativeTotal}
                         </Text>
                         <Text>
-                          Cumulative Average Score:{" "} 
+                          Cumulative Average Score:{" "}
                           {eachWinner.cumulativeAverage.toFixed(2)}
                         </Text>
                       </Box>
@@ -896,7 +903,7 @@ export default function Page({ params }) {
               Cancel
             </Button>
             <Button
-             isLoading={winnerLoading}
+              isLoading={winnerLoading}
               isDisabled={
                 !selectedUserId ||
                 !selectedUserId2nd ||

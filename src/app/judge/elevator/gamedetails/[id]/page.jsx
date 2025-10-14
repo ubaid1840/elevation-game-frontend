@@ -1,4 +1,5 @@
 "use client";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
@@ -458,12 +459,14 @@ export default function Page({ params }) {
               <strong>Additional Judges:</strong>{" "}
               {gameData?.additional_judges_names.join(", ")}
             </Text>
-            <Text>
-              <strong>Deadline: </strong>
-              {gameData?.deadline
-                ? moment(gameData?.deadline).format("MM/DD/YYYY")
-                : "NA"}
-            </Text>
+            <DeadlineTooltip>
+              <Text>
+                <strong>Target Close Date: </strong>
+                {gameData?.deadline
+                  ? moment(gameData?.deadline).format("MM/DD/YYYY")
+                  : "NA"}
+              </Text>
+            </DeadlineTooltip>
 
             <Text>
               <strong>Round Instructions:</strong>{" "}

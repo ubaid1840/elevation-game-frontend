@@ -77,7 +77,7 @@ export default function Page() {
           Start Date: {moment(new Date(game.start_date)).format("MM/DD/YYYY")}
         </Text> */}
           <Text fontSize="lg">
-            Deadline: {moment(new Date(game.deadline)).format("MM/DD/YYYY")}
+            Target Close Date: {moment(new Date(game.deadline)).format("MM/DD/YYYY")}
           </Text>
         </Box>
 

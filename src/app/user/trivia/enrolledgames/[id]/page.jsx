@@ -1,4 +1,5 @@
 "use client";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 import { UserContext } from "@/store/context/UserContext";
 import { debounce } from "@/utils/debounce";
 import {
@@ -315,14 +316,16 @@ const GameCard = ({ gameDetailData, instructions }) => {
             <Badge colorScheme="blue">{gameDetailData?.game?.createdby}</Badge>
           </Text>
         </GridItem>
+        <DeadlineTooltip>
         <GridItem>
           <Text fontWeight="bold">
-            Deadline:{" "}
+            Target Close Date:{" "}
             {gameDetailData?.game?.deadline
               ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
               : ""}
           </Text>
         </GridItem>
+        </DeadlineTooltip>
       </Grid>
 
       <Divider my={4} />

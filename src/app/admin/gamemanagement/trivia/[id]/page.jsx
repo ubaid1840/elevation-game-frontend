@@ -1,4 +1,5 @@
 "use client";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import { UserContext } from "@/store/context/UserContext";
 import {
@@ -131,12 +132,14 @@ const GameCard = ({ gameDetailData, instructions }) => {
             ? moment(gameDetailData.game.start_date).format("MM/DD/YYYY")
             : ""}
         </Text>
+        <DeadlineTooltip>
         <Text fontWeight="bold">
-          Deadline:{" "}
+          Target Close Date:{" "}
           {gameDetailData?.game?.deadline
             ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
             : ""}
         </Text>
+        </DeadlineTooltip>
         <Text fontWeight="bold">
           Spots Available: {gameDetailData?.game?.spots_remaining}
         </Text>

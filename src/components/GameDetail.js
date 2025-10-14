@@ -31,6 +31,7 @@ import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
 import moment from "moment";
 import { useContext, useEffect, useState } from "react";
+import DeadlineTooltip from "./deadline-tooltip";
 
 export default function GameDetail({ params }) {
 
@@ -221,16 +222,18 @@ export default function GameDetail({ params }) {
                         </Text>
                     </GridItem>
 
-                    <GridItem>
-                        <Text fontWeight="bold" color="purple.600">
-                            Deadline:{" "}
-                            <span>
-                                {gameDetailData?.game?.deadline
-                                    ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
-                                    : ""}
-                            </span>
-                        </Text>
-                    </GridItem>
+                    <DeadlineTooltip>
+                        <GridItem>
+                            <Text fontWeight="bold" color="purple.600">
+                                Target Close Date:{" "}
+                                <span>
+                                    {gameDetailData?.game?.deadline
+                                        ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+                                        : ""}
+                                </span>
+                            </Text>
+                        </GridItem>
+                    </DeadlineTooltip>
 
                     <GridItem>
                         <Text fontWeight="bold" color="purple.600" wordBreak="break-word">

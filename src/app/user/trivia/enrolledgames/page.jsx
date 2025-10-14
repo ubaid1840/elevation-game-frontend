@@ -1,22 +1,19 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/store/context/UserContext";
 import {
+  Badge,
   Box,
+  Button,
   Heading,
+  Link,
+  SimpleGrid,
   Stack,
   Text,
-  Button,
-  SimpleGrid,
   useColorModeValue,
-  Link,
-  Badge,
 } from "@chakra-ui/react";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { useRouter } from "next/navigation";
 import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
 import moment from "moment";
+import { useContext, useEffect, useState } from "react";
 
 export default function Page() {
   const [participantGamesData, setParticipantGamesData] = useState([]);
@@ -69,7 +66,7 @@ export default function Page() {
                   {game.title}
                 </Heading>
                 <Text color="purple.500">
-                  Deadline:{" "}
+                  Target Close Date:{" "}
                   {moment(new Date(game.deadline)).format("MM/DD/YYYY")}
                 </Text>
                 <div>

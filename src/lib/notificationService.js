@@ -42,8 +42,8 @@ export const sendBulkNotifications = async (message, subject, type) => {
         if (user.phone) {
           return twilioClient.messages.create({
             body: message,
-            // from: process.env.TWILIO_PHONE_NUMBER,
-            messagingServiceSid : process.env.TWILIO_TWILIO_MESSAGING_SERVICE_SID,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            // messagingServiceSid : process.env.TWILIO_TWILIO_MESSAGING_SERVICE_SID,
             to: user.phone,
           }).catch(err => {
             console.error(`Error sending SMS to ${user.phone}:`, err);
