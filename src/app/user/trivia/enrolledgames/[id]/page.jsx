@@ -57,7 +57,8 @@ export default function Page({ params }) {
     if (UserState.value.data?.id) {
       debouncedFetchData(UserState.value.data?.id);
     }
-  }, [UserState.value.data]);
+
+  }, [UserState.value.data?.id]);
 
   const debouncedFetchData = useCallback(
     debounce((id) => {
@@ -68,7 +69,7 @@ export default function Page({ params }) {
 
   async function fetchQuestion(id) {
     try {
-      const response = await axios.get( 
+      const response = await axios.get(
         `/api/trivia/users/${id}/games/${params.id}/question`
       );
       if (!response.data?.message) {
@@ -76,9 +77,8 @@ export default function Page({ params }) {
         setTimeLeft(response.data.time * 1000);
       } else {
         setQuestions({});
-         fetchData(id)
         fetchMyGameResult(id);
-       
+
       }
     } catch (e) {
       console.log("Error fetching questions:", e.message);
@@ -124,7 +124,7 @@ export default function Page({ params }) {
       });
   }
 
-  
+
   useEffect(() => {
     if (timeLeft && timeLeft > 0) {
       if (!isModalOpen && !isLoading) {
@@ -196,36 +196,36 @@ export default function Page({ params }) {
       {myGameResult ? (
         <GameResult data={myGameResult} handleShareGame={handleShareGame} />
       ) :
-      loading ? (
-        <Center mt={10}>
-          <Spinner />
-        </Center>
-      ) : (
-        <Box p={5} maxW="600px" mx="auto">
-          {questions?.question ? (
-            <VStack spacing={4} align="stretch">
-              <Text fontSize="lg">Question: {questions?.question}</Text>
-              <Progress
-                value={(timeLeft / (questions?.time * 1000)) * 100}
-                size="sm"
-                colorScheme="purple"
-              />
-              <RenderQuestions />
-              <Button
-                colorScheme="purple"
-                onClick={handleAnswer}
-                isDisabled={!selectedAnswer || isLoading}
-              >
-                {isLoading ? "Saving..." : "Continue"}
-              </Button>
-            </VStack>
-          ) : (
-            <Text fontSize="xl" textAlign="center">
-              {" Preparing..."}
-            </Text>
-          )}
-        </Box>
-      )}
+        loading ? (
+          <Center mt={10}>
+            <Spinner />
+          </Center>
+        ) : (
+          <Box p={5} maxW="600px" mx="auto">
+            {questions?.question ? (
+              <VStack spacing={4} align="stretch">
+                <Text fontSize="lg">Question: {questions?.question}</Text>
+                <Progress
+                  value={(timeLeft / (questions?.time * 1000)) * 100}
+                  size="sm"
+                  colorScheme="purple"
+                />
+                <RenderQuestions />
+                <Button
+                  colorScheme="purple"
+                  onClick={handleAnswer}
+                  isDisabled={!selectedAnswer || isLoading}
+                >
+                  {isLoading ? "Saving..." : "Continue"}
+                </Button>
+              </VStack>
+            ) : (
+              <Text fontSize="xl" textAlign="center">
+                {" Preparing..."}
+              </Text>
+            )}
+          </Box>
+        )}
       <AnswerModal
         visible={isModalOpen}
         onClose={(val) => {
@@ -317,14 +317,14 @@ const GameCard = ({ gameDetailData, instructions }) => {
           </Text>
         </GridItem>
         <DeadlineTooltip>
-        <GridItem>
-          <Text fontWeight="bold">
-            Target Close Date:{" "}
-            {gameDetailData?.game?.deadline
-              ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
-              : ""}
-          </Text>
-        </GridItem>
+          <GridItem>
+            <Text fontWeight="bold">
+              Target Close Date:{" "}
+              {gameDetailData?.game?.deadline
+                ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+                : ""}
+            </Text>
+          </GridItem>
         </DeadlineTooltip>
       </Grid>
 
@@ -416,8 +416,8 @@ const GameResult = ({ data, handleShareGame }) => {
                           ? "green.200"
                           : "red.200"
                         : option === question.correct
-                        ? "blue.200"
-                        : "gray.100"
+                          ? "blue.200"
+                          : "gray.100"
                     }
                   >
                     <Text>
