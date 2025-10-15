@@ -28,6 +28,10 @@ export async function POST(req) {
         return NextResponse.json({ message: "Notifications sent" }, { status: 200 });
 
     } catch (error) {
+          await query(
+                `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
+                [JSON.stringify(error), "notification route"]
+            );
         return NextResponse.json({ message: 'Error occured', error: error.message }, { status: 500 });
     }
 
