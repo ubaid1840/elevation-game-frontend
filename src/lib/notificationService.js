@@ -75,6 +75,11 @@ export const sendSingleEmail = async (message, subject, id) => {
         text: message,
       });
 
+        await query(
+        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+        [Number(id), `Email sent successfully to ${user.email}`]
+      );
+
       console.log(`Email sent successfully to ${user.email}`);
     } else {
       console.log(`User with id ${id} not found or missing email.`);
@@ -100,6 +105,10 @@ export const sendSingleSMS = async (message, id) => {
         from: process.env.TWILIO_PHONE_NUMBER,
         to: user.phone,
       })
+      await query(
+        'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
+        [Number(id), `SMS sent successfully to ${user.phone}`]
+      );
       console.log(`SMS sent successfully to ${user.phone}`);
     } else {
       console.log(`User with id ${id} not found or missing phone.`);
