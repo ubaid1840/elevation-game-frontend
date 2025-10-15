@@ -81,6 +81,10 @@ export const sendSingleEmail = async (message, subject, id) => {
     }
   } catch (error) {
     console.log('Error in sending email:', error);
+    await query(
+      `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
+      [JSON.stringify(error), "email"]
+    );
   }
 };
 
@@ -96,11 +100,16 @@ export const sendSingleSMS = async (message, id) => {
         from: process.env.TWILIO_PHONE_NUMBER,
         to: user.phone,
       })
+      console.log(`SMS sent successfully to ${user.phone}`);
     } else {
       console.log(`User with id ${id} not found or missing phone.`);
     }
   } catch (error) {
     console.log('Error in sending sms:', error);
+    await query(
+      `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
+      [JSON.stringify(error), "sms"]
+    );
   }
 };
 

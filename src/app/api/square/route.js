@@ -33,8 +33,8 @@ export async function POST(req) {
 
         if (error instanceof SquareError) {
             await query(
-                `INSERT INTO error_logs (message) VALUES ($1)`,
-                [JSON.stringify(error)]
+                `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
+                [JSON.stringify(error), "payment"]
             );
             return NextResponse.json({ message: error?.body?.errors[0]?.category || "Something went wrong" }, { status: 500 })
         } else {

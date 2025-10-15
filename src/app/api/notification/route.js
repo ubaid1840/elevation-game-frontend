@@ -1,6 +1,6 @@
 import { sendBulkNotifications, sendSingleEmail, sendSingleSMS } from "@/lib/notificationService";
 import { NextResponse } from "next/server";
-
+ 
 
 export async function POST(req) {
     const { msg, type, ids } = await req.json();
