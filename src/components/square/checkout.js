@@ -236,7 +236,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                                 } else {
                                     setLoading(false)
                                     setMessage("")
-                                    setErrorMessage("CashApp Payment failedz try again with other method!")
+                                    setErrorMessage("CashApp Payment failed try again with other method!")
                                     const url = new URL(window.location.href);
                                     url.searchParams.delete("cash_request_id");
                                     window.history.replaceState({}, "", url);

@@ -16,10 +16,10 @@ export async function POST(req) {
 
         const localAmount = Number(amount)
 
-
         const result = await client.payments.create({
             idempotencyKey: randomUUID(),
             sourceId: token,
+            locationId : process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
             amountMoney: {
                 currency: 'USD',
                 amount: BigInt(localAmount * 100)
