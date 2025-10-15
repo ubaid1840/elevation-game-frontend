@@ -13,7 +13,9 @@ export async function GET(req, { params }) {
         g.totalrounds, 
         g.level, 
         g.prize_amount, 
-        g.winner, 
+        g.winner,
+        g.closed_by_admin,
+        g.close_reason, 
         g.additional_judges
        FROM games g 
        WHERE g.created_by = $1 OR $1::text = ANY(g.additional_judges::text[])`,

@@ -72,12 +72,13 @@ export default function Page() {
                 <div>
                   <Badge
                     colorScheme={
-                      game.status === "COMPLETED" ? "green" : "yellow"
+                      game?.winner_id ? "green" : 
+                     game?.closed_by_admin ? "red" : "yellow"
                     }
                     variant="solid"
                     fontSize="1rem"
                   >
-                    {game.completed ? "WINNER ANNOUNCED" : "PENDING"}
+                    {game?.winner_id ? "WINNER ANNOUNCED" : game?.closed_by_admin ? game?.close_reason  : "PENDING"}
                   </Badge>
                 </div>
               </Stack>

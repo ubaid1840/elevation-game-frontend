@@ -14,6 +14,9 @@ import {
   Center,
   Spinner,
   useToast,
+  Tooltip,
+  UnorderedList,
+  ListItem,
 } from "@chakra-ui/react";
 import axios from "axios";
 import moment from "moment";
@@ -52,11 +55,13 @@ export default function JudgesInteraction() {
 
     axios.get(`/api/booking/${id}`).then((response) => {
       if (response.data.length > 0) {
-        const temp = response.data.filter((item) => item.status !== "Ended");
+        const temp = response.data
         setMyBookings([...temp]);
       }
     });
   }
+
+
 
   const handleJudgeChange = (event) => {
     setSelectedJudge(event.target.value);
@@ -270,12 +275,23 @@ export default function JudgesInteraction() {
                         href={booking.meeting_link}
                         color="teal.500"
                         target="blank"
+                        display={'flex'}
                       >
                         Join Meeting
                       </Link>
                     ) : (
                       <Text color="gray.500">Meeting link not available</Text>
                     )}
+
+                    {(
+                      booking.status === 'Ended' ||
+                      moment().diff(moment(Number(booking.booking_date)), 'days') > 30
+                    ) && (
+                        <RemoveButton booking={booking} user_id={UserState.value.data?.id} onRefresh={() => {
+                          fetchData(UserState.value.data?.id)
+                        }} />
+                      )}
+
                   </Box>
                 ))
               ) : (
@@ -287,4 +303,44 @@ export default function JudgesInteraction() {
       )}
     </>
   );
+}
+
+const RemoveButton = ({ booking, user_id, onRefresh }) => {
+  const [loading, setLoading] = useState(false)
+
+  async function handleRemove() {
+    if (!booking?.id) return
+
+    setLoading(true)
+
+    try {
+
+      await axios.put(`/api/booking/${booking.id}/user`, { user_id })
+      onRefresh()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Tooltip
+      fontSize="md"
+      hasArrow
+      label={
+        <Box p={2}>
+          <UnorderedList>
+            <ListItem>
+              This meeting date has expired and is no longer active. You can safely remove it from your calendar.
+            </ListItem>
+          </UnorderedList>
+        </Box>
+      }
+    >
+      <Button onClick={handleRemove} isDisabled={loading} isLoading={loading} mt={2} colorScheme="red" size="sm">
+        Remove
+      </Button>
+    </Tooltip>
+  )
 }

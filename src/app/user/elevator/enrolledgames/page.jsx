@@ -30,7 +30,6 @@ export default function Page() {
     axios
       .get(`/api/users/${UserState.value.data?.id}/games`)
       .then((response) => {
-        console.log(response.data);
         setParticipantGamesData(response.data.myGames);
       });
   }

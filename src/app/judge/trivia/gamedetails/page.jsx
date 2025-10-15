@@ -6,7 +6,6 @@ import {
   Box,
   Center,
   Divider,
-  Flex,
   Heading,
   Input,
   Link,
@@ -18,11 +17,10 @@ import {
   TabPanels,
   Tabs,
   Text,
-  useColorModeValue,
+  useColorModeValue
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { IoIosWarning } from "react-icons/io";
 
 export default function Page() {
   const cardBg = useColorModeValue("gray.100", "gray.700");
@@ -125,7 +123,9 @@ export default function Page() {
                 <TabPanel>
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                     {filteredGames
-                      .filter((item) => !item.winner_id)
+                      .filter((item) => {
+                        if (!item.winner_id && !item.closed_by_admin) return item
+                      })
                       .map((game, index) => (
                         <Box
                           as={Link}
@@ -178,7 +178,9 @@ export default function Page() {
                 <TabPanel>
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                     {filteredGames
-                      .filter((item) => item.winner_id)
+                      .filter((item) => {
+                        if (item.winner_id || item.closed_by_admin) return item
+                      })
                       .map((game, index) => (
                         <Box
                           as={Link}
@@ -217,10 +219,10 @@ export default function Page() {
                               Status:{" "}
                               <Badge
                                 colorScheme={
-                                  game.winner_id ? "green" : "yellow"
+                                  game.winner_id ? "green" : "red"
                                 }
                               >
-                                {game.winner_id ? "Winner Announced" : "Pending"}
+                                {game.winner_id ? "Winner Announced" : game?.close_reason}
                               </Badge>
                             </Text>
                           </Stack>

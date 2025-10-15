@@ -146,6 +146,8 @@ export default function GameDetail({ params }) {
                     {gameDetailData?.game?.title}
                 </Heading>
 
+                  {gameDetailData?.game?.closed_by_admin && <Badge mb={4} fontSize={"md"} color={"red"}>{gameDetailData?.game?.close_reason}</Badge>}
+
                 <Grid
                     templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }}
                     gap={6}
@@ -397,7 +399,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && (
+                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && !gameDetailData?.game?.closed_by_admin && (
                             <Button
                                 isDisabled={!UserState.value.data?.navigationAllowed}
                                 w={"full"}

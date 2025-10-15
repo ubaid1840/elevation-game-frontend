@@ -6,6 +6,7 @@ import {
   Center,
   Heading,
   Input,
+  ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,6 +17,8 @@ import {
   Spinner,
   Stack,
   Text,
+  Tooltip,
+  UnorderedList,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -171,6 +174,15 @@ export default function JudgeMeeting() {
                           End Session
                         </Button>
                       )}
+
+                    {(
+                      group.status === 'Ended' ||
+                      moment().diff(moment(Number(group.booking_date)), 'days') > 30
+                    ) && (
+                        <RemoveButton booking={group} user_id={UserState.value.data?.id} onRefresh={() => {
+                          fetchData(UserState.value.data?.id)
+                        }} />
+                      )}
                   </VStack>
                 </Box>
               ))}
@@ -222,4 +234,44 @@ export default function JudgeMeeting() {
       </Modal>
     </>
   );
+}
+
+const RemoveButton = ({ booking, user_id, onRefresh }) => {
+  const [loading, setLoading] = useState(false)
+
+  async function handleRemove() {
+    if (!booking?.id) return
+
+    setLoading(true)
+
+    try {
+
+      await axios.delete(`/api/booking/${booking.id}`)
+      onRefresh()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Tooltip
+      fontSize="md"
+      hasArrow
+      label={
+        <Box p={2}>
+          <UnorderedList>
+            <ListItem>
+              This meeting date has expired and is no longer active. You can safely remove it from your calendar.
+            </ListItem>
+          </UnorderedList>
+        </Box>
+      }
+    >
+      <Button onClick={handleRemove} isDisabled={loading} isLoading={loading} mt={2} colorScheme="red" size="sm">
+        Remove
+      </Button>
+    </Tooltip>
+  )
 }

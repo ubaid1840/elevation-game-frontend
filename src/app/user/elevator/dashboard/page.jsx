@@ -245,9 +245,7 @@ export default function Page() {
                 </Box>
               ))}
           </Flex>
-          {/* <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-           
-          </Grid> */}
+       
         </VStack>
 
         <Divider borderColor="gray.300" />

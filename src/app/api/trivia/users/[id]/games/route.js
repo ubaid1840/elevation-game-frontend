@@ -6,13 +6,13 @@ export async function GET(req, { params }) {
 
   try {
     const games = await query(
-      'SELECT trivia_game.*, (trivia_game.winner_id IS NOT NULL) AS Completed FROM trivia_game JOIN trivia_game_enrollment ON trivia_game.id = trivia_game_enrollment.game_id WHERE trivia_game_enrollment.user_id = $1',
+      'SELECT trivia_game.*, (trivia_game.winner_id IS NOT NULL  OR trivia_game.closed_by_admin = TRUE) AS Completed FROM trivia_game JOIN trivia_game_enrollment ON trivia_game.id = trivia_game_enrollment.game_id WHERE trivia_game_enrollment.user_id = $1',
       [id]
     );
 
     
     const availableGames = await query(
-      `SELECT * FROM trivia_game WHERE winner_id IS NULL AND id NOT IN (SELECT game_id FROM trivia_game_enrollment WHERE user_id = $1)`,
+      `SELECT * FROM trivia_game WHERE winner_id IS NULL AND closed_by_admin IS FALSE AND id NOT IN (SELECT game_id FROM trivia_game_enrollment WHERE user_id = $1)`,
        [id]
     );
 

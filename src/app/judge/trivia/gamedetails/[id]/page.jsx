@@ -89,6 +89,9 @@ const GameCard = ({ gameDetailData, instructions }) => {
         {gameDetailData?.game?.title}
       </Heading>
 
+       {gameDetailData?.game?.closed_by_admin && <Badge fontSize={"md"} color={"red"} mb={2}>{gameDetailData?.game?.close_reason}</Badge>}
+      
+
       <Box gap={2} display={"flex"} flexDir={"column"}>
       {instructions.length > 0 && (
           <>

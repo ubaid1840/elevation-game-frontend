@@ -1,3 +1,4 @@
+import { query } from "@/lib/db";
 import client from "@/lib/squareClient";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
@@ -29,7 +30,12 @@ export async function POST(req) {
         return NextResponse.json({ message: "Payment done", paymentId: result?.payment?.id }, { status: 200 })
     } catch (error) {
         console.log(error)
+
         if (error instanceof SquareError) {
+            await query(
+                `INSERT INTO error_logs (message) VALUES ($1)`,
+                [JSON.stringify(error)]
+            );
             return NextResponse.json({ message: error?.body?.errors[0]?.category || "Something went wrong" }, { status: 500 })
         } else {
             return NextResponse.json({ message: error?.message || "Something went wrong" }, { status: 500 })
@@ -38,6 +44,6 @@ export async function POST(req) {
     }
 
 
-} 
+}
 
 export const revalidate = 0

@@ -240,13 +240,13 @@ async function ProcessTriviaGameResult(gid) {
 
     const expiredGames = expiredGamesResult.rows;
     if (expiredGames.length === 0) {
-      return; 
+      return;
     }
 
     const game = expiredGames[0];
     const { id: gameId, game_percentage, fee, title, prize } = game;
 
-      const questionCountResult = await query(
+    const questionCountResult = await query(
       `SELECT COUNT(*) AS total_questions FROM trivia_questions WHERE game_id = $1`,
       [gameId]
     );
@@ -267,7 +267,7 @@ async function ProcessTriviaGameResult(gid) {
       return;
     }
 
-     for (const enrollment of enrollmentsResult.rows) {
+    for (const enrollment of enrollmentsResult.rows) {
       const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
       const answeredQuestions = progress.length;
 
@@ -286,6 +286,18 @@ async function ProcessTriviaGameResult(gid) {
       const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
       return { user_id: enrollment.user_id, correctAnswers, totalTime };
     });
+
+    const highestScore = Math.max(...userScores.map(u => u.correctAnswers));
+
+    if (highestScore === 0) {
+      await query("BEGIN");
+      await query(
+        `UPDATE trivia_game SET closed_by_admin = TRUE, close_reason = 'No one answered any question correctly' WHERE id = $1`,
+        [gameId]
+      );
+      await query("COMMIT");    
+      return;
+    }
 
     // Determine winner
     const winner = userScores.sort(

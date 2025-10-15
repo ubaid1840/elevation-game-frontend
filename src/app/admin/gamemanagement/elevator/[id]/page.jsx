@@ -42,6 +42,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import DeadlineTooltip from "@/components/deadline-tooltip";
+import EndGame from "@/components/end-game";
 
 export default function Page({ params }) {
 
@@ -77,6 +78,12 @@ export default function Page({ params }) {
     isOpen: isOpenEditInstruction,
     onOpen: onOpenEditInstruction,
     onClose: onCloseEditInstruction,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenEndGame,
+    onOpen: onOpenEndGame,
+    onClose: onCloseEndGame,
   } = useDisclosure();
 
   const [selectedPitch, setSelectedPitch] = useState();
@@ -386,6 +393,7 @@ export default function Page({ params }) {
             {gameData?.title}
           </Heading>
           <VStack align="start" spacing={3}>
+            {gameData?.closed_by_admin && <Badge fontSize={"md"} color={"red"}>{gameData?.close_reason}</Badge>}
             <Text>
               <strong>Created By:</strong> {gameData?.created_by_name}
             </Text>
@@ -449,19 +457,22 @@ export default function Page({ params }) {
             <Box whiteSpace="pre-wrap">
               {gameData?.roundinstruction?.[currentRound]}
             </Box>
-            <Text></Text>
-            <Button
-              isLoading={editDescriptionLoading}
-              colorScheme="blue"
-              onClick={handleEditInstruction}
-            >
-              Edit Instruction
-            </Button>
+
+            {gameData && !gameData?.closed_by_admin && !gameData?.winner &&
+              <Button
+                isLoading={editDescriptionLoading}
+                colorScheme="blue"
+                onClick={handleEditInstruction}
+              >
+                Edit Instruction
+              </Button>
+            }
           </VStack>
         </Box>
         {gameData && (
           <>
             {gameData.currentround === 0 ? (
+              !gameData?.closed_by_admin && !gameData?.winner &&
               <Button
                 isDisabled={Number(gameData?.spots_remaining ?? -1) !== 0}
                 isLoading={roundLoading}
@@ -673,11 +684,12 @@ export default function Page({ params }) {
       </Box>
       {gameData?.totalrounds &&
         gameData.currentround === currentRound &&
-        !gameData.winner && (
+        !gameData.winner && !gameData?.closed_by_admin && (
           <Button
             isDisabled={gameData.currentround === gameData.totalrounds}
             isLoading={roundLoading}
-            m={4}
+            mx={4}
+            mb={2}
             colorScheme="purple"
             size={"lg"}
             onClick={() => {
@@ -689,10 +701,11 @@ export default function Page({ params }) {
         )}
       {gameData &&
         gameData.currentround === gameData.totalrounds &&
-        !gameData.winner &&
+        !gameData.winner && !gameData?.closed_by_admin && 
         (
           <Button
-            m={4}
+            mx={4}
+            mb={2}
             colorScheme="teal"
             size={"lg"}
             onClick={() => {
@@ -714,6 +727,34 @@ export default function Page({ params }) {
           >
             Announce Winner
           </Button>
+        )}
+
+
+      {gameData &&
+        !gameData.winner && !gameData?.closed_by_admin && 
+        (
+          <EndGame type="elevator" gameid={gameData?.id} isOpen={isOpenEndGame} onClose={onCloseEndGame} onRefresh={() => {
+            fetchData()
+          }} onClick={() => {
+            if (gameData.enrollments.length > 1) {
+              const validUsers = gameData.enrollments
+                .filter((enrollment) =>
+                  enrollment.pitches.every(
+                    (pitch) => pitch.pitch_status !== "Disqualify"
+                  )
+                )
+                .map((enrollment) => ({
+                  user_id: enrollment.user_id,
+                  user_name: enrollment.user_name,
+                }));
+              setWinnersList(validUsers);
+              setSelectedUserId("")
+              setSelectedUserId2nd("")
+              onOpenWinner();
+            } else {
+              onOpenEndGame()
+            }
+          }} />
         )}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

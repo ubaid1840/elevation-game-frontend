@@ -11,6 +11,8 @@ export async function GET(req, { params }) {
         g.title,
         g.currentround, 
         g.totalrounds, 
+        g.closed_by_admin,
+        g.close_reason,
         g.level, 
         g.deadline,
         g.prize_amount, 

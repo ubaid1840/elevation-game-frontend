@@ -2,11 +2,18 @@ import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const games = await query(
-      'SELECT games.*, (games.winner IS NOT NULL) AS Completed FROM games JOIN game_enrollments ON games.id = game_enrollments.game_id WHERE game_enrollments.user_id = $1',
+      `
+      SELECT 
+    games.*, 
+    (games.winner IS NOT NULL OR games.closed_by_admin = TRUE) AS completed
+  FROM games
+  JOIN game_enrollments ON games.id = game_enrollments.game_id
+  WHERE game_enrollments.user_id = $1
+  `,
       [id]
     );
 
@@ -14,7 +21,7 @@ export async function GET(req, { params }) {
     const availableGames = await query(
       `SELECT id, title, total_participants, prize_amount, level, spots_remaining, currentRound, totalRounds, total_spots, deadline, 
        array_length(additional_judges, 1) + 1 as totalJudges 
-       FROM games WHERE winner IS NULL AND id NOT IN (SELECT game_id FROM game_enrollments WHERE user_id = $1)`,
+       FROM games WHERE winner IS NULL AND closed_by_admin IS FALSE AND id NOT IN (SELECT game_id FROM game_enrollments WHERE user_id = $1)`,
       [id]
     );
 

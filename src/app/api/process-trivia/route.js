@@ -34,7 +34,7 @@ export async function GET() {
   //         console.log(`No participants found for game ID ${gameId}. Skipping.`);
   //         continue;
   //       }
-
+ 
 
   //       const userScores = enrollmentsResult.rows.map((enrollment) => {
   //         const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];

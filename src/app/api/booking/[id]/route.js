@@ -96,4 +96,18 @@ export async function POST(req, { params }) {
   }
 }
 
+
+export async function DELETE(req, { params }) {
+  const { id } = await params;
+
+  try {
+    await query('DELETE FROM bookings WHERE id = $1', [id]);
+    return NextResponse.json({
+      message: 'Bookings delete',
+    });
+  } catch (error) {
+    return NextResponse.json({ message: 'Error deleting bookings', error: error.message }, { status: 500 });
+  }
+}
+
 export const revalidate = 0;

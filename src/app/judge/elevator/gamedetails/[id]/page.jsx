@@ -412,6 +412,8 @@ export default function Page({ params }) {
             {gameData?.title}
           </Heading>
           <VStack align="start" spacing={3}>
+            {gameData?.closed_by_admin && <Badge fontSize={"md"} color={"red"}>{gameData?.close_reason}</Badge>}
+
             <Text>
               <strong>Created By:</strong> {gameData?.created_by_name}
             </Text>
@@ -474,74 +476,76 @@ export default function Page({ params }) {
             <Box whiteSpace="pre-wrap">
               {gameData?.roundinstruction?.[currentRound]}
             </Box>
-            <Text></Text>
-            <Button
-              isDisabled={!UserState.value.data?.navigationAllowed}
-              isLoading={editDescriptionLoading}
-              colorScheme="blue"
-              onClick={handleEditInstruction}
-            >
-              Edit Instruction
-            </Button>
+            {gameData && !gameData?.closed_by_admin && !gameData?.winner &&
+              <Button
+                isDisabled={!UserState.value.data?.navigationAllowed}
+                isLoading={editDescriptionLoading}
+                colorScheme="blue"
+                onClick={handleEditInstruction}
+              >
+                Edit Instruction
+              </Button>
+            }
           </VStack>
         </Box>
         {gameData && (
           <>
-            {gameData.currentround === 0 ? gameData?.judges_count?.includes(UserState.value.data?.id) ?
+            {gameData.currentround === 0 ?
+              (!gameData?.closed_by_admin && !gameData?.winner) && gameData?.judges_count?.includes(UserState.value.data?.id) ?
 
-              <Text
-                fontSize="lg"
-                fontWeight="semibold"
-                color="orange.400"
-                px={4}
-                py={2}
+                <Text
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  color="orange.400"
+                  px={4}
+                  py={2}
 
-                textAlign="center"
-                animation="pulse 2s infinite"
-              >
-                Waiting for other judges to start the game
-              </Text>
-              : (
-                <Button
-                  isDisabled={
-                    Number(gameData?.spots_remaining ?? -1) !== 0 ||
-                    !UserState.value.data?.navigationAllowed
-                  }
-                  isLoading={roundLoading}
-                  colorScheme="purple"
-                  mt={5}
-                  onClick={() => {
-                    if (UserState.value.data?.id === Number(gameData?.created_by)) {
-                      onOpenStart();
-                    } else {
-                      handleStartGame()
-                    }
-
-                  }}
+                  textAlign="center"
+                  animation="pulse 2s infinite"
                 >
-                  Start Game
-                </Button>
-              ) : (
-              <Box display="flex" justifyContent="space-between" my={4}>
-                <Button
-                  colorScheme="purple"
-                  onClick={handlePreviousRound}
-                  disabled={currentRound === 1}
-                >
-                  Previous Round
-                </Button>
-                <Text fontWeight="bold" color="purple.700">
-                  Round: {currentRound}/{gameData?.totalrounds}
+                  Waiting for other judges to start the game
                 </Text>
-                <Button
-                  colorScheme="purple"
-                  onClick={handleNextRound}
-                  disabled={currentRound === gameData?.totalrounds}
-                >
-                  Next Round
-                </Button>
-              </Box>
-            )}
+                : (
+                  <Button
+                    isDisabled={
+                      Number(gameData?.spots_remaining ?? -1) !== 0 ||
+                      !UserState.value.data?.navigationAllowed
+                    }
+                    isLoading={roundLoading}
+                    colorScheme="purple"
+                    mt={5}
+                    onClick={() => {
+                      if (UserState.value.data?.id === Number(gameData?.created_by)) {
+                        onOpenStart();
+                      } else {
+                        handleStartGame()
+                      }
+
+                    }}
+                  >
+                    Start Game
+                  </Button>
+                ) : (
+                <Box display="flex" justifyContent="space-between" my={4}>
+                  <Button
+                    colorScheme="purple"
+                    onClick={handlePreviousRound}
+                    disabled={currentRound === 1}
+                  >
+                    Previous Round
+                  </Button>
+                  <Text fontWeight="bold" color="purple.700">
+                    Round: {currentRound}/{gameData?.totalrounds}
+                  </Text>
+                  <Button
+                    colorScheme="purple"
+                    onClick={handleNextRound}
+                    disabled={currentRound === gameData?.totalrounds}
+                  >
+                    Next Round
+                  </Button>
+                </Box>
+              )}
             <Heading as="h2" size="lg" mt={10} mb={6} color="teal.500">
               Enrollments
             </Heading>
@@ -740,7 +744,7 @@ export default function Page({ params }) {
         UserState.value.data?.id === Number(gameData?.created_by || 0) &&
         gameData?.totalrounds &&
         gameData.currentround === currentRound &&
-        !gameData.winner && (
+        !gameData.winner && !gameData?.closed_by_admin && (
           <Button
             isDisabled={
               gameData.currentround === gameData.totalrounds ||
@@ -759,7 +763,7 @@ export default function Page({ params }) {
         )}
       {gameData &&
         gameData.currentround === gameData.totalrounds &&
-        !gameData.winner &&
+        !gameData.winner && !gameData?.closed_by_admin &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
           <Button
             isDisabled={!UserState.value.data?.navigationAllowed}

@@ -125,7 +125,9 @@ export default function Page() {
                 <TabPanel>
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                     {filteredGames
-                      .filter((item) => !item.winner)
+                      .filter((item) => {
+                        if (!item.winner && !item.closed_by_admin) return item
+                      })
                       .map((game, index) => (
                         <Box
                           as={Link}
@@ -167,9 +169,9 @@ export default function Page() {
                             <Text fontWeight="bold" color="purple.700">
                               Status:{" "}
                               <Badge
-                                colorScheme={game.winner ? "green" : "yellow"}
+                                colorScheme={"yellow"}
                               >
-                                {game.winner ? "Completed" : "Pending"}
+                                {"Pending"}
                               </Badge>
                             </Text>
                           </Stack>
@@ -180,7 +182,9 @@ export default function Page() {
                 <TabPanel>
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                     {filteredGames
-                      .filter((item) => item.winner)
+                      .filter((item) => {
+                        if (item.winner || item.closed_by_admin) return item
+                      })
                       .map((game, index) => (
                         <Box
                           as={Link}
@@ -222,9 +226,9 @@ export default function Page() {
                             <Text fontWeight="bold" color="purple.700">
                               Status:{" "}
                               <Badge
-                                colorScheme={game.winner ? "green" : "yellow"}
+                                colorScheme={game.winner ? "green" : "red"}
                               >
-                                {game.winner ? "Completed" : "Pending"}
+                                {game.winner ? "Completed" : game?.close_reason}
                               </Badge>
                             </Text>
                           </Stack>

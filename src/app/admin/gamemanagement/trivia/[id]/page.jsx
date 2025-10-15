@@ -1,5 +1,6 @@
 "use client";
 import DeadlineTooltip from "@/components/deadline-tooltip";
+import EndGame from "@/components/end-game";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import { UserContext } from "@/store/context/UserContext";
 import {
@@ -17,6 +18,7 @@ import {
   Spinner,
   Stack,
   Text,
+  useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -30,6 +32,11 @@ export default function Page({ params }) {
   const [loading, setLoading] = useState(false);
   const [instructions, setInstructions] = useState([]);
   const toast = useToast();
+  const {
+    isOpen: isOpenEndGame,
+    onOpen: onOpenEndGame,
+    onClose: onCloseEndGame,
+  } = useDisclosure();
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -58,12 +65,14 @@ export default function Page({ params }) {
       });
   }
 
+
   return loading ? (
     <Center h={"100vh"}>
       <Spinner />
     </Center>
   ) : (
     <Box p={8} minH="100vh">
+       
       <Flex flexWrap={"wrap"} justify={"space-between"}>
         <GameCard gameDetailData={gameData} instructions={instructions} />
         <Leaderboard
@@ -76,6 +85,17 @@ export default function Page({ params }) {
         enrollments={gameData?.enrollments || []}
         questions={gameData?.questions || []}
       />
+      {gameData &&
+        !gameData?.game?.winner_id && !gameData?.game?.closed_by_admin &&
+        (
+          <Flex  mt={4}>
+          <EndGame type="trivia" gameid={gameData?.game?.id} isOpen={isOpenEndGame} onClose={onCloseEndGame} onRefresh={() => {
+            fetchData()
+          }} onClick={() => {
+            onOpenEndGame()
+          }} />
+          </Flex>
+        )}
     </Box>
   );
 }
@@ -86,6 +106,8 @@ const GameCard = ({ gameDetailData, instructions }) => {
       <Heading mb={4} color="purple.400">
         {gameDetailData?.game?.title}
       </Heading>
+
+        {gameDetailData?.game?.closed_by_admin && <Badge fontSize={"md"} color={"red"} mb={2}>{gameDetailData?.game?.close_reason}</Badge>}
 
       <Box gap={2} display={"flex"} flexDir={"column"}>
         {instructions.length > 0 && (
@@ -133,12 +155,12 @@ const GameCard = ({ gameDetailData, instructions }) => {
             : ""}
         </Text>
         <DeadlineTooltip>
-        <Text fontWeight="bold">
-          Target Close Date:{" "}
-          {gameDetailData?.game?.deadline
-            ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
-            : ""}
-        </Text>
+          <Text fontWeight="bold">
+            Target Close Date:{" "}
+            {gameDetailData?.game?.deadline
+              ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+              : ""}
+          </Text>
         </DeadlineTooltip>
         <Text fontWeight="bold">
           Spots Available: {gameDetailData?.game?.spots_remaining}
@@ -205,8 +227,8 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
                                     ? "green.200"
                                     : "red.200"
                                   : option === question.correct
-                                  ? "blue.200"
-                                  : "gray.100"
+                                    ? "blue.200"
+                                    : "gray.100"
                               }
                             >
                               <Text>
@@ -260,7 +282,7 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
         user_name: enrollment.user_name || "Unknown User",
         correctAnswers,
         totalQuestions,
-        totalTime : totalTime.toFixed(4),
+        totalTime: totalTime.toFixed(4),
       };
     })
     .sort(
