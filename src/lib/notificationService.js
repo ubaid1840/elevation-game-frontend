@@ -69,7 +69,7 @@ export const sendSingleEmail = async (message, subject, id) => {
   try {
 
     if (user?.email) {
-      addInOverallLogs(user, "/api/notification", "sending email to " + user.email)
+      addInOverallLogs(user, "notification service", "sending email to " + user.email)
       await transporter.sendMail({
         from: process.env.BULK_EMAIL_USER,
         to: user.email,
@@ -81,14 +81,15 @@ export const sendSingleEmail = async (message, subject, id) => {
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `Email sent successfully to ${user.email}`]
       );
-      addInOverallLogs(user, "/api/notification", "Email sent to " + user.email)
+      addInOverallLogs(user, "notification service", "Email sent to " + user.email)
       console.log(`Email sent successfully to ${user.email}`);
     } else {
+       addInOverallLogs({}, "notification service", `User with id ${id} not found or missing email`)
       console.log(`User with id ${id} not found or missing email.`);
     }
   } catch (error) {
     console.log('Error in sending email:', error);
-    addInOverallLogs(error, "/api/notification", "email sending failed " + user.email)
+    addInOverallLogs(error, "notification service", "email sending failed " + user.email)
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
       [JSON.stringify(error), "email"]
@@ -104,23 +105,24 @@ export const sendSingleSMS = async (message, id) => {
 
 
     if (user.phone) {
-      addInOverallLogs(user, "/api/notification", "Sending sms to " + user.phone)
+      addInOverallLogs(user, "notification service", "Sending sms to " + user.phone)
       await twilioClient.messages.create({
         body: message,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: user.phone,
       })
-      addInOverallLogs(user, "/api/notification", "SMS sent to " + user.phone)
+      addInOverallLogs(user, "notification service", "SMS sent to " + user.phone)
       await query(
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `SMS sent successfully to ${user.phone}`]
       );
       console.log(`SMS sent successfully to ${user.phone}`);
     } else {
+       addInOverallLogs({}, "notification service", `User with id ${id} not found or missing phone`)
       console.log(`User with id ${id} not found or missing phone.`);
     }
   } catch (error) {
-    addInOverallLogs(error, "/api/notification", "sms sending failed " + user.phone)
+    addInOverallLogs(error, "notification service", "sms sending failed " + user.phone)
     console.log('Error in sending sms:', error);
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,

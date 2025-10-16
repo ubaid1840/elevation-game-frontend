@@ -13,15 +13,16 @@ export async function POST(req) {
 
     try {
         if (filter) {
-            addInOverallLogs({}, "/api/notification", "sending notifications to " + JSON.stringify(ids))
+            addInOverallLogs({}, "/api/notification", "sending notifications to " + ids.join(", "))
             Array.isArray(ids) && ids.forEach((id) => {
                 if (type === 'email') {
-
-                    sendSingleEmail(msg, "Notification", id)
                     addInOverallLogs({}, "/api/notification", "sending email to " + id)
+                    sendSingleEmail(msg, "Notification", id)
+
                 } else {
-                    sendSingleSMS(msg, id)
                     addInOverallLogs({}, "/api/notification", "sending sms to " + id)
+                    sendSingleSMS(msg, id)
+
                 }
 
             })
