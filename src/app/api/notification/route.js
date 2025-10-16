@@ -13,7 +13,7 @@ export async function POST(req) {
 
     try {
         if (filter) {
-            addInOverallLogs({}, "/api/notification", "sending notifications to " + ids.join(", "))
+            await addInOverallLogs({}, "/api/notification", "sending notifications to " + ids.join(", "))
             Array.isArray(ids) && ids.forEach(async (id) => {
                 if (type === 'email') {
                     await addInOverallLogs({}, "/api/notification", "sending email to " + id)

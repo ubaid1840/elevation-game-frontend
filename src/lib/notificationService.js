@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+const twilioClient = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
 export const sendBulkNotifications = async (message, subject, type) => {
 
