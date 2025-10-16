@@ -63,13 +63,15 @@ export const sendBulkNotifications = async (message, subject, type) => {
 };
 
 
-export const sendSingleEmail = async (message, subject, id) => {
-  const usersQuery = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [id]);
-  const user = usersQuery.rows[0];
+export async function sendSingleEmail(message, subject, id) {
+  await addInOverallLogs({}, "notification service", "starting sending email to " + id)
   try {
+    const usersQuery = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [id]);
 
+    const user = usersQuery.rows[0];
+    await addInOverallLogs(user, "notification service", "found user for email with " + id)
     if (user?.email) {
-      addInOverallLogs(user, "notification service", "sending email to " + user.email)
+      await addInOverallLogs(user, "notification service", "sending email to " + user.email)
       await transporter.sendMail({
         from: process.env.BULK_EMAIL_USER,
         to: user.email,
@@ -81,15 +83,15 @@ export const sendSingleEmail = async (message, subject, id) => {
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `Email sent successfully to ${user.email}`]
       );
-      addInOverallLogs(user, "notification service", "Email sent to " + user.email)
+      await addInOverallLogs(user, "notification service", "Email sent to " + user.email)
       console.log(`Email sent successfully to ${user.email}`);
     } else {
-       addInOverallLogs({}, "notification service", `User with id ${id} not found or missing email`)
+      await addInOverallLogs({}, "notification service", `User with id ${id} not found or missing email`)
       console.log(`User with id ${id} not found or missing email.`);
     }
   } catch (error) {
     console.log('Error in sending email:', error);
-    addInOverallLogs(error, "notification service", "email sending failed " + user.email)
+    await addInOverallLogs(error, "notification service", "email sending failed to" + id)
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
       [JSON.stringify(error), "email"]
@@ -99,30 +101,32 @@ export const sendSingleEmail = async (message, subject, id) => {
 
 
 export const sendSingleSMS = async (message, id) => {
-  const usersQuery = await query('SELECT phone FROM users WHERE id = $1 LIMIT 1', [id]);
-  const user = usersQuery.rows[0];
+   await addInOverallLogs({}, "notification service", "starting sending sms to " + id)
+
   try {
 
-
+    const usersQuery = await query('SELECT phone FROM users WHERE id = $1 LIMIT 1', [id]);
+    const user = usersQuery.rows[0];
+     await addInOverallLogs(user, "notification service", "found user for sms with " + id)
     if (user.phone) {
-      addInOverallLogs(user, "notification service", "Sending sms to " + user.phone)
+      await addInOverallLogs(user, "notification service", "Sending sms to " + user.phone)
       await twilioClient.messages.create({
         body: message,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: user.phone,
       })
-      addInOverallLogs(user, "notification service", "SMS sent to " + user.phone)
+      await addInOverallLogs(user, "notification service", "SMS sent to " + user.phone)
       await query(
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `SMS sent successfully to ${user.phone}`]
       );
       console.log(`SMS sent successfully to ${user.phone}`);
     } else {
-       addInOverallLogs({}, "notification service", `User with id ${id} not found or missing phone`)
+      await addInOverallLogs({}, "notification service", `User with id ${id} not found or missing phone`)
       console.log(`User with id ${id} not found or missing phone.`);
     }
   } catch (error) {
-    addInOverallLogs(error, "notification service", "sms sending failed " + user.phone)
+    await addInOverallLogs(error, "notification service", "sms sending failed to" + id)
     console.log('Error in sending sms:', error);
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,

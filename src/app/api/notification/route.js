@@ -54,6 +54,10 @@ export async function addInOverallLogs(logs = {}, route = "", additional = "") {
         );
 
     } catch (error) {
+         await query(
+            `INSERT INTO overall_logs (logs, route, additional) VALUES ($1, $2, $3)`,
+            [JSON.stringify(error), route, additional]
+        );
         console.log(error)
     }
 
