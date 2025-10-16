@@ -14,14 +14,14 @@ export async function POST(req) {
     try {
         if (filter) {
             addInOverallLogs({}, "/api/notification", "sending notifications to " + ids.join(", "))
-            Array.isArray(ids) && ids.forEach((id) => {
+            Array.isArray(ids) && ids.forEach(async (id) => {
                 if (type === 'email') {
-                    addInOverallLogs({}, "/api/notification", "sending email to " + id)
-                    sendSingleEmail(msg, "Notification", id)
+                    await addInOverallLogs({}, "/api/notification", "sending email to " + id)
+                    await sendSingleEmail(msg, "Notification", id)
 
                 } else {
-                    addInOverallLogs({}, "/api/notification", "sending sms to " + id)
-                    sendSingleSMS(msg, id)
+                    await addInOverallLogs({}, "/api/notification", "sending sms to " + id)
+                    await sendSingleSMS(msg, id)
 
                 }
 
@@ -54,7 +54,7 @@ export async function addInOverallLogs(logs = {}, route = "", additional = "") {
         );
 
     } catch (error) {
-         await query(
+        await query(
             `INSERT INTO overall_logs (logs, route, additional) VALUES ($1, $2, $3)`,
             [JSON.stringify(error), route, additional]
         );
