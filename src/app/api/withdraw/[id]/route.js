@@ -1,5 +1,5 @@
 import { query } from "@/lib/db"
-import { sendSingleEmail } from "@/lib/notificationService";
+import { sendSingleEmail, sendSingleSMS } from "@/lib/notificationService";
 import { NextResponse } from "next/server"
 
 
@@ -55,18 +55,12 @@ export async function PUT(req, { params }) {
             await query(`UPDATE users SET residual_income = residual_income + $1 WHERE id = $2`, [rowData.rows[0]?.requested_amount || 0, user_id])
         }
 
-        sendSingleEmail(`Your withdrawal request is ${status}`, `Request ${status}`, user_id)
-
-
-
+        await sendSingleEmail(`Your withdrawal request is ${status}`, `Request ${status}`, user_id)
+        await sendSingleSMS(`Your withdrawal request is ${status}`, user_id)
         return NextResponse.json({ message: "Data updated" }, { status: 200 })
     } catch (error) {
         return NextResponse.json({ message: error?.message || "Server error" }, { status: 500 })
-    } finally {
-        sendSingleEmail(`Your withdrawal request is ${status}`, `Request ${status}`, user_id)
-    }
-
-
+    } 
 }
 
 export const revalidate = 0

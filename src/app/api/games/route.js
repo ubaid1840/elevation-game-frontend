@@ -1,5 +1,5 @@
 import pool, { query } from '@/lib/db';
-import { sendSingleEmail } from '@/lib/notificationService';
+import { sendSingleEmail, sendSingleSMS } from '@/lib/notificationService';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -74,8 +74,8 @@ export async function POST(req) {
     );
 
     if (additional_judges && Array.isArray(additional_judges) && additional_judges.length > 0) {
-      additional_judges.map((id) =>
-        sendSingleEmail(
+      additional_judges.map(async (id) =>
+        await sendSingleEmail(
           `
           Hello,
 
@@ -92,6 +92,8 @@ export async function POST(req) {
           id
         )
       );
+
+      await sendSingleSMS(`You have been assigned as a *Critique Judge* in the Elevator Game: "${title}".`, id)
     }
 
 
