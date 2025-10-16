@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 import { query } from './db';
+import { addInOverallLogs } from '@/app/api/notification/route';
 
 const transporter = nodemailer.createTransport({
   host: process.env.BULK_EMAIL_HOST,
@@ -63,11 +64,12 @@ export const sendBulkNotifications = async (message, subject, type) => {
 
 
 export const sendSingleEmail = async (message, subject, id) => {
+  const usersQuery = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [id]);
+  const user = usersQuery.rows[0];
   try {
-    const usersQuery = await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [id]);
-    const user = usersQuery.rows[0];
 
     if (user?.email) {
+      addInOverallLogs(user, "/api/notification", "sending email to " + user.email)
       await transporter.sendMail({
         from: process.env.BULK_EMAIL_USER,
         to: user.email,
@@ -75,17 +77,18 @@ export const sendSingleEmail = async (message, subject, id) => {
         text: message,
       });
 
-        await query(
+      await query(
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `Email sent successfully to ${user.email}`]
       );
-
+      addInOverallLogs(user, "/api/notification", "Email sent to " + user.email)
       console.log(`Email sent successfully to ${user.email}`);
     } else {
       console.log(`User with id ${id} not found or missing email.`);
     }
   } catch (error) {
     console.log('Error in sending email:', error);
+    addInOverallLogs(error, "/api/notification", "email sending failed " + user.email)
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
       [JSON.stringify(error), "email"]
@@ -95,16 +98,19 @@ export const sendSingleEmail = async (message, subject, id) => {
 
 
 export const sendSingleSMS = async (message, id) => {
+  const usersQuery = await query('SELECT phone FROM users WHERE id = $1 LIMIT 1', [id]);
+  const user = usersQuery.rows[0];
   try {
-    const usersQuery = await query('SELECT phone FROM users WHERE id = $1 LIMIT 1', [id]);
-    const user = usersQuery.rows[0];
+
 
     if (user.phone) {
+      addInOverallLogs(user, "/api/notification", "Sending sms to " + user.phone)
       await twilioClient.messages.create({
         body: message,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: user.phone,
       })
+      addInOverallLogs(user, "/api/notification", "SMS sent to " + user.phone)
       await query(
         'INSERT INTO logs (user_id, action) VALUES ($1, $2)',
         [Number(id), `SMS sent successfully to ${user.phone}`]
@@ -114,6 +120,7 @@ export const sendSingleSMS = async (message, id) => {
       console.log(`User with id ${id} not found or missing phone.`);
     }
   } catch (error) {
+    addInOverallLogs(error, "/api/notification", "sms sending failed " + user.phone)
     console.log('Error in sending sms:', error);
     await query(
       `INSERT INTO error_logs (message, type) VALUES ($1, $2)`,
