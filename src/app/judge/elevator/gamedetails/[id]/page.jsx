@@ -4,6 +4,9 @@ import RenderProfilePicture from "@/components/RenderProfilePicture";
 import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Badge,
   Box,
   Button,
@@ -440,7 +443,7 @@ export default function Page({ params }) {
                   {gameData?.winner_name}
                 </Badge>
               ) : (
-                 gameData?.closed_by_admin ? "No winner selected" : "TBA"
+                gameData?.closed_by_admin ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -488,6 +491,28 @@ export default function Page({ params }) {
             }
           </VStack>
         </Box>
+
+
+
+        {gameData && gameData.currentRound === 0 && !gameData?.closed_by_admin && !gameData?.winner &&
+
+          <Alert
+            status="warning"
+            variant="subtle"
+            color="black"
+            fontSize="sm"
+            py={2}
+            px={3}
+            mt={2}
+          >
+            <AlertIcon />
+            <AlertDescription>
+              Prizes are recalculated automatically based on the number of paid participants when the game starts.
+              Standard payouts apply — <b>30%</b> for first place and <b>10%</b> for second — using the total paid amount.
+            </AlertDescription>
+          </Alert>
+        }
+
         {gameData && (
           <>
             {gameData.currentround === 0 ?
@@ -738,7 +763,7 @@ export default function Page({ params }) {
             </Stack>
           </>
         )}
-      </Box>
+      </Box >
       {gameData &&
         gameData.currentround !== gameData.totalrounds &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) &&
@@ -760,8 +785,10 @@ export default function Page({ params }) {
           >
             Move To Next Round
           </Button>
-        )}
-      {gameData &&
+        )
+      }
+      {
+        gameData &&
         gameData.currentround === gameData.totalrounds &&
         !gameData.winner && !gameData?.closed_by_admin &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
@@ -787,7 +814,8 @@ export default function Page({ params }) {
           >
             Announce Winner
           </Button>
-        )}
+        )
+      }
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>

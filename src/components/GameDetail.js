@@ -2,6 +2,9 @@
 import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
 import {
+    Alert,
+    AlertDescription,
+    AlertIcon,
     Badge,
     Box,
     Button,
@@ -271,7 +274,25 @@ export default function GameDetail({ params }) {
                             {gameDetailData?.game?.roundinstruction?.[currentRound]}
                         </Box>
                     </GridItem>
+
                 </Grid>
+
+                {gameDetailData && gameDetailData?.game?.currentRound === 0 && !gameDetailData?.game?.closed_by_admin && !gameDetailData?.game?.winner &&
+                    <Alert
+                        status="warning"
+                        variant="subtle"
+                        color="black"
+                        fontSize="sm"
+                        py={2}
+                        px={3}
+                        mb={4}
+                    >
+                        <AlertIcon />
+                        <AlertDescription>
+                            Prizes are recalculated automatically based on the number of paid participants when the game starts.
+                            Standard payouts apply — <b>30%</b> for first place and <b>10%</b> for second — using the total paid amount.
+                        </AlertDescription>
+                    </Alert>}
 
 
                 {gameDetailData && gameDetailData.game.currentround !== 0 &&
