@@ -68,6 +68,12 @@ export default function Page({ params }) {
     onClose: onCloseStart,
     onOpen: onOpenStart,
   } = useDisclosure();
+
+  const {
+    isOpen: isOpenStartEarly,
+    onClose: onCloseStartEarly,
+    onOpen: onOpenStartEarly,
+  } = useDisclosure();
   const {
     isOpen: isOpenNextRound,
     onOpen: onOpenNextRound,
@@ -336,6 +342,25 @@ export default function Page({ params }) {
     handleMoveToNextRound();
   }
 
+  async function handleStartGameEarly() {
+    setRoundLoading(true);
+    onCloseStartEarly();
+    await axios
+      .put(`/api/games/${params.id}/early`, {
+        round: Number(gameData.currentround) + 1,
+        deadline: deadline,
+      })
+      .then(() => {
+        fetchData();
+      })
+      .catch((e) => {
+        console.log(e);
+      })
+      .finally(() => {
+        setRoundLoading(false);
+      });
+  }
+
   function handleEditInstruction() {
     onOpenEditInstruction();
     setEditInstruction("");
@@ -420,7 +445,7 @@ export default function Page({ params }) {
                   {gameData?.winner_name}
                 </Badge>
               ) : (
-                "TBA"
+                gameData?.closed_by_admin ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -431,7 +456,7 @@ export default function Page({ params }) {
                   {gameData?.winner_2nd_name}
                 </Badge>
               ) : (
-                "TBA"
+                 gameData?.closed_by_admin ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -474,12 +499,20 @@ export default function Page({ params }) {
             {gameData.currentround === 0 ? (
               !gameData?.closed_by_admin && !gameData?.winner &&
               <Button
-                isDisabled={Number(gameData?.spots_remaining ?? -1) !== 0}
+                isDisabled={Number(gameData?.enrollments?.length) === 0}
+
                 isLoading={roundLoading}
                 colorScheme="purple"
                 mt={5}
                 onClick={() => {
-                  onOpenStart();
+                  setDeadline(null)
+                  if (Number(gameData?.spots_remaining ?? -1) !== 0) {
+
+                    onOpenStartEarly();
+                  } else {
+                    onOpenStart();
+                  }
+
                 }}
               >
                 Start Game
@@ -701,7 +734,7 @@ export default function Page({ params }) {
         )}
       {gameData &&
         gameData.currentround === gameData.totalrounds &&
-        !gameData.winner && !gameData?.closed_by_admin && 
+        !gameData.winner && !gameData?.closed_by_admin &&
         (
           <Button
             mx={4}
@@ -731,7 +764,7 @@ export default function Page({ params }) {
 
 
       {gameData &&
-        !gameData.winner && !gameData?.closed_by_admin && 
+        !gameData.winner && !gameData?.closed_by_admin &&
         (
           <EndGame type="elevator" gameid={gameData?.id} isOpen={isOpenEndGame} onClose={onCloseEndGame} onRefresh={() => {
             fetchData()
@@ -967,7 +1000,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Deadline</Text>
+            <Text fontWeight={"600"}>Target Deadline</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}
@@ -1015,6 +1048,69 @@ export default function Page({ params }) {
         </ModalContent>
       </Modal>
 
+
+      <Modal isOpen={isOpenStartEarly} onClose={onCloseStartEarly}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Early Game Start</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+
+            <Text fontSize="lg" color={"orange.600"}>
+              You are about to start this game before all participant spots are filled.
+              Prize amounts will be recalculated based on the number of paid participants currently enrolled.
+              Standard payouts of 30% (First Place) and 10% (Second Place) will apply.
+            </Text>
+
+            <Text mt={4} fontWeight={"600"}>Target Deadline</Text>
+            <Box
+              border={"1px solid"}
+              borderColor={"#D0D5DD"}
+              borderRadius={"md"}
+              display={"flex"}
+              justifyContent={"center"}
+              alignItems={"center"}
+              height={"40px"}
+              px={4}
+            >
+              <Calendar
+                minDate={new Date()}
+                id="deadline"
+                value={deadline}
+                onChange={(e) => {
+                  setDeadline(e.value);
+                }}
+                showIcon
+                // className="custom-calendar"
+                dateFormat="mm/dd/yy"
+                style={{ width: "100%", zIndex: 99999 }}
+              />
+            </Box>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"outline"} onClick={onCloseStartEarly}>
+              Cancel
+            </Button>
+            <Button
+              isDisabled={
+                !deadline ||
+                !gameData ||
+                moment(deadline).isSameOrBefore(
+                  moment(new Date(gameData.deadline))
+                )
+              }
+              colorScheme="blue"
+              ml={3}
+              onClick={handleStartGameEarly}
+            >
+              Confirm & Start
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <Modal isOpen={isOpenNextRound} onClose={onCloseNextRound}>
         <ModalOverlay />
         <ModalContent>
@@ -1022,7 +1118,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Deadline</Text>
+            <Text fontWeight={"600"}>Target Deadline</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}

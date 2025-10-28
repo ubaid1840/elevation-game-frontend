@@ -440,7 +440,7 @@ export default function Page({ params }) {
                   {gameData?.winner_name}
                 </Badge>
               ) : (
-                "TBA"
+                 gameData?.closed_by_admin ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -452,7 +452,7 @@ export default function Page({ params }) {
                   {gameData?.winner_2nd_name}
                 </Badge>
               ) : (
-                "TBA"
+                gameData?.closed_by_admin ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -1002,7 +1002,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Deadline</Text>
+            <Text fontWeight={"600"}>Target Deadline</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}
@@ -1058,7 +1058,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Deadline</Text>
+            <Text fontWeight={"600"}>Target Deadline</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}

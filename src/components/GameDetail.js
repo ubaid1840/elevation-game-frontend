@@ -146,7 +146,7 @@ export default function GameDetail({ params }) {
                     {gameDetailData?.game?.title}
                 </Heading>
 
-                  {gameDetailData?.game?.closed_by_admin && <Badge mb={4} fontSize={"md"} color={"red"}>{gameDetailData?.game?.close_reason}</Badge>}
+                {gameDetailData?.game?.closed_by_admin && <Badge mb={4} fontSize={"md"} color={"red"}>{gameDetailData?.game?.close_reason}</Badge>}
 
                 <Grid
                     templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)" }}
@@ -200,7 +200,7 @@ export default function GameDetail({ params }) {
                                     {gameDetailData?.game?.winner}
                                 </Badge>
                             ) : (
-                                "TBA"
+                                gameDetailData?.game?.closed_by_admin ? "No winner selected" : "TBA"
                             )}
                         </Text>
                     </GridItem>
@@ -219,7 +219,7 @@ export default function GameDetail({ params }) {
                                     {gameDetailData?.game?.winner_2nd}
                                 </Badge>
                             ) : (
-                                "TBA"
+                                gameDetailData?.game?.closed_by_admin ? "No winner selected" : "TBA"
                             )}
                         </Text>
                     </GridItem>

@@ -89,11 +89,11 @@ const GameCard = ({ gameDetailData, instructions }) => {
         {gameDetailData?.game?.title}
       </Heading>
 
-       {gameDetailData?.game?.closed_by_admin && <Badge fontSize={"md"} color={"red"} mb={2}>{gameDetailData?.game?.close_reason}</Badge>}
-      
+      {gameDetailData?.game?.closed_by_admin && <Badge fontSize={"md"} color={"red"} mb={2}>{gameDetailData?.game?.close_reason}</Badge>}
+
 
       <Box gap={2} display={"flex"} flexDir={"column"}>
-      {instructions.length > 0 && (
+        {instructions.length > 0 && (
           <>
             <Text fontSize="md">
               <strong>Game Instructions:</strong>
@@ -107,47 +107,47 @@ const GameCard = ({ gameDetailData, instructions }) => {
             </VStack>
           </>
         )}
-          <Text fontWeight="bold">
-            Prize:{" "}
-            <Badge colorScheme="green">${gameDetailData?.game?.calculated_prize}</Badge>
-          </Text>
-          <Text fontWeight="bold">
-            Winner:{" "}
-            {gameDetailData?.game?.winner_id ? (
-              <Badge colorScheme="purple">{gameDetailData?.game?.winner_name}</Badge>
-            ) : (
-              "TBA"
-            )}
-          </Text>
-          <Text fontWeight="bold">
-            Created By:{" "}
-            <Badge colorScheme="blue">{gameDetailData?.game?.created_by_name}</Badge>
-          </Text>
-          <Text fontWeight="bold">
-            Category: {gameDetailData?.game?.category}
-          </Text>
-          <Text fontWeight="bold">
-            Start Date:{" "}
-            {gameDetailData?.game?.start_date
-              ? moment(gameDetailData.game.start_date).format("MM/DD/YYYY")
-              : ""}
-          </Text>
-          <DeadlineTooltip>
+        <Text fontWeight="bold">
+          Prize:{" "}
+          <Badge colorScheme="green">${gameDetailData?.game?.calculated_prize}</Badge>
+        </Text>
+        <Text fontWeight="bold">
+          Winner:{" "}
+          {gameDetailData?.game?.winner_id ? (
+            <Badge colorScheme="purple">{gameDetailData?.game?.winner_name}</Badge>
+          ) : (
+            "TBA"
+          )}
+        </Text>
+        <Text fontWeight="bold">
+          Created By:{" "}
+          <Badge colorScheme="blue">{gameDetailData?.game?.created_by_name}</Badge>
+        </Text>
+        <Text fontWeight="bold">
+          Category: {gameDetailData?.game?.category}
+        </Text>
+        <Text fontWeight="bold">
+          Start Date:{" "}
+          {gameDetailData?.game?.start_date
+            ? moment(gameDetailData.game.start_date).format("MM/DD/YYYY")
+            : ""}
+        </Text>
+        <DeadlineTooltip>
           <Text fontWeight="bold">
             Target Close Date:{" "}
             {gameDetailData?.game?.deadline
               ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
               : ""}
           </Text>
-          </DeadlineTooltip>
-          <Text fontWeight="bold">
-            Spots Available: {gameDetailData?.game?.spots_remaining}
-          </Text>
-          <Text fontWeight="bold">
-            Total Participants: {gameDetailData?.game?.total_participants}
-          </Text>
-  
-      
+        </DeadlineTooltip>
+        <Text fontWeight="bold">
+          Spots Available: {gameDetailData?.game?.spots_remaining}
+        </Text>
+        <Text fontWeight="bold">
+          Total Participants: {gameDetailData?.game?.total_participants}
+        </Text>
+
+
 
       </Box>
     </Box>
@@ -168,8 +168,8 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
             <AccordionItem key={enrollment.id}>
               <h2>
                 <AccordionButton m={2}>
-                <Flex flex="1" textAlign="left" alignItems={"center"}>
-                    <RenderProfilePicture email={user_email} name={user_name}/>
+                  <Flex flex="1" textAlign="left" alignItems={"center"}>
+                    <RenderProfilePicture email={user_email} name={user_name} />
                     <Text ml={2}>{user_name || "Unknown User"}</Text>
                   </Flex>
                   <AccordionIcon />
@@ -208,8 +208,8 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
                                     ? "green.200"
                                     : "red.200"
                                   : option === question.correct
-                                  ? "blue.200"
-                                  : "gray.100"
+                                    ? "blue.200"
+                                    : "gray.100"
                               }
                             >
                               <Text>
@@ -247,7 +247,7 @@ const UserResultsAccordion = ({ enrollments, questions }) => {
 };
 
 const Leaderboard = ({ enrollments, totalQuestions }) => {
- const sortedUsers = enrollments
+  const sortedUsers = enrollments
     .map((enrollment) => {
       const progress = Array.isArray(enrollment.progress)
         ? enrollment.progress
@@ -263,7 +263,7 @@ const Leaderboard = ({ enrollments, totalQuestions }) => {
         user_name: enrollment.user_name || "Unknown User",
         correctAnswers,
         totalQuestions,
-        totalTime : totalTime.toFixed(4),
+        totalTime: totalTime.toFixed(4),
       };
     })
     .sort(

@@ -13,6 +13,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -23,6 +24,8 @@ import {
   Stack,
   Text,
   Textarea,
+  Tooltip,
+  UnorderedList,
   useDisclosure,
   VStack
 } from "@chakra-ui/react";
@@ -332,7 +335,16 @@ export default function Page() {
         </FormControl>
 
         <FormControl mb={6}>
-          <FormLabel htmlFor="deadline">Deadline</FormLabel>
+          <Tooltip fontSize={'md'} label={
+            <Box p={2}>
+              <UnorderedList>
+                <ListItem>This is the planned end date for the game. The administrator may extend or start the game early if all spots are not filled. The actual close date will be recorded once the game is processed.</ListItem>
+              </UnorderedList>
+            </Box>
+          } >
+            <FormLabel htmlFor="deadline">Target Close Date</FormLabel>
+          </Tooltip>
+
           <Box
             border={"1px solid"}
             borderColor={"#D0D5DD"}
@@ -349,7 +361,7 @@ export default function Page() {
               value={deadline}
               onChange={(e) => setDeadline(e.value)}
               showIcon
-              className="custom-calendar"
+              // className="custom-calendar"
               dateFormat="mm/dd/yy"
               style={{ width: "100%" }}
             />

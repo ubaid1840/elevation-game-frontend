@@ -8,7 +8,7 @@ const DeadlineTooltip = ({ children }) => {
             <Box p={2}>
                 <UnorderedList>
 
-                    <ListItem>This is the estimated date when the game may close or advance. The actual end depends on activity — the game only closes when all spots are filled, the admin advances it, or it becomes inactive.</ListItem>
+                    <ListItem>This is the planned end date for the game. The administrator may extend or start the game early if all spots are not filled. The actual close date will be recorded once the game is processed.</ListItem>
 
                 </UnorderedList>
             </Box>

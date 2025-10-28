@@ -28,7 +28,7 @@ export async function POST(req) {
             })
 
         } else {
-            sendBulkNotifications(msg, "Notification", type)
+          await  sendBulkNotifications(msg, "Notification", type)
 
         }
 

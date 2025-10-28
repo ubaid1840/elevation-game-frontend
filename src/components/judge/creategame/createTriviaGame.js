@@ -1,5 +1,6 @@
 "use client";
 
+import DeadlineTooltip from "@/components/deadline-tooltip";
 import { UserContext } from "@/store/context/UserContext";
 import { DeleteIcon } from "@chakra-ui/icons";
 import {
@@ -79,21 +80,21 @@ export default function CreateTriviaGame({ page }) {
     })
   }
 
-  
+
   const updateQuestionText = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].text = value;
     setQuestions(updatedQuestions);
   };
 
-  
+
   const updateQuestionTime = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].time = value;
     setQuestions(updatedQuestions);
   };
 
-  
+
   const addQuestion = () => {
     setQuestions([
       ...questions,
@@ -101,34 +102,34 @@ export default function CreateTriviaGame({ page }) {
     ]);
   };
 
-  
+
   const removeQuestion = (index) => {
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
   };
 
-  
+
   const addOption = (questionIndex) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options.push("");
     setQuestions(updatedQuestions);
   };
 
-  
+
   const updateOption = (questionIndex, optionIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options[optionIndex] = value;
     setQuestions(updatedQuestions);
   };
 
-  
+
   const removeOption = (questionIndex, optionIndex) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].options.splice(optionIndex, 1);
     setQuestions(updatedQuestions);
   };
 
-  
+
   const setCorrectAnswer = (questionIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[questionIndex].correct = value;
@@ -166,7 +167,7 @@ export default function CreateTriviaGame({ page }) {
     const missing = validateForm();
     if (missing.length > 0) {
       setMissingFields(missing);
-      onOpen(); 
+      onOpen();
       return;
     }
 
@@ -182,8 +183,8 @@ export default function CreateTriviaGame({ page }) {
         start_date: startDate,
         category: category,
         description: gameDescription,
-        spots_remaining : spots,
-        total_spots : spots
+        spots_remaining: spots,
+        total_spots: spots
       })
       .then(() => {
         toast({
@@ -278,7 +279,9 @@ export default function CreateTriviaGame({ page }) {
       </FormControl>
 
       <FormControl mb={6}>
-        <FormLabel htmlFor="deadline">Deadline</FormLabel>
+        <DeadlineTooltip>
+          <FormLabel htmlFor="deadline">Target Close Date</FormLabel>
+        </DeadlineTooltip>
         <Box
           border="1px solid"
           borderColor="#D0D5DD"
@@ -296,7 +299,7 @@ export default function CreateTriviaGame({ page }) {
             value={deadline}
             onChange={(e) => setDeadline(e.value)}
             showIcon
-            className="custom-calendar"
+            // className="custom-calendar"
             dateFormat="mm/dd/yy"
             style={{ width: "100%" }}
           />
@@ -314,7 +317,7 @@ export default function CreateTriviaGame({ page }) {
         />
       </FormControl>
 
-    
+
 
       <FormControl mb={6}>
         <FormLabel>Total Spots</FormLabel>
@@ -396,7 +399,7 @@ export default function CreateTriviaGame({ page }) {
                   size="sm"
                   colorScheme="red"
                   onClick={() => removeOption(qIndex, oIndex)}
-                  isDisabled={question.options.length === 1} 
+                  isDisabled={question.options.length === 1}
                 />
               </HStack>
             ))}

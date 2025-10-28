@@ -72,9 +72,10 @@ export async function POST(req) {
             if (response?.message) {
                 localReason = `${reason}, ${response.message}`
             }
+
             await pool.query(
-                `UPDATE trivia_game SET closed_by_admin = $1, close_reason = $2 WHERE id = $3`,
-                [true, localReason, game_id]
+                `UPDATE trivia_game SET closed_by_admin = $1, close_reason = $2, spots_remaining = $3, total_spots = total_participants WHERE id = $4`,
+                [true, localReason, 0, game_id]
             );
 
             return NextResponse.json({ message: "Done" }, { status: 200 });
@@ -91,7 +92,6 @@ export async function POST(req) {
 
 
 async function ProcessTriviaGameResult(gid) {
-    console.log(gid)
     if (!gid) return;
 
     try {
@@ -108,7 +108,7 @@ async function ProcessTriviaGameResult(gid) {
         }
 
         const game = expiredGames[0];
-        const { id: gameId, title, prize } = game;
+        const { id: gameId, title, prize, fee, game_percentage } = game;
 
         const questionCountResult = await query(
             `SELECT COUNT(*) AS total_questions FROM trivia_questions WHERE game_id = $1`,
@@ -131,41 +131,48 @@ async function ProcessTriviaGameResult(gid) {
             return
         }
 
+        let winner = null
 
-        const userScores = enrollmentsResult.rows.map((enrollment) => {
-            const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
-            const correctAnswers = progress.filter((p) => p.isCorrect).length;
-            const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
-            return { user_id: enrollment.user_id, correctAnswers, totalTime };
-        });
+        if (enrollmentsResult.rows.length === 1) {
+            winner = enrollmentsResult.rows[0]
+        } else {
+            const userScores = enrollmentsResult.rows.map((enrollment) => {
+                const progress = Array.isArray(enrollment.progress) ? enrollment.progress : [];
+                const correctAnswers = progress.filter((p) => p.isCorrect).length;
+                const totalTime = progress.reduce((acc, p) => acc + (Number(p.time_taken) || 0), 0);
+                return { user_id: enrollment.user_id, correctAnswers, totalTime };
+            });
 
-        const highestScore = Math.max(...userScores.map(u => u.correctAnswers));
-        console.log(highestScore)
+            const highestScore = Math.max(...userScores.map(u => u.correctAnswers));
 
-        if (highestScore === 0) {
-            return { message: 'No player answered any question correctly' };
+            if (highestScore === 0) {
+                return { message: 'No player answered any question correctly' };
+            }
+
+            winner = userScores.sort(
+                (a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime
+            )[0];
         }
-
-        const winner = userScores.sort(
-            (a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime
-        )[0];
 
         if (!winner || !winner.user_id) {
             console.log(`No valid winner found for game ID ${gameId}.`);
             return;
         }
 
+         const prize_amount = Number(fee) * Number(enrollmentsResult.rows.length) * (Number(game_percentage) / 100);
+
         await query("BEGIN");
 
-        await query(`UPDATE trivia_game SET winner_id = $1 WHERE id = $2`, [
+        await query(`UPDATE trivia_game SET winner_id = $1, prize = $2 WHERE id = $3`, [
             winner.user_id,
+            prize_amount,
             gameId,
         ]);
 
         await query(
             `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
        VALUES ($1, $2, 'Trivia game winning', $3, 'Completed', 'trivia')`,
-            [winner.user_id, prize, gameId]
+            [winner.user_id, prize_amount, gameId]
         );
 
         const tempStr = `Won game Trivia game - ${title}`;

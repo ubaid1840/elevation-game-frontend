@@ -49,6 +49,22 @@ export async function POST(req) {
       pitch_instruction
     } = await req.json();
 
+    console.log(
+      title,
+      description,
+      totalRounds,
+      category,
+      spotsRemaining,
+      additional_judges,
+      total_spots,
+      video_link,
+      creator_id,
+      deadline,
+      currentround,
+      level,
+      pitch_instruction
+    )
+
     const newGame = await pool.query(
       `INSERT INTO games 
        (title, description, totalRounds, category, spots_remaining, created_at, 
@@ -93,12 +109,9 @@ export async function POST(req) {
         )
       );
 
-      await sendSingleSMS(`You have been assigned as a *Critique Judge* in the Elevator Game: "${title}".`, id)
+      additional_judges.map(async (id) => await sendSingleSMS(`You have been assigned as a *Critique Judge* in the Elevator Game: "${title}".`, id)
+      )
     }
-
-
-
-
 
     return NextResponse.json(newGame.rows[0], { status: 201 });
   } catch (error) {

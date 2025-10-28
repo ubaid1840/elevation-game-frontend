@@ -33,6 +33,7 @@ import { UserContext } from "@/store/context/UserContext";
 import moment from "moment";
 import { redirect, useRouter } from "next/navigation";
 import { debounce } from "@/utils/debounce";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 
 export default function Page({ params }) {
   const { state: UserState } = useContext(UserContext);
@@ -151,12 +152,14 @@ export default function Page({ params }) {
           </GridItem>
 
           <GridItem>
-            <Text fontWeight="bold">
-              Deadline:{" "}
-              {gameDetailData?.game?.deadline
-                ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
-                : ""}
-            </Text>
+            <DeadlineTooltip>
+              <Text fontWeight="bold">
+                Target Close Date:{" "}
+                {gameDetailData?.game?.deadline
+                  ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
+                  : ""}
+              </Text>
+            </DeadlineTooltip>
           </GridItem>
 
           <GridItem>

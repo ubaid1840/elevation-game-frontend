@@ -136,7 +136,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
               {gameDetailData?.game?.winner_name}
             </Badge>
           ) : (
-            "TBA"
+             gameDetailData?.game?.closed_by_admin ? "No winner selected" : "TBA"
           )}
         </Text>
         <Text fontWeight="bold">

@@ -1,4 +1,5 @@
 "use client";
+import DeadlineTooltip from "@/components/deadline-tooltip";
 import { db } from "@/config/firebase";
 import { UserContext } from "@/store/context/UserContext";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -14,6 +15,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,6 +26,8 @@ import {
   Stack,
   Text,
   Textarea,
+  Tooltip,
+  UnorderedList,
   useDisclosure,
   VStack
 } from "@chakra-ui/react";
@@ -119,9 +123,14 @@ export default function Page() {
       missing.push("Total Spots cannot be zero or empty");
     if (!category) missing.push("Game Category");
     if (!deadline) missing.push("Deadline");
+    if (!selectedJudges || selectedJudges.length < 2) missing.push("Minimum two additional judges required");
 
     return missing;
   };
+
+  useEffect(()=>{
+    console.log(selectedJudges.length)
+  },[selectedJudges])
 
   const handleInitiateGame = async () => {
 
@@ -342,7 +351,9 @@ export default function Page() {
         </FormControl>
 
         <FormControl mb={6}>
-          <FormLabel htmlFor="deadline">Deadline</FormLabel>
+          <DeadlineTooltip>
+            <FormLabel htmlFor="deadline">Target Close Date</FormLabel>
+          </DeadlineTooltip>
           <Box
             border={"1px solid"}
             borderColor={"#D0D5DD"}
@@ -359,7 +370,7 @@ export default function Page() {
               value={deadline}
               onChange={(e) => setDeadline(e.value)}
               showIcon
-              className="custom-calendar"
+              // className="custom-calendar"
               dateFormat="mm/dd/yy"
               style={{ width: "100%" }}
             />
@@ -391,7 +402,16 @@ export default function Page() {
         </FormControl>
 
         <FormControl mb={6}>
-          <FormLabel htmlFor="addJudge">Add Additional Judges</FormLabel>
+           <Tooltip fontSize={'md'} label={
+            <Box p={2}>
+              <UnorderedList>
+                <ListItem>A minimum of three judges is required to activate this game. Select two additional judges from the list below to initiate the judging process.</ListItem>
+              </UnorderedList>
+            </Box>
+          } >
+            <FormLabel htmlFor="addJudge">Add Additional Judges</FormLabel>
+          </Tooltip>
+         
           <Select
             id="addJudge"
             onChange={handleAddJudge}

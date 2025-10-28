@@ -126,7 +126,7 @@ export async function PUT(req, { params }) {
       const updatedGame = await pool.query(
         `UPDATE games 
          SET winner = $1, winner_2nd = $2 
-         WHERE id = $2 
+         WHERE id = $3 
          RETURNING *`,
         [winnerid, winnerid2nd, id]
       );
