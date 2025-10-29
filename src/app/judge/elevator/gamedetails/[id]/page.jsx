@@ -422,13 +422,15 @@ export default function Page({ params }) {
             </Text>
             <Text>
               <strong>Current Round:</strong>{" "}
-              {gameData && gameData.currentround === 0 ? (
-                <Badge colorScheme="yellow">Waiting for game to start</Badge>
-              ) : gameData ? (
-                `${gameData.currentround} / ${gameData.totalrounds}`
-              ) : (
-                "NA"
-              )}
+              {gameData && gameData.currentround === 0 ?
+                !gameData?.active ?
+                  <Badge colorScheme="red">Game Ended</Badge> : (
+                    <Badge colorScheme="yellow">Waiting for game to start</Badge>
+                  ) : gameData ? (
+                    `${gameData.currentround} / ${gameData.totalrounds}`
+                  ) : (
+                  "NA"
+                )}
             </Text>
             <Text>
               <strong>Tier:</strong> {gameData?.level}
@@ -443,7 +445,7 @@ export default function Page({ params }) {
                   {gameData?.winner_name}
                 </Badge>
               ) : (
-                gameData?.closed_by_admin ? "No winner selected" : "TBA"
+                !gameData?.active ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -455,7 +457,7 @@ export default function Page({ params }) {
                   {gameData?.winner_2nd_name}
                 </Badge>
               ) : (
-                gameData?.closed_by_admin ? "No winner selected" : "TBA"
+                !gameData?.active ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -479,9 +481,8 @@ export default function Page({ params }) {
             <Box whiteSpace="pre-wrap">
               {gameData?.roundinstruction?.[currentRound]}
             </Box>
-            {gameData && !gameData?.closed_by_admin && !gameData?.winner &&
+            {gameData && gameData?.active &&
               <Button
-                isDisabled={!UserState.value.data?.navigationAllowed}
                 isLoading={editDescriptionLoading}
                 colorScheme="blue"
                 onClick={handleEditInstruction}
@@ -494,7 +495,7 @@ export default function Page({ params }) {
 
 
 
-        {gameData && gameData.currentRound === 0 && !gameData?.closed_by_admin && !gameData?.winner &&
+        {gameData && gameData?.active && gameData.currentround === 0 &&
 
           <Alert
             status="warning"
@@ -516,7 +517,7 @@ export default function Page({ params }) {
         {gameData && (
           <>
             {gameData.currentround === 0 ?
-              (!gameData?.closed_by_admin && !gameData?.winner) && gameData?.judges_count?.includes(UserState.value.data?.id) ?
+              (gameData?.active) && gameData?.judges_count?.includes(UserState.value.data?.id) ?
 
                 <Text
                   fontSize="lg"
@@ -769,7 +770,7 @@ export default function Page({ params }) {
         UserState.value.data?.id === Number(gameData?.created_by || 0) &&
         gameData?.totalrounds &&
         gameData.currentround === currentRound &&
-        !gameData.winner && !gameData?.closed_by_admin && (
+        gameData?.active && (
           <Button
             isDisabled={
               gameData.currentround === gameData.totalrounds ||
@@ -790,7 +791,7 @@ export default function Page({ params }) {
       {
         gameData &&
         gameData.currentround === gameData.totalrounds &&
-        !gameData.winner && !gameData?.closed_by_admin &&
+        gameData?.active &&
         UserState.value.data?.id === Number(gameData?.created_by || 0) && (
           <Button
             isDisabled={!UserState.value.data?.navigationAllowed}
@@ -1030,7 +1031,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Target Deadline</Text>
+            <Text fontWeight={"600"}>Target Close Date</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}
@@ -1086,7 +1087,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Target Deadline</Text>
+            <Text fontWeight={"600"}>Target Close Date</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}

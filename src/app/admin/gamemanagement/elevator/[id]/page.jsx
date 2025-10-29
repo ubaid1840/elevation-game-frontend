@@ -1,48 +1,40 @@
 "use client";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Box,
-  Text,
-  Stack,
-  Heading,
-  Button,
-  Grid,
-  GridItem,
-  Divider,
-  VStack,
-  Flex,
-  Link,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  FormControl,
-  FormLabel,
-  Textarea,
-  ModalFooter,
-  HStack,
-  Spacer,
-  Input,
-  useToast,
-  Select,
-  Badge,
-} from "@chakra-ui/react";
-import axios from "axios";
-import { UserContext } from "@/store/context/UserContext";
-import Sidebar from "@/components/sidebar";
-import GetLinkItems from "@/utils/SideBarItems";
-import { GhostButton } from "@/components/ui/Button";
-import { Calendar } from "primereact/calendar";
-import moment from "moment";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/firebase";
 import RenderProfilePicture from "@/components/RenderProfilePicture";
 import DeadlineTooltip from "@/components/deadline-tooltip";
 import EndGame from "@/components/end-game";
+import { db } from "@/config/firebase";
+import { UserContext } from "@/store/context/UserContext";
+import {
+  Badge,
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Heading,
+  HStack,
+  Input,
+  Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
+  Spacer,
+  Stack,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
+  VStack
+} from "@chakra-ui/react";
+import axios from "axios";
+import { addDoc, collection } from "firebase/firestore";
+import moment from "moment";
+import { Calendar } from "primereact/calendar";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 export default function Page({ params }) {
 
@@ -403,6 +395,7 @@ export default function Page({ params }) {
       });
   }
 
+
   return (
     <>
       <Box p={6} minH="100vh" bg="gray.50">
@@ -424,16 +417,21 @@ export default function Page({ params }) {
             </Text>
             <Text>
               <strong>Current Round:</strong>{" "}
-              {gameData && gameData.currentround === 0 ? (
-                <Badge colorScheme="yellow">Waiting for game to start</Badge>
-              ) : gameData ? (
-                `${gameData.currentround} / ${gameData.totalrounds}`
-              ) : (
-                "NA"
-              )}
+              {gameData && gameData.currentround === 0 ?
+                !gameData?.active ?
+                  <Badge colorScheme="red">Game Ended</Badge> : (
+                    <Badge colorScheme="yellow">Waiting for game to start</Badge>
+                  ) : gameData ? (
+                    `${gameData.currentround} / ${gameData.totalrounds}`
+                  ) : (
+                  "NA"
+                )}
             </Text>
             <Text>
               <strong>Tier:</strong> {gameData?.level}
+            </Text>
+            <Text>
+              <strong>Spots Remaining: </strong> {gameData?.spots_remaining}
             </Text>
             {/* <Text>
               <strong>Prize Amount: </strong> ${gameData?.prize_amount}
@@ -445,7 +443,7 @@ export default function Page({ params }) {
                   {gameData?.winner_name}
                 </Badge>
               ) : (
-                gameData?.closed_by_admin ? "No winner selected" : "TBA"
+                !gameData?.active ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -456,7 +454,7 @@ export default function Page({ params }) {
                   {gameData?.winner_2nd_name}
                 </Badge>
               ) : (
-                 gameData?.closed_by_admin ? "No winner selected" : "TBA"
+                !gameData?.active ? "No winner selected" : "TBA"
               )}
             </Text>
 
@@ -474,8 +472,6 @@ export default function Page({ params }) {
               </Text>
             </DeadlineTooltip>
 
-
-
             <Text>
               <strong>Round Instructions:</strong>{" "}
             </Text>
@@ -483,7 +479,7 @@ export default function Page({ params }) {
               {gameData?.roundinstruction?.[currentRound]}
             </Box>
 
-            {gameData && !gameData?.closed_by_admin && !gameData?.winner &&
+            {gameData && gameData?.active &&
               <Button
                 isLoading={editDescriptionLoading}
                 colorScheme="blue"
@@ -496,8 +492,8 @@ export default function Page({ params }) {
         </Box>
         {gameData && (
           <>
-            {gameData.currentround === 0 ? (
-              !gameData?.closed_by_admin && !gameData?.winner &&
+            {gameData?.active && gameData?.currentround === 0 ? (
+
               <Button
                 isDisabled={Number(gameData?.enrollments?.length) === 0}
 
@@ -715,9 +711,8 @@ export default function Page({ params }) {
           </>
         )}
       </Box>
-      {gameData?.totalrounds &&
-        gameData.currentround === currentRound &&
-        !gameData.winner && !gameData?.closed_by_admin && (
+      {gameData?.active && gameData?.totalrounds &&
+        gameData.currentround === currentRound && (
           <Button
             isDisabled={gameData.currentround === gameData.totalrounds}
             isLoading={roundLoading}
@@ -732,9 +727,9 @@ export default function Page({ params }) {
             Move To Next Round
           </Button>
         )}
-      {gameData &&
+      {gameData && gameData?.active &&
         gameData.currentround === gameData.totalrounds &&
-        !gameData.winner && !gameData?.closed_by_admin &&
+
         (
           <Button
             mx={4}
@@ -763,8 +758,7 @@ export default function Page({ params }) {
         )}
 
 
-      {gameData &&
-        !gameData.winner && !gameData?.closed_by_admin &&
+      {gameData && gameData?.active &&
         (
           <EndGame type="elevator" gameid={gameData?.id} isOpen={isOpenEndGame} onClose={onCloseEndGame} onRefresh={() => {
             fetchData()
@@ -1000,7 +994,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Target Deadline</Text>
+            <Text fontWeight={"600"}>Target Close Date</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}
@@ -1063,7 +1057,7 @@ export default function Page({ params }) {
               Standard payouts of 30% (First Place) and 10% (Second Place) will apply.
             </Text>
 
-            <Text mt={4} fontWeight={"600"}>Target Deadline</Text>
+            <Text mt={4} fontWeight={"600"}>Target Close Date</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}
@@ -1118,7 +1112,7 @@ export default function Page({ params }) {
           <ModalCloseButton />
 
           <ModalBody>
-            <Text fontWeight={"600"}>Target Deadline</Text>
+            <Text fontWeight={"600"}>Target Close Date</Text>
             <Box
               border={"1px solid"}
               borderColor={"#D0D5DD"}

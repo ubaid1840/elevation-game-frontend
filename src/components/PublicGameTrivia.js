@@ -115,7 +115,7 @@ const GameCard = ({ gameDetailData, instructions }) => {
                         : ""}
                 </Text>
                 <Text fontWeight="bold">
-                    Target Deadline Date:{" "}
+                    Target Close Date:{" "}
                     {gameDetailData?.game?.deadline
                         ? moment(gameDetailData.game.deadline).format("MM/DD/YYYY")
                         : ""}

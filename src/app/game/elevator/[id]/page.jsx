@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
 
     return {
       title: game?.title ? `Search for ${game.title}` : "Game Details",
-      description: `Win a grand prize of $${game.prize_amount}. Target Deadline Date: ${moment(game.deadline).format("MM/DD/YYYY")}`,
+      description: `Win a grand prize of $${game.prize_amount}. Target Close Date: ${moment(game.deadline).format("MM/DD/YYYY")}`,
       openGraph: {
         images: [
           {

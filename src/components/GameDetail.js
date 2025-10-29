@@ -203,7 +203,7 @@ export default function GameDetail({ params }) {
                                     {gameDetailData?.game?.winner}
                                 </Badge>
                             ) : (
-                                gameDetailData?.game?.closed_by_admin ? "No winner selected" : "TBA"
+                                !gameDetailData?.game?.active ? "No winner selected" : "TBA"
                             )}
                         </Text>
                     </GridItem>
@@ -222,7 +222,7 @@ export default function GameDetail({ params }) {
                                     {gameDetailData?.game?.winner_2nd}
                                 </Badge>
                             ) : (
-                                gameDetailData?.game?.closed_by_admin ? "No winner selected" : "TBA"
+                                !gameDetailData?.game?.active ? "No winner selected" : "TBA"
                             )}
                         </Text>
                     </GridItem>
@@ -277,7 +277,7 @@ export default function GameDetail({ params }) {
 
                 </Grid>
 
-                {gameDetailData && gameDetailData?.game?.currentRound === 0 && !gameDetailData?.game?.closed_by_admin && !gameDetailData?.game?.winner &&
+                {gameDetailData && gameDetailData?.game?.active && gameDetailData?.game?.currentround === 0 && 
                     <Alert
                         status="warning"
                         variant="subtle"
@@ -420,7 +420,7 @@ export default function GameDetail({ params }) {
                                 </Box>
                             ))}
                         </Stack>
-                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && !gameDetailData?.game?.winner && !gameDetailData?.game?.closed_by_admin && (
+                        {gameDetailData && (gameDetailData.game.currentround === currentRound) && !gameDetailData.pitches.some(pitch => pitch.status === "Disqualify") && gameDetailData?.game?.active && (
                             <Button
                                 isDisabled={!UserState.value.data?.navigationAllowed}
                                 w={"full"}

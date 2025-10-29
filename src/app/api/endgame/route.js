@@ -20,8 +20,8 @@ export async function POST(req) {
 
             if (totalEnrollments.length === 0) {
                 await pool.query(
-                    `UPDATE games SET closed_by_admin = $1, close_reason = $2 WHERE id = $3`,
-                    [true, reason, game_id]
+                    `UPDATE games SET closed_by_admin = $1, close_reason = $2, spots_remaining = $3, total_spots = $4 WHERE id = $5`,
+                    [true, reason, 0, totalEnrollments.length, game_id]
                 );
                 return NextResponse.json({ message: "No enrollments found, game closed" }, { status: 200 });
             }
@@ -58,8 +58,8 @@ export async function POST(req) {
             );
 
             await pool.query(
-                `UPDATE games SET winner = $1, closed_by_admin = $2, close_reason = $3 WHERE id = $4`,
-                [winnerid, true, reason, game_id]
+                `UPDATE games SET winner = $1, closed_by_admin = $2, close_reason = $3, spots_remaining = $4, total_spots = $5 WHERE id = $6`,
+                [winnerid, true, reason, 0, totalEnrollments.length, game_id]
             );
 
             await pool.query(`COMMIT`);
@@ -159,7 +159,7 @@ async function ProcessTriviaGameResult(gid) {
             return;
         }
 
-         const prize_amount = Number(fee) * Number(enrollmentsResult.rows.length) * (Number(game_percentage) / 100);
+        const prize_amount = Number(fee) * Number(enrollmentsResult.rows.length) * (Number(game_percentage) / 100);
 
         await query("BEGIN");
 

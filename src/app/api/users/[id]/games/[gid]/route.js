@@ -47,6 +47,12 @@ export async function GET(req, { params }) {
     const createdByName = createdByResult.rows[0]?.name || null;
     game.createdby = createdByName;
 
+    game.active = true
+
+    if (game.winner || game.closed_by_admin) {
+      game.active = false
+    }
+
     
     if (game.additional_judges && Array.isArray(game.additional_judges)) {
       const judgeIds = game.additional_judges;

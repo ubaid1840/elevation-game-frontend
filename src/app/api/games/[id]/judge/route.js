@@ -15,7 +15,6 @@ export async function GET(req, { params }) {
         g.close_reason,
         g.level, 
         g.deadline,
-        g.prize_amount, 
         g.winner,
         g.winner_2nd, 
         g.created_by, 
@@ -44,7 +43,7 @@ export async function GET(req, { params }) {
     for (const judgeId of game.additional_judges) {
       const judgeResult = await pool.query(
         `SELECT name FROM users WHERE id = $1`,
-        [parseInt(judgeId)] 
+        [parseInt(judgeId)]
       );
       judgeNames.push(judgeResult.rows[0]?.name || 'Unknown');
     }
@@ -58,8 +57,8 @@ export async function GET(req, { params }) {
       game.winner_name = winnerResult.rows[0]?.name || 'Unknown';
     }
 
-    if(game.winner_2nd){
-       const winnerResult = await pool.query(
+    if (game.winner_2nd) {
+      const winnerResult = await pool.query(
         `SELECT name FROM users WHERE id = $1`,
         [game.winner_2nd]
       );
@@ -120,6 +119,12 @@ export async function GET(req, { params }) {
     }
 
     game.enrollments = enrollments;
+
+    game.active = true
+
+    if (game.winner || game.closed_by_admin) {
+      game.active = false
+    }
 
     return NextResponse.json(game, { status: 200 });
   } catch (error) {
