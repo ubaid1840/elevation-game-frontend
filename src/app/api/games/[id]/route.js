@@ -60,7 +60,7 @@ export async function GET(req, { params }) {
 
     const prize_amount = pricePerSpot * Number(game.total_spots);
     game.prize_amount = prize_amount;
-    game.first_prize = Number((prize_amount  * 0.3).toFixed(2)) 
+    game.first_prize = Number((prize_amount * 0.3).toFixed(2))
     game.second_prize = Number((prize_amount * 0.1).toFixed(2))
     game.prize_amount = game.first_prize
 
@@ -82,19 +82,33 @@ export async function PUT(req, { params }) {
 
   try {
 
-    if (winnerid && winnerid2nd) {
+    if (winnerid) {
 
       const gameResult = await pool.query(`SELECT * FROM games WHERE id = $1`, [id]);
       const gameData = gameResult.rows[0];
-
-      const amountQuery = await pool.query(`SELECT price FROM settings WHERE label = $1`, [gameData.level])
-      const amount = Number(amountQuery.rows[0].price || 0);
-      const winnerAmount1st = Number((amount * Number(gameData.total_spots) * 0.30).toFixed(2))
-      const winnerAmount2nd = Number((amount * Number(gameData.total_spots) * 0.10).toFixed(2))
-
-      if (!gameData || !amountQuery.rows[0]) {
-        return NextResponse.json({ message: 'Invalid game or amount data' }, { status: 400 });
+      if (!gameData) {
+        return NextResponse.json(
+          { message: "Invalid game record" },
+          { status: 404 }
+        );
       }
+      const amountResult = await pool.query(
+        `SELECT price FROM settings WHERE label = $1`,
+        [gameData.level]
+      );
+
+      if (!amountResult.rows.length) {
+        return NextResponse.json(
+          { message: "Invalid or missing level configuration" },
+          { status: 400 }
+        );
+      }
+      const amount = Number(amountResult.rows[0].price || 0);
+      const totalSpots = Number(gameData.total_spots);
+      const winnerAmount1st = Number((amount * totalSpots * 0.3).toFixed(2));
+      const winnerAmount2nd = Number((amount * totalSpots * 0.1).toFixed(2));
+
+
 
       await pool.query(
         `UPDATE users 
@@ -109,27 +123,32 @@ export async function PUT(req, { params }) {
         [winnerid, winnerAmount1st, id]
       );
 
-      await pool.query(
-        `UPDATE users 
+      if (winnerid2nd) {
+
+
+        await pool.query(
+          `UPDATE users 
            SET winner_earnings = winner_earnings + $1 
            WHERE users.id = $2`,
-        [winnerAmount2nd, winnerid2nd]
-      );
-      await pool.query(
-        `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
+          [winnerAmount2nd, winnerid2nd]
+        );
+        await pool.query(
+          `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type) 
          VALUES ($1, $2, $3, 'Completed', 'elevator', 'Elevator game winning')`,
-        [winnerid2nd, winnerAmount2nd, id]
-      );
+          [winnerid2nd, winnerAmount2nd, id]
+        );
 
+      }
 
+      const updateQuery = winnerid2nd
+        ? `UPDATE games SET winner = $1, winner_2nd = $2 WHERE id = $3 RETURNING *`
+        : `UPDATE games SET winner = $1 WHERE id = $2 RETURNING *`;
 
       const updatedGame = await pool.query(
-        `UPDATE games 
-         SET winner = $1, winner_2nd = $2 
-         WHERE id = $3 
-         RETURNING *`,
-        [winnerid, winnerid2nd, id]
+        updateQuery,
+        winnerid2nd ? [winnerid, winnerid2nd, id] : [winnerid, id]
       );
+
       return NextResponse.json(updatedGame.rows[0], { status: 200 });
     }
 
@@ -147,7 +166,6 @@ export async function PUT(req, { params }) {
     return NextResponse.json({ message: "Data saved" }, { status: 200 })
 
   } catch (error) {
-    console.error('Error updating game:', error);
     return NextResponse.json({ message: 'Error updating game', error: error.message }, { status: 500 });
   }
 }

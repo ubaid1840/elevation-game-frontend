@@ -1009,10 +1009,10 @@ export default function Page({ params }) {
             <Button
               isLoading={winnerLoading}
               isDisabled={
-                !selectedUserId ||
-                !selectedUserId2nd ||
-                winnerLoading ||
-                !UserState.value.data?.navigationAllowed
+                winnerLoading || !UserState.value.data?.navigationAllowed ||
+                (winnersList.length > 1
+                  ? !selectedUserId || !selectedUserId2nd
+                  : !selectedUserId)
               }
               colorScheme="blue"
               ml={3}

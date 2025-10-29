@@ -895,22 +895,25 @@ export default function Page({ params }) {
                 </FormControl>
               </Box>
 
-              <Box flex={1}>
-                <FormControl id="user_id_2nd" mb={4}>
-                  <FormLabel>Select 2nd Winner</FormLabel>
-                  <Select
-                    placeholder="Select 2nd winner"
-                    value={selectedUserId2nd}
-                    onChange={(e) => setSelectedUserId2nd(e.target.value)}
-                  >
-                    {winnersList.map((winner) => (
-                      <option key={winner.user_id} value={winner.user_id}>
-                        {winner.user_name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
+              {winnersList.length > 1 &&
+
+                <Box flex={1}>
+                  <FormControl id="user_id_2nd" mb={4}>
+                    <FormLabel>Select 2nd Winner</FormLabel>
+                    <Select
+                      placeholder="Select 2nd winner"
+                      value={selectedUserId2nd}
+                      onChange={(e) => setSelectedUserId2nd(e.target.value)}
+                    >
+                      {winnersList.map((winner) => (
+                        <option key={winner.user_id} value={winner.user_id}>
+                          {winner.user_name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              }
 
               <Box
                 flex={1}
@@ -973,9 +976,10 @@ export default function Page({ params }) {
             <Button
               isLoading={winnerLoading}
               isDisabled={
-                !selectedUserId ||
-                !selectedUserId2nd ||
-                winnerLoading
+                winnerLoading ||
+                (winnersList.length > 1
+                  ? !selectedUserId || !selectedUserId2nd
+                  : !selectedUserId)
               }
               colorScheme="blue"
               ml={3}

@@ -12,7 +12,7 @@ export async function POST(req) {
     try {
         if (type === 'elevator') {
             const enrollments = await pool.query(
-                'SELECT id, user_id FROM game_enrollments WHERE game_id = $1',
+                'SELECT id, user_id FROM game_enrollments WHERE game_id = $1 ORDER BY id ASC ',
                 [game_id]
             );
 
