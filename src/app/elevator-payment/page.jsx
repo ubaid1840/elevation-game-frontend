@@ -3,9 +3,9 @@ import SquareCheckout from "@/components/square/checkout";
 import useCheckSession from "@/lib/checkSession";
 import { UserContext } from "@/store/context/UserContext";
 import { Box, Center, Heading, Spinner, useToast } from "@chakra-ui/react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Page() {
   const checkSession = useCheckSession();
@@ -13,7 +13,7 @@ export default function Page() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-   const toast = useToast();
+  const toast = useToast();
 
   useEffect(() => {
     let unsubscribe;
@@ -41,9 +41,8 @@ export default function Page() {
     if (UserState.value.data?.id) {
       const params = new URLSearchParams(window.location.search);
       const allParams = Object.fromEntries(params.entries());
-      if (allParams.fee && allParams.g) {
-        checkPayment(Number(allParams.fee) , Number(allParams.g))
-      
+      if (allParams.p && allParams.g) {
+        checkPayment(Number(allParams.p), Number(allParams.g))
       } else {
         router.replace(`/${UserState.value.data.role}`);
       }
@@ -51,28 +50,30 @@ export default function Page() {
   }, [UserState.value.data]);
 
   async function checkPayment(fee, gid) {
-  
-      try {
-        const response = await axios.get(`/api/checkpayment?type=trivia&uid=${UserState.value.data?.id}&gid=${gid}`)
-        if (response?.data?.status) {
-          router.replace(`/${UserState.value.data.role}/trivia/enrolledgames/${gid}`);
-        }
-      } catch (error) {
-  
-        toast({
-          title: "Error",
-          description: "Error checking payment status, refresh page",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-  
-      } finally {
-        setData({ fee, gid })
-        setLoading(false)
+
+    try {
+      const response = await axios.get(`/api/checkpayment?type=elevator&uid=${UserState.value.data?.id}&gid=${gid}`)
+      if (response?.data?.status) {
+        router.replace(`/${UserState.value.data.role}/elevator/enrolledgames/${gid}`);
       }
-  
+    } catch (error) {
+
+      toast({
+        title: "Error",
+        description: "Error checking payment status, refresh page",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+
+    } finally {
+      setData({ fee, gid })
+      setLoading(false)
     }
+
+  }
+
+ 
 
   const RenderCheckout = useCallback(() => {
     return (
@@ -85,7 +86,7 @@ export default function Page() {
               user={UserState.value.data}
               amount={data?.fee}
               gameId={data?.gid}
-              plan={"trivia"}
+              plan={"elevator"}
             />
           )
         )}
@@ -96,7 +97,7 @@ export default function Page() {
   return (
     <Box p={8} maxWidth="1200px" mx="auto">
       <Heading mb={8} textAlign="center">
-        Trivia Game fee
+        Elevator Game fee
       </Heading>
 
       <RenderCheckout />

@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ApplePay, CashAppPay, CreditCard, GooglePay, PaymentForm } from "react-square-web-payments-sdk";
 
-const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
+const SquareCheckout = ({ amount, plan, gameId, user }) => {
     const router = useRouter()
     const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
     const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
@@ -42,8 +42,11 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
         setLoading(true)
         setMessage("Processing")
         axios
-            .post("/api/square", { token: token, note: plan, amount: amount })
+            .post("/api/square", { token: token, note: plan, amount: amount, gid: gameId, uid: user?.id })
             .then(async (response) => {
+                if (response.data?.alreadyPaid) {
+                    router.push(`/user/${plan}/enrolledgames/${gameId}`)
+                }
                 const paymentIntentId = response.data.paymentId
                 if (plan == "trivia") {
                     if (gameId) {
@@ -53,7 +56,7 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     }
                 } else if (plan === 'elevator') {
                     if (gameId) {
-                        await onElevatorPayment(paymentIntentId);
+                        await handleUpdateElevatorPayment(paymentIntentId, Number(amount), Number(gameId));
                     } else {
                         setErrorMessage("Game not found")
                     }
@@ -62,7 +65,8 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                 }
             })
             .catch((e) => {
-                setMessage("Payment failed");
+                setMessage("");
+                setErrorMessage("Payment Failed! Try other method")
                 toast({
                     title: e?.response?.data?.message || e?.message,
                     status: "error",
@@ -77,6 +81,38 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
             })
     }
 
+    async function handleUpdateElevatorPayment(paymentIntent, price, gid) {
+        return new Promise((res) => {
+            axios
+                .post("/api/games/enroll", {
+                    userId: user?.id,
+                    gameId: gid,
+                    entryLevel: "PENDING",
+                    paymentIntent: paymentIntent,
+                    price: price,
+                })
+                .then(() => {
+                    router.replace(`/user/elevator/enrolledgames/${gid}`);
+                })
+                .catch((e) => {
+                    setMessage("");
+                    setErrorMessage("Payment Failed")
+                    toast({
+                        title: e?.response?.data?.message || e?.message,
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("cash_request_id");
+                    window.history.replaceState({}, "", url);
+
+                })
+                .finally(() => {
+                    res(true)
+                });
+        })
+    };
 
     async function handleUpdateTriviaPayment(paymentIntent, gid) {
 
@@ -105,7 +141,8 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     );
                 })
                 .catch((e) => {
-                    setMessage("Payment failed");
+                    setMessage("");
+                    setErrorMessage("Payment Failed")
                     toast({
                         title: e?.response?.data?.message || e?.message,
                         status: "error",
@@ -155,7 +192,8 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
 
                 })
                 .catch((e) => {
-                    setMessage("Payment failed");
+                    setMessage("");
+                    setErrorMessage("Payment Failed")
                     toast({
                         title: e?.response?.data?.message || e?.message,
                         status: "error",
@@ -202,7 +240,6 @@ const SquareCheckout = ({ amount, plan, gameId, user, onElevatorPayment }) => {
                     locationId={locationId}
                     cardTokenizeResponseReceived={async (token) => {
                         handlePayment(token.token);
-
                     }}
 
                     createPaymentRequest={() => ({

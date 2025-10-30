@@ -39,31 +39,7 @@ export default function GameEnrollmentPage({ params }) {
   const search = useSearchParams()
   const cashReq = search.get("cash_request_id")
 
-  useEffect(() => {
 
-    if (!game) return
-
-    const p = search.get("p")
-    const o = search.get("o")
-    const g = search.get("g")
-    const type = search.get("type")
-
-
-    if (type === "proceed") {
-      setProceed(true)
-    } else {
-      setProceed(false)
-    }
-
-
-
-    setPaymentData({ price: Number(p), game: Number(g) });
-    if (o && o === 'true') {
-      onOpen()
-    } else {
-      onClose()
-    }
-  }, [search, game])
 
   useEffect(() => {
     if (UserState.value.data?.id) {
@@ -88,7 +64,9 @@ export default function GameEnrollmentPage({ params }) {
       })
       .then((response) => {
         if (response.data?.alreadyEnrolled) {
-          window.history.pushState({}, "", `${window.location.pathname}?p=${response.data?.price}&g=${params.id}&o=true`);
+
+          setPaymentData({ price: response.data?.price, game: params.id })
+          onOpen()
         } else {
           router.replace(`/user/elevator/enrolledgames/${params.id}`);
         }
@@ -101,10 +79,10 @@ export default function GameEnrollmentPage({ params }) {
           duration: 3000,
           isClosable: true,
         });
-        console.error("Error fetching data:", e);
-        const url = new URL(window.location.href);
-        url.searchParams.delete("cash_request_id");
-        window.history.replaceState({}, "", url);
+        console.log("Error fetching data:", e);
+        // const url = new URL(window.location.href);
+        // url.searchParams.delete("cash_request_id");
+        // window.history.replaceState({}, "", url);
       })
       .finally(() => {
         setLoading(false);
@@ -132,17 +110,7 @@ export default function GameEnrollmentPage({ params }) {
     return url;
   }
 
-  function handleClose() {
-    if (!cashReq) {
-      const url = new URL(window.location.href)
-      url.searchParams.delete("g");
-      url.searchParams.delete("p");
-      url.searchParams.delete("o");
-      url.searchParams.delete("type")
-      window.history.replaceState({}, "", url);
-    }
 
-  }
 
   return (
     <>
@@ -270,45 +238,32 @@ export default function GameEnrollmentPage({ params }) {
         </Button>
       </Box>
 
-      <Modal isOpen={isOpen} onClose={handleClose}>
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Payment</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            {!proceed ? (
-              <Stack dir="column">
-                <Text fontSize="lg" color={"orange.600"}>
-                  You already have an active subscription. This Elevator Pitch
-                  game requires a separate participation fee. Proceeding will
-                  initiate another active subscription entry for this game.
-                </Text>
 
-                <Button
-                  onClick={() => {
-                    window.history.pushState({}, "", `${window.location.pathname}?p=${paymentData.price}&g=${paymentData?.game}&o=true&type=proceed`);
-                  }}
-                  colorScheme="purple"
-                  my={2}
-                >
-                  Proceed
-                </Button>
-              </Stack>
-            ) : (
-              <Stack dir="column">
-                <SquareCheckout
-                  amount={Number(paymentData.price)}
-                  user={UserState.value.data?.id}
-                  plan={"elevator"}
-                  gameId={paymentData?.game}
-                  onElevatorPayment={(intentId) => {
-                    handleClose();
-                    setLoading(true);
-                    handleSubmit(intentId, paymentData.price);
-                  }}
-                />
-              </Stack>
-            )}
+            <Stack dir="column">
+              <Text fontSize="lg" color={"orange.600"}>
+                You already have an active subscription. This Elevator Pitch
+                game requires a separate participation fee. Proceeding will
+                initiate another active subscription entry for this game.
+              </Text>
+
+              <Button
+                onClick={() => {
+                  router.push(`/elevator-payment?p=${paymentData.price}&g=${paymentData?.game}`)
+                  // window.history.pushState({}, "", `${window.location.pathname}?p=${paymentData.price}&g=${paymentData?.game}&o=true&type=proceed`);
+                }}
+                colorScheme="purple"
+                my={2}
+              >
+                Proceed
+              </Button>
+            </Stack>
+
           </ModalBody>
         </ModalContent>
       </Modal>

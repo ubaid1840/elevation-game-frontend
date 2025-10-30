@@ -34,6 +34,7 @@ export default function useCheckSession() {
                 if (
                     !pathname.includes(userData.role) &&
                     !pathname.includes("/payment") &&
+                    !pathname.includes("/elevator-payment") &&
                     !pathname.includes("/judgepayment") &&
                     !pathname.includes("/triviapayment") &&
                     !pathname.includes("/payment-success")

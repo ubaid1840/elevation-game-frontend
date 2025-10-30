@@ -118,11 +118,11 @@ export default function SubscriptionPage({ page }) {
                             Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="green.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
                         </Text>
                         :
-                        <Flex align={'center'}>
+                        <Flex align={'center'} flexWrap={'wrap'} gap={4}>
                             <Text fontSize={'lg'} color="purple.700">
                                 Annual Judge payment expiry: {UserState.value.data?.annual_package_expiry && <Text as="span" color="red.500">{moment(UserState.value.data?.annual_package_expiry).format("MMM DD, yyyy")}</Text>}
                             </Text>
-                            <Button as={Link} href={'/judgepayment'} ml={4} colorScheme="purple">Renew annual subscription</Button>
+                            <Button as={Link} href={'/judgepayment'} colorScheme="purple">Renew annual subscription</Button>
                         </Flex>
                     : null}
 
