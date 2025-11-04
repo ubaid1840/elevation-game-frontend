@@ -295,7 +295,7 @@ async function ProcessTriviaGameResult(gid) {
         `UPDATE trivia_game SET closed_by_admin = TRUE, close_reason = 'No one answered any question correctly' WHERE id = $1`,
         [gameId]
       );
-      await query("COMMIT");    
+      await query("COMMIT");
       return;
     }
 
@@ -315,6 +315,13 @@ async function ProcessTriviaGameResult(gid) {
       winner.user_id,
       gameId,
     ]);
+
+    await query(
+      `UPDATE users 
+               SET winner_earnings = winner_earnings + $1, residual_income = residual_income + $1 
+               WHERE users.id = $2`,
+      [prize, winner.user_id]
+    );
 
     await query(
       `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)

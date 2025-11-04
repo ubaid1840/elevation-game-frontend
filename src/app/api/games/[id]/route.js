@@ -112,7 +112,7 @@ export async function PUT(req, { params }) {
 
       await pool.query(
         `UPDATE users 
-           SET winner_earnings = winner_earnings + $1 
+           SET winner_earnings = winner_earnings + $1, residual_income = residual_income + $1 
            WHERE users.id = $2`,
         [winnerAmount1st, winnerid]
       );
@@ -128,7 +128,7 @@ export async function PUT(req, { params }) {
 
         await pool.query(
           `UPDATE users 
-           SET winner_earnings = winner_earnings + $1 
+           SET winner_earnings = winner_earnings + $1, residual_income = residual_income + $1 
            WHERE users.id = $2`,
           [winnerAmount2nd, winnerid2nd]
         );

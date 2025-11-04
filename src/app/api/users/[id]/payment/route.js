@@ -105,7 +105,7 @@ export async function POST(req, { params }) {
                 const checkPlan = checkPlanQuery.rows[0].package;
                 if (checkPlan === 'Silver') {
                     await query(
-                        'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03) WHERE id = $2',
+                        'UPDATE users SET direct_referral = direct_referral + ($1 * 0.03), residual_income = residual_income + ($1 * 0.03) WHERE id = $2',
                         [amountToSave, referrer_id]
                     );
                     await query(
@@ -120,7 +120,7 @@ export async function POST(req, { params }) {
                 } else {
                     if (checkPlan === 'Platinum') {
                         await query(
-                            'UPDATE users SET tier1 = tier1 + ($1 * 0.2) WHERE id = $2',
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.2), residual_income = residual_income + ($1 * 0.2) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
 
@@ -136,7 +136,7 @@ export async function POST(req, { params }) {
                     } else if (checkPlan === 'Gold') {
 
                         await query(
-                            'UPDATE users SET tier2 = tier2 + ($1 * 0.1) WHERE id = $2',
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.1), residual_income = residual_income + ($1 * 0.1) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
 
@@ -152,7 +152,7 @@ export async function POST(req, { params }) {
 
                     } else if (checkPlan === 'Iridium') {
                         await query(
-                            'UPDATE users SET tier3 = tier3 + ($1 * 0.05) WHERE id = $2',
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.05), residual_income = residual_income + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer_id]
                         );
 
@@ -181,7 +181,7 @@ export async function POST(req, { params }) {
 
                     if (checkPlan === 'Platinum') {
                         await query(
-                            'UPDATE users SET tier1 = tier1 + ($1 * 0.1) WHERE id = $2',
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.1), residual_income = residual_income + ($1 * 0.1) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
 
@@ -197,7 +197,7 @@ export async function POST(req, { params }) {
                     } else if (checkPlan === 'Gold') {
 
                         await query(
-                            'UPDATE users SET tier2 = tier2 + ($1 * 0.05) WHERE id = $2',
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.05), residual_income = residual_income + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
 
@@ -213,7 +213,7 @@ export async function POST(req, { params }) {
 
                     } else if (checkPlan === 'Iridium') {
                         await query(
-                            'UPDATE users SET tier3 = tier3 + ($1 * 0.025) WHERE id = $2',
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.025), residual_income = residual_income + ($1 * 0.025) WHERE id = $2',
                             [amountToSave, referrer2_id]
                         );
 
@@ -239,7 +239,7 @@ export async function POST(req, { params }) {
                 if (checkPlan !== 'Silver') {
                     if (checkPlan === 'Platinum') {
                         await query(
-                            'UPDATE users SET tier1 = tier1 + ($1 * 0.05) WHERE id = $2',
+                            'UPDATE users SET tier1 = tier1 + ($1 * 0.05), residual_income = residual_income + ($1 * 0.05) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
 
@@ -255,7 +255,7 @@ export async function POST(req, { params }) {
                     } else if (checkPlan === 'Gold') {
 
                         await query(
-                            'UPDATE users SET tier2 = tier2 + ($1 * 0.025) WHERE id = $2',
+                            'UPDATE users SET tier2 = tier2 + ($1 * 0.025), residual_income = residual_income + ($1 * 0.025) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
 
@@ -271,7 +271,7 @@ export async function POST(req, { params }) {
 
                     } else if (checkPlan === 'Iridium') {
                         await query(
-                            'UPDATE users SET tier3 = tier3 + ($1 * 0.0125) WHERE id = $2',
+                            'UPDATE users SET tier3 = tier3 + ($1 * 0.0125), residual_income = residual_income + ($1 * 0.0125) WHERE id = $2',
                             [amountToSave, referrer3_id]
                         );
 

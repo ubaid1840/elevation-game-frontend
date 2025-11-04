@@ -8,13 +8,13 @@ export async function PUT(req, { params }) {
 
     try {
 
-        
+
         const existingPayment = await query(
             "SELECT 1 FROM trivia_game_enrollment WHERE user_id = $1 AND game_id = $2 AND payment_intent_id = $3",
             [id, gid, payment_intent_id]
         );
 
-        
+
         if (existingPayment.rows.length > 0) {
             return NextResponse.json({ message: "Payment already recorded" }, { status: 200 });
         }
@@ -56,10 +56,20 @@ export async function PUT(req, { params }) {
 
 
                 await query(
+                    `UPDATE users 
+                          SET residual_income = residual_income + $1 
+                          WHERE users.id = $2`,
+                    [commission, referrer_id]
+                );
+
+                await query(
                     `INSERT INTO transactions (user_id, amount, game_id, status, game_type, transaction_type, reference_id) 
                  VALUES ($1, $2, $3, 'Completed', 'trivia', 'Trivia game referral earning', $4)`,
                     [referrer_id, commission, gid, id]
                 );
+
+
+
                 const tempStr = `Made payment of $${fee || ""} for trivia game - ${title || ""}`
                 await query(
                     'INSERT INTO logs (user_id, action) VALUES ($1, $2)',

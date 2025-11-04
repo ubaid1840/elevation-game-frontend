@@ -47,7 +47,7 @@ export async function POST(req) {
             await pool.query(`BEGIN`);
 
             await pool.query(
-                `UPDATE users SET winner_earnings = winner_earnings + $1 WHERE id = $2`,
+                `UPDATE users SET winner_earnings = winner_earnings + $1, residual_income = residual_income + $1 WHERE id = $2`,
                 [winnerAmount1st, winnerid]
             );
 
@@ -168,6 +168,11 @@ async function ProcessTriviaGameResult(gid) {
             prize_amount,
             gameId,
         ]);
+
+         await query(
+                `UPDATE users SET winner_earnings = winner_earnings + $1, residual_income = residual_income + $1 WHERE id = $2`,
+                [prize_amount, winner.user_id]
+            );
 
         await query(
             `INSERT INTO transactions (user_id, amount, transaction_type, game_id, status, game_type)
