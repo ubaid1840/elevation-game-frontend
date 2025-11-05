@@ -49,7 +49,6 @@ export async function GET(req, { params }) {
         if (remainingTime > 0) {
 
           return NextResponse.json({
-            message: "Continuing existing question",
             question: question.text,
             time: remainingTime,
             question_id: question.id,

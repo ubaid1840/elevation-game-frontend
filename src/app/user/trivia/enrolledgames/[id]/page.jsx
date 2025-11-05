@@ -72,7 +72,7 @@ export default function Page({ params }) {
       const response = await axios.get(
         `/api/trivia/users/${id}/games/${params.id}/question`
       );
-      if (!response.data?.message) {
+      if ( !response.data?.message) {
         setQuestions(response.data);
         setTimeLeft(response.data.time * 1000);
       } else {
